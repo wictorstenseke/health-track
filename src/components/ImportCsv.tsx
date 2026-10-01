@@ -3,7 +3,8 @@ import { importRows } from '../db/entries'
 import { sv } from '../i18n/sv'
 import { readCsvFiles, type ReadResult } from '../io/csvFiles'
 import { summarize } from '../lib/csv'
-import { formatDate } from '../lib/format'
+import { formatDate, formatValue } from '../lib/format'
+import { METRICS } from '../lib/metrics'
 
 /** Pick one or more CSV files → preview → confirm. */
 export function ImportCsv() {
@@ -43,6 +44,18 @@ export function ImportCsv() {
           <p className="font-medium">
             {summary ? sv.import.found(summary.count, formatDate(summary.from), formatDate(summary.to)) : sv.import.nothingFound}
           </p>
+          {preview.rows.length > 0 && (
+            <div className="mt-1 text-xs text-zinc-500">
+              <p>{sv.import.sample}</p>
+              <ul>
+                {preview.rows.slice(0, 3).map((row, i) => (
+                  <li key={i}>
+                    {formatDate(row.takenAt)}: {formatValue(row.value, METRICS[row.metricId].unit)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {preview.errors.length > 0 && (
             <details className="mt-2 text-zinc-500">
               <summary>{sv.import.invalid(preview.errors.length)}</summary>

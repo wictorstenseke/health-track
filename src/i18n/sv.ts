@@ -67,6 +67,7 @@ export const sv = {
     button: 'Importera CSV',
     found: (count: number, from: string, to: string) => `Hittade ${count} rader (${from} – ${to})`,
     nothingFound: 'Hittade inga giltiga rader',
+    sample: 'Exempel',
     invalid: (n: number) => `${n} ogiltiga rader`,
     invalidRow: (file: string, line: number, text: string) => `${file} rad ${line}: ${text}`,
     confirm: 'Importera',

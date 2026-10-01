@@ -43,6 +43,17 @@ describe('parseCsv — legacy per-year sheets', () => {
   it('ignores extra columns', () => {
     expect(parseCsv('2024-01-03;88,2;bra dag').rows).toHaveLength(1)
   })
+  it('merges an unquoted decimal comma in a comma-delimited file', () => {
+    const result = parseCsv('Datum,Vikt\n2024-01-03,82,4\n')
+    expect(result.errors).toEqual([])
+    expect(result.rows).toEqual([{ metricId: 'weight', takenAt: at(2024, 1, 3), value: 82.4 }])
+  })
+  it('keeps a second decimal digit from a merged comma (rounding happens on write)', () => {
+    expect(parseCsv('2024-01-03,82,45\n').rows).toEqual([{ metricId: 'weight', takenAt: at(2024, 1, 3), value: 82.45 }])
+  })
+  it('leaves an integer weight alone', () => {
+    expect(parseCsv('2024-01-03,82\n').rows).toEqual([{ metricId: 'weight', takenAt: at(2024, 1, 3), value: 82 }])
+  })
   it('reports invalid rows with 1-based line numbers', () => {
     const result = parseCsv('Datum;Vikt\n2024-01-03;88,2\n2024-13-01;88\n2024-01-05;abc\n2024-01-06;5\n')
     expect(result.rows).toHaveLength(1)

@@ -91,12 +91,21 @@ export function parseCsv(text: string): CsvParseResult {
       layout = cells.length >= 3 && isMetricId(cells[1]) ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy' }
     }
 
-    const row = parseRow(cells, layout)
+    const row = parseRow(layout.kind === 'legacy' && delimiter === ',' ? mergeDecimalComma(cells) : cells, layout)
     if (row) rows.push(row)
     else errors.push({ line: i + 1, text: raw })
   })
 
   return { rows, errors }
+}
+
+/**
+ * A comma-delimited legacy sheet with an unquoted decimal comma (`2024-01-03,82,4`) splits the value
+ * into two cells; without this the weight would silently read as 82.
+ */
+function mergeDecimalComma(cells: string[]): string[] {
+  if (/^\d+$/.test(cells[1] ?? '') && /^\d{1,2}$/.test(cells[2] ?? '')) return [cells[0], `${cells[1]},${cells[2]}`, ...cells.slice(3)]
+  return cells
 }
 
 function parseRow(cells: string[], layout: Layout): CsvRow | null {
