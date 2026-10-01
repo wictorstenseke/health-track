@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { DecimalField, TextField } from '../components/Fields'
 import { ImportCsv } from '../components/ImportCsv'
 import { clearAllData } from '../db/entries'
+import { useAllEntries } from '../db/hooks'
 import { setHeightCm, setName, type Profile } from '../db/settings'
 import { sv } from '../i18n/sv'
 import { exportCsv } from '../io/csvFiles'
@@ -27,13 +28,20 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
   }
 
   const [exportFailed, setExportFailed] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  // Loaded up front so the share sheet can open synchronously inside the tap.
+  const entries = useAllEntries()
 
   const runExport = async () => {
+    if (!entries || exporting) return
     setExportFailed(false)
+    setExporting(true)
     try {
-      await exportCsv()
+      await exportCsv(entries)
     } catch {
       setExportFailed(true)
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -57,7 +65,12 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
       <section className={`${card} space-y-3`}>
         <h2 className="text-lg font-semibold">{sv.settings.data}</h2>
         <ImportCsv />
-        <button type="button" onClick={() => void runExport()} className="w-full rounded-full bg-ink py-3 font-semibold text-white">
+        <button
+          type="button"
+          disabled={!entries || exporting}
+          onClick={() => void runExport()}
+          className="w-full rounded-full bg-ink py-3 font-semibold text-white disabled:opacity-40"
+        >
           {sv.settings.exportCsv}
         </button>
         {exportFailed && (
