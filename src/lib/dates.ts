@@ -20,6 +20,16 @@ export function parseLocalIso(s: string): number | null {
   return date.getTime()
 }
 
+/** Parses Swedish `D/M` (no year, as Numbers exports a per-year sheet) as local noon in `year`. */
+export function parseDayMonth(s: string, year: number): number | null {
+  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})$/)
+  if (!m) return null
+  const [d, mo] = [Number(m[1]), Number(m[2])]
+  const date = new Date(year, mo - 1, d, 12)
+  if (date.getMonth() !== mo - 1 || date.getDate() !== d) return null
+  return date.getTime()
+}
+
 export function startOfLocalDay(ts: number): number {
   const d = new Date(ts)
   d.setHours(0, 0, 0, 0)

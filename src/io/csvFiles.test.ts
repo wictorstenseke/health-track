@@ -12,6 +12,10 @@ describe('readCsvFiles', () => {
     expect(result.rows.map((r) => r.value)).toEqual([88.2, 86.0])
     expect(result.errors).toEqual([{ file: '2025.csv', line: 3, text: 'fel;rad' }])
   })
+  it('takes the year for day/month dates from the file name', async () => {
+    const result = await readCsvFiles([new File(['Datum;Vikt\n2/1;84,2 kg\n'], '2024-År 2024 tracking.csv')])
+    expect(result.rows).toEqual([{ metricId: 'weight', takenAt: new Date(2024, 0, 2, 12).getTime(), value: 84.2 }])
+  })
 })
 
 describe('exportCsv', () => {

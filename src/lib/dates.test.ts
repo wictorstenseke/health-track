@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calendarDaysBetween, chartDay, MONTH_START_DAYS, parseLocalIso, toLocalIso } from './dates'
+import { calendarDaysBetween, chartDay, MONTH_START_DAYS, parseDayMonth, parseLocalIso, toLocalIso } from './dates'
 
 describe('toLocalIso / parseLocalIso', () => {
   it('round-trips local time', () => {
@@ -18,6 +18,19 @@ describe('toLocalIso / parseLocalIso', () => {
     expect(parseLocalIso('hello')).toBeNull()
     expect(parseLocalIso('2026-02-30')).toBeNull()
     expect(parseLocalIso('03/01/2024')).toBeNull()
+  })
+})
+
+describe('parseDayMonth', () => {
+  it('reads Swedish day/month in the given year at noon', () => {
+    expect(parseDayMonth('2/1', 2024)).toBe(new Date(2024, 0, 2, 12).getTime())
+    expect(parseDayMonth('23/10', 2025)).toBe(new Date(2025, 9, 23, 12).getTime())
+  })
+  it('rejects impossible dates and other formats', () => {
+    expect(parseDayMonth('29/2', 2025)).toBeNull()
+    expect(parseDayMonth('1/13', 2024)).toBeNull()
+    expect(parseDayMonth('2024-01-02', 2024)).toBeNull()
+    expect(parseDayMonth('Datum', 2024)).toBeNull()
   })
 })
 

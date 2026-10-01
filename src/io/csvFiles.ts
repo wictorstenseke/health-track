@@ -1,5 +1,5 @@
 import { setLastExportAt } from '../db/settings'
-import { parseCsv, toCsv, type CsvError, type CsvRow } from '../lib/csv'
+import { parseCsv, toCsv, yearFromFileName, type CsvError, type CsvRow } from '../lib/csv'
 import { toLocalIso } from '../lib/dates'
 
 export interface FileCsvError extends CsvError {
@@ -12,7 +12,7 @@ export interface ReadResult {
 }
 
 export async function readCsvFiles(files: File[]): Promise<ReadResult> {
-  const parsed = await Promise.all(files.map(async (f) => ({ file: f.name, result: parseCsv(await f.text()) })))
+  const parsed = await Promise.all(files.map(async (f) => ({ file: f.name, result: parseCsv(await f.text(), { year: yearFromFileName(f.name) }) })))
   return {
     rows: parsed.flatMap((p) => p.result.rows),
     errors: parsed.flatMap((p) => p.result.errors.map((e) => ({ ...e, file: p.file }))),

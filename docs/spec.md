@@ -134,7 +134,7 @@ takenAt,metric,value
 Multi-file select. Auto-detects:
 - Delimiter `,` or `;`; decimal `.` or `,`.
 - **Own format**: `takenAt,metric,value`.
-- **Legacy per-year sheets**: `date,weight` (2 columns, header optional) → metric `weight`. Date-only rows get `takenAt` 12:00 local (avoids day shift). Exact date formats TBD from sample rows.
+- **Legacy per-year sheets** (Numbers export, e.g. `2024-År 2024 tracking.csv`): date in column 1; header `Vikt`/`Midja`/`Höft` → weight/waist/hip, other columns ignored. No recognised header → weight in column 2. Dates `YYYY-MM-DD` or `D/M` with the year taken from the file name. Values may carry `kg`/`cm`. Waist/hip values repeated from the row above are carried forward, not new measurements → skipped. Date-only rows get `takenAt` 12:00 local (avoids day shift).
 
 Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogiltiga`) → Importera. Rows identical to an existing entry (same metric + takenAt + value) are skipped, so re-import is idempotent. Invalid rows listed, not imported.
 
@@ -161,7 +161,6 @@ No E2E. Dial + visuals checked by hand on iPhone via local network dev URL.
 
 ## Open items
 
-- Sample rows from legacy sheets → finalise date formats in importer.
 - Dial tick spacing / sensitivity / fling — tune on device.
 - iOS haptic trick during drag (may only fire on taps) — verify on device.
 
