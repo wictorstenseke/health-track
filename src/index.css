@@ -13,6 +13,12 @@
 }
 
 @layer base {
+  :root {
+    /* Floating tab bar (TabBar.tsx), shared with anything that must sit above it. */
+    --tab-bar-bottom: max(0.75rem, calc(env(safe-area-inset-bottom) - 0.5rem));
+    --tab-bar-height: 3.875rem;
+    --tab-bar-top: calc(var(--tab-bar-bottom) + var(--tab-bar-height));
+  }
   html {
     background: var(--color-canvas);
     overscroll-behavior: none;
