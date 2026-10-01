@@ -145,8 +145,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         <UndoToast
           key={undo.id}
           message={sv.toast.deleted}
-          onUndo={() => {
-            void restoreEntry(undo)
+          // Only hide the toast once the restore succeeded; a failure surfaces through ErrorToast.
+          onUndo={async () => {
+            await restoreEntry(undo)
             setUndo(null)
           }}
           onDismiss={dismissUndo}

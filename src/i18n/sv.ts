@@ -73,6 +73,7 @@ export const sv = {
     confirm: 'Importera',
     done: (added: number, skipped: number) => `${added} importerade, ${skipped} dubbletter hoppades över`,
   },
+  errors: { failed: 'Något gick fel. Ladda om appen.', reload: 'Ladda om' },
   setup: {
     title: 'Välkommen till Vågen',
     nameLabel: 'Vad heter du?',

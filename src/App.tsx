@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { ErrorToast } from './components/ErrorToast'
 import { TabBar } from './components/TabBar'
 import { useProfile } from './db/hooks'
 import { routeToHash, useRoute } from './lib/router'
@@ -8,7 +9,17 @@ import { MeasuresScreen } from './screens/MeasuresScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { SetupScreen } from './screens/SetupScreen'
 
+/** The toast sits outside the screens so it covers every one of them, including setup. */
 export function App() {
+  return (
+    <>
+      <Screens />
+      <ErrorToast />
+    </>
+  )
+}
+
+function Screens() {
   const profile = useProfile()
   const route = useRoute()
   const hash = routeToHash(route)
