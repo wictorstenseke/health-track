@@ -57,6 +57,7 @@ export const sv = {
     exportCsv: 'Exportera CSV',
     lastExport: (when: string) => `Senaste export: ${when}`,
     neverExported: 'Aldrig exporterad',
+    exportFailed: 'Exporten misslyckades. Försök igen.',
     deleteAll: 'Radera all data',
     confirmDeleteAll: 'Radera all data? Det går inte att ångra.',
     confirmDeleteAllAgain: 'Är du helt säker? Alla mätningar försvinner.',

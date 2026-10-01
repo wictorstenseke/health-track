@@ -20,21 +20,27 @@ export async function readCsvFiles(files: File[]): Promise<ReadResult> {
   }
 }
 
-/** Share sheet on iOS ("Spara i Filer"), download elsewhere. Only a completed export updates "Senaste export". */
+/**
+ * Share sheet on iOS ("Spara i Filer"); download elsewhere, or when sharing fails
+ * (e.g. NotAllowedError once the tap's user activation has expired). Only a completed export updates "Senaste export".
+ */
 export async function exportCsv(now = Date.now()): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const csv = toCsv(await getAllEntries())
   const filename = `vagen-${toLocalIso(now).slice(0, 10)}.csv`
   const file = new File([csv], filename, { type: 'text/csv' })
 
   if (navigator.canShare?.({ files: [file] })) {
+    let shared = false
     try {
       await navigator.share({ files: [file] })
+      shared = true
     } catch (e) {
       if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled'
-      throw e
     }
-    await setLastExportAt(now)
-    return 'shared'
+    if (shared) {
+      await setLastExportAt(now)
+      return 'shared'
+    }
   }
 
   const url = URL.createObjectURL(file)
@@ -42,7 +48,8 @@ export async function exportCsv(now = Date.now()): Promise<'shared' | 'downloade
   a.href = url
   a.download = filename
   a.click()
-  URL.revokeObjectURL(url)
+  // Revoking immediately can abort the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
   await setLastExportAt(now)
   return 'downloaded'
 }

@@ -7,6 +7,7 @@ import { sv } from '../i18n/sv'
 import { exportCsv } from '../io/csvFiles'
 import { formatRelativeDay, parseDecimal } from '../lib/format'
 import { isValidHeight } from '../lib/metrics'
+import { navigate } from '../lib/router'
 
 const card = 'rounded-[28px] bg-white p-5 shadow-card'
 
@@ -25,8 +26,22 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
     else if (heightValue !== null && !heightInvalid) void setHeightCm(heightValue)
   }
 
-  const deleteAll = () => {
-    if (window.confirm(sv.settings.confirmDeleteAll) && window.confirm(sv.settings.confirmDeleteAllAgain)) void clearAllData()
+  const [exportFailed, setExportFailed] = useState(false)
+
+  const runExport = async () => {
+    setExportFailed(false)
+    try {
+      await exportCsv()
+    } catch {
+      setExportFailed(true)
+    }
+  }
+
+  const deleteAll = async () => {
+    if (!window.confirm(sv.settings.confirmDeleteAll) || !window.confirm(sv.settings.confirmDeleteAllAgain)) return
+    await clearAllData()
+    // Back to the start route so the app lands on Hem after the new setup.
+    navigate({ name: 'home' })
   }
 
   return (
@@ -42,9 +57,14 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
       <section className={`${card} space-y-3`}>
         <h2 className="text-lg font-semibold">{sv.settings.data}</h2>
         <ImportCsv />
-        <button type="button" onClick={() => void exportCsv()} className="w-full rounded-full bg-ink py-3 font-semibold text-white">
+        <button type="button" onClick={() => void runExport()} className="w-full rounded-full bg-ink py-3 font-semibold text-white">
           {sv.settings.exportCsv}
         </button>
+        {exportFailed && (
+          <p role="alert" className="text-center text-sm text-red-600">
+            {sv.settings.exportFailed}
+          </p>
+        )}
         <p className="text-center text-sm text-zinc-500">
           {profile.lastExportAt === null
             ? sv.settings.neverExported
@@ -52,7 +72,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
         </p>
       </section>
 
-      <button type="button" onClick={deleteAll} className="w-full rounded-full bg-red-50 py-3 font-semibold text-red-600">
+      <button type="button" onClick={() => void deleteAll()} className="w-full rounded-full bg-red-50 py-3 font-semibold text-red-600">
         {sv.settings.deleteAll}
       </button>
       <p className="text-center text-xs text-zinc-400">{sv.settings.version(__APP_VERSION__)}</p>
