@@ -4,3 +4,6 @@ dev-dist
 coverage
 *.local
 .DS_Store
+
+# Third-party design references: kept locally, never published
+docs/design/reference-*.png
