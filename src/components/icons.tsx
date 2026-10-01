@@ -31,6 +31,13 @@ export const SlidersIcon = () => (
   </svg>
 )
 
+export const CalendarIcon = () => (
+  <svg {...base}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+    <path d="M3.5 10h17M8 3v4M16 3v4" />
+  </svg>
+)
+
 export const ChevronLeftIcon = () => (
   <svg {...base}>
     <path d="M15 18l-6-6 6-6" />

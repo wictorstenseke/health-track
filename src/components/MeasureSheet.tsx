@@ -41,7 +41,7 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
           />
         ))}
       </div>
-      <div className="my-5">
+      <div className="my-5 flex justify-center">
         <DateTimeField value={takenAt} onChange={setTakenAt} />
       </div>
       <button

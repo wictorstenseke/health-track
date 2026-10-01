@@ -45,8 +45,8 @@ export function visibleTicks(center: number, halfSpanKg = HALF_SPAN_KG): Tick[] 
 }
 
 /** Tick opacity by distance from the needle: solid in the middle, fading out at the ends of the scale. */
-export function edgeFade(offset: number): number {
-  return Math.max(0, 1 - (Math.abs(offset) / (HALF_SPAN_KG * UNITS_PER_KG)) ** 4)
+export function edgeFade(offset: number, halfSpanKg = HALF_SPAN_KG): number {
+  return Math.max(0, 1 - (Math.abs(offset) / (halfSpanKg * UNITS_PER_KG)) ** 4)
 }
 
 /** Friction per 16 ms frame */

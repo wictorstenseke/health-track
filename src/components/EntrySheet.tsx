@@ -36,7 +36,7 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
       ) : (
         <DecimalField label={sv.metrics[entry.metricId]} unit={METRICS[entry.metricId].unit} value={text} onChange={setText} invalid={!valid} />
       )}
-      <div className="my-5">
+      <div className="my-5 flex justify-center">
         <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
       </div>
       <div className="flex gap-3">

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { sv } from '../i18n/sv'
 import { toDialValue } from '../lib/dialMath'
 import { formatNumber, parseDecimal } from '../lib/format'
@@ -25,14 +25,51 @@ export function WeightValue({ value, onChange }: { value: number; onChange: (val
           onFocus={(e) => e.currentTarget.select()}
           onBlur={(e) => commitTyped(e.currentTarget.value)}
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-          className="w-[5ch] bg-transparent text-center text-5xl font-semibold tracking-tight tabular-nums outline-none"
+          className="w-[5ch] bg-transparent text-center text-4xl font-semibold tracking-tight tabular-nums outline-none"
         />
       ) : (
-        <button type="button" aria-label={sv.home.typeValue} onClick={() => setTyping(true)} className="text-5xl font-semibold tracking-tight tabular-nums">
+        <button type="button" aria-label={sv.home.typeValue} onClick={() => setTyping(true)} className="text-4xl font-semibold tracking-tight tabular-nums">
           {formatNumber(value)}
-          <span className="ml-1.5 text-2xl font-medium text-zinc-400">kg</span>
+          <span className="ml-1 text-lg font-medium text-zinc-400">kg</span>
         </button>
       )}
+    </div>
+  )
+}
+
+/**
+ * Hem's weight entry: one band (the dial's rim and white inside) with the number (and an optional `caption`
+ * under it) on top, the scale in the middle, and below it `start` (the date button) on the left with `children`
+ * (Spara) centred in the band.
+ */
+export function WeightScale({
+  value,
+  onChange,
+  caption,
+  start,
+  children,
+}: {
+  value: number
+  onChange: (value: number) => void
+  caption?: ReactNode
+  start: ReactNode
+  children: ReactNode
+}) {
+  return (
+    // Same rim colours and 8 px rim as the dial's own band.
+    <div className="rounded-[40px] bg-linear-to-r from-[#ffd2bd] via-[#ff9466] to-[#ffd2bd] p-2">
+      <div className="rounded-[32px] bg-white py-5">
+        <WeightValue value={value} onChange={onChange} />
+        {caption && <p className="text-center text-sm text-zinc-500">{caption}</p>}
+        <div className="mt-4">
+          <WeightDial value={value} onChange={onChange} bare />
+        </div>
+        {/* Equal outer columns keep `children` centred whatever `start` is; 20 px in, like the bottom padding. */}
+        <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center px-5">
+          <div className="justify-self-start">{start}</div>
+          {children}
+        </div>
+      </div>
     </div>
   )
 }

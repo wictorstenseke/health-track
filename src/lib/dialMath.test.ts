@@ -50,6 +50,10 @@ describe('edgeFade', () => {
     expect(edgeFade(edge / 2)).toBeGreaterThan(0.9)
     expect(edgeFade(edge * 0.9)).toBeLessThan(edgeFade(edge / 2))
   })
+  it('fades over a wider span when given one', () => {
+    expect(edgeFade(edge, 6)).toBeGreaterThan(0.5)
+    expect(edgeFade(6 * UNITS_PER_KG, 6)).toBe(0)
+  })
 })
 
 describe('momentumStep', () => {

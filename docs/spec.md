@@ -79,15 +79,15 @@ Top to bottom:
    - Current year solid line; previous 2 years as ghost lines (older = fainter), small year labels at line ends.
    - X axis Jan–Dec, full year visible.
    - Tap → weight detail screen.
-3. **Big number** `82,4 kg`; tap → keypad input (`inputmode="decimal"`). No `−`/`+` buttons.
-4. **Date link** under the number: `Idag · ändra` → native date-time picker for backdating. Defaults to now.
-5. **Weight scale**:
+3. **Registrera** section heading (18 px).
+4. **Weight entry**: one band (the dial's rim + white inside; 20 px padding top and bottom) holding, top to bottom: the number `82,4 kg` (tap → keypad input, `inputmode="decimal"`; the picked date and time under it only while backdated), 16 px to the scale (no band of its own, tick labels every 5 kg; it shows ~±5,2 kg so the ticks run out to just inside the band's edges), 20 px to the buttons (see 5). Hem fits an iPhone 17 Pro screen without scrolling.
+   Scale details:
    - Straight pill-shaped band with rounded ends (reference image 3's frame, unbent), **fixed orange needle, scale slides** under it. Ticks fade out towards the ends.
    - Range 60–100 kg (constant). Ticks at 0.5 and 1 kg, labels every 5 kg. ~±4,5 kg visible (tune on device).
    - Drag left/right with momentum (fling capped at ~3 kg travel), snaps to 0.1.
    - Starts at last weight (75,0 if none).
    - Haptic tick per 0.1, best effort: Vibration API on Android; on iOS the `<input type="checkbox" switch>` trick, which only fires from code on iOS 17.4–26.4 (26.5 blocked it).
-6. **Spara** (black pill button) under the scale. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now.
+5. **Buttons** under the scale, both 40 px: a round calendar icon button on the left, 20 px in (opens the native date-time picker for backdating; defaults to now; tinted orange while backdated), and the **Spara** pill centred in the band. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now.
 
 ### Detail screen (`/metric/:metricId`) — weight, waist, hip
 
@@ -142,7 +142,7 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 
 - Light only. Reference image 2: orange→red gradient hero, white/soft-grey cards, large radii, soft shadows, black pill buttons. Dial styled after reference image 3, recoloured to app palette.
 - iOS: `viewport-fit=cover`, safe-area insets, `overscroll-behavior: none`. Status bar `apple-mobile-web-app-status-bar-style: default` with `theme-color` canvas grey: on iOS 26 Home Screen apps, `black-translucent` makes the web view one status-bar height too short (gap under the tab bar, WebKit bug 301108), and iOS tints a see-through bar from the page. The status-bar style is read at install time, so changing it needs a reinstall. iOS 26 also blurs and fades ~30 pt below the status bar over whatever sits there (measured on device, can't be turned off), so every screen starts its content at `--screen-top` (safe area + 2.25rem).
-- Type scale (Tailwind sizes only, no one-off px): 48 `5xl` display (the weight number) · 30 `3xl` screen titles (name on Hem, Mått, Inställningar, detail, setup) · 24 `2xl` card values and the `kg` suffix · 18 `lg` card/section/sheet titles and primary buttons · 16 `base` body, inputs, secondary buttons · 14 `sm` labels, date link, month headers, chips, the detail table · 12 `xs` captions (version, import details). Semibold for 18 and up; medium for labels; `tracking-tight` for 24 and up.
+- Type scale (Tailwind sizes only, no one-off px): 36 `4xl` display (the weight number) · 30 `3xl` screen titles (name on Hem, Mått, Inställningar, detail, setup) · 24 `2xl` card values · 18 `lg` card/section/sheet titles, primary buttons and the `kg` after the weight number · 16 `base` body, inputs, secondary buttons · 14 `sm` labels, date link, month headers, chips, the detail table · 12 `xs` captions (version, import details). Semibold for 18 and up; medium for labels; `tracking-tight` for 24 and up.
 - Layout: content and cards sit 16 px from the screen edges, header card included. Hem's header card: the left-aligned welcome line and name (tight, no gap) sit centred between the card's top and the nested chart card (64 px each side); the text starts where the chart card's "2026" does.
 - Locale: Swedish. `82,4 kg`, `1 okt 2026`, 24 h, week starts Monday. `Intl` with `sv-SE`. All strings in `src/i18n/sv.ts`.
 

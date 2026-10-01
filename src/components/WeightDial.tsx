@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { sv } from '../i18n/sv'
-import { clampVelocity, DIAL_MAX, DIAL_MIN, edgeFade, momentumStep, toDialValue, UNITS_PER_KG, valueAfterDrag, visibleTicks } from '../lib/dialMath'
+import { clampVelocity, DIAL_MAX, DIAL_MIN, edgeFade, HALF_SPAN_KG, momentumStep, toDialValue, UNITS_PER_KG, valueAfterDrag, visibleTicks } from '../lib/dialMath'
 import { haptic } from '../lib/haptics'
 import { roundValue } from '../lib/metrics'
 
@@ -12,6 +12,10 @@ const CX = VIEW_W / 2
 const TICK_TOP = BAND.y + 10
 const TICK_LENGTH = { major: 24, mid: 16, minor: 10 } as const
 const LABEL_Y = TICK_TOP + 38
+/** Without its own band (`bare`), the view is cropped to what's inside it: needle top to just under the labels. */
+const BARE_VIEW = { x: BAND.x + BAND.rim, y: TICK_TOP - 8, width: VIEW_W - (BAND.x + BAND.rim) * 2, height: LABEL_Y + 10 - (TICK_TOP - 8) }
+/** kg either side of the needle when bare: the ticks run out to just inside the view's edges. */
+const BARE_HALF_SPAN_KG = (BARE_VIEW.width / 2 - 4) / UNITS_PER_KG
 const FLING_PAUSE_MS = 80
 
 interface Drag {
@@ -25,8 +29,17 @@ interface Drag {
   velocity: number
 }
 
+interface WeightDialProps {
+  value: number
+  onChange: (value: number) => void
+  /** No band of its own: the caller's container is the band. */
+  bare?: boolean
+}
+
 /** Fixed needle, sliding scale. Drag or fling; snaps to 0.1 kg. Emits only snapped values. */
-export function WeightDial({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
+  const view = bare ? BARE_VIEW : { x: 0, y: 0, width: VIEW_W, height: VIEW_H }
+  const halfSpan = bare ? BARE_HALF_SPAN_KG : HALF_SPAN_KG
   const [pos, setPos] = useState(() => toDialValue(value))
   const posRef = useRef(pos)
   const emitted = useRef(toDialValue(value))
@@ -68,7 +81,7 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
     drag.current = {
       startX: e.clientX,
       startPos: posRef.current,
-      scale: VIEW_W / e.currentTarget.getBoundingClientRect().width,
+      scale: view.width / e.currentTarget.getBoundingClientRect().width,
       lastX: e.clientX,
       lastT: e.timeStamp,
       velocity: 0,
@@ -113,7 +126,7 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
 
   return (
     <svg
-      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
       className="w-full cursor-grab touch-none select-none"
       role="slider"
       aria-label={sv.metrics.weight}
@@ -132,19 +145,23 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
           <stop offset="1" stopColor="#ffd2bd" />
         </linearGradient>
       </defs>
-      <rect x={BAND.x} y={BAND.y} width={BAND.width} height={BAND.height} rx={BAND.height / 2} fill="url(#dial-rim)" />
-      <rect
-        x={BAND.x + BAND.rim}
-        y={BAND.y + BAND.rim}
-        width={BAND.width - BAND.rim * 2}
-        height={BAND.height - BAND.rim * 2}
-        rx={BAND.height / 2 - BAND.rim}
-        fill="#fff"
-      />
-      {visibleTicks(pos).map((t) => {
+      {!bare && (
+        <>
+          <rect x={BAND.x} y={BAND.y} width={BAND.width} height={BAND.height} rx={BAND.height / 2} fill="url(#dial-rim)" />
+          <rect
+            x={BAND.x + BAND.rim}
+            y={BAND.y + BAND.rim}
+            width={BAND.width - BAND.rim * 2}
+            height={BAND.height - BAND.rim * 2}
+            rx={BAND.height / 2 - BAND.rim}
+            fill="#fff"
+          />
+        </>
+      )}
+      {visibleTicks(pos, halfSpan).map((t) => {
         const x = CX + t.offset
         return (
-          <g key={t.value} opacity={edgeFade(t.offset)}>
+          <g key={t.value} opacity={edgeFade(t.offset, halfSpan)}>
             <line
               x1={x}
               y1={TICK_TOP}
