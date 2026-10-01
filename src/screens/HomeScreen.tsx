@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { DateTimeField } from '../components/DateTimeField'
+import { HapticTap } from '../components/HapticTap'
 import { WeightDial } from '../components/WeightDial'
 import { WeightValue } from '../components/WeightPicker'
 import { YearChart } from '../components/YearChart'
@@ -7,23 +8,15 @@ import { saveWeightForDay } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
 import { DEFAULT_WEIGHT, toDialValue } from '../lib/dialMath'
-import { formatDelta, formatRelativeDay, formatValue } from '../lib/format'
-import { haptic } from '../lib/haptics'
+import { formatDelta } from '../lib/format'
 import type { Entry } from '../lib/metrics'
 import { navigate } from '../lib/router'
 import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
 
 const SAVED_MS = 1500
 
-function LatestPill({ entry }: { entry: Entry | undefined }) {
-  return (
-    <div className="rounded-full bg-white/55 px-5 py-3 text-center text-[15px] font-medium text-ink shadow-sm backdrop-blur-xl">
-      {entry ? sv.home.latest(formatValue(entry.value, 'kg'), formatRelativeDay(entry.takenAt, Date.now())) : sv.home.noWeighIn}
-    </div>
-  )
-}
-
-function YearCard({ entries }: { entries: Entry[] }) {
+// Memo: the dial re-renders Hem on every 0.1 kg step, and redrawing the Recharts chart each time made dragging stutter.
+const YearCard = memo(function YearCard({ entries }: { entries: Entry[] }) {
   const year = new Date().getFullYear()
   const series = yearSeries(entries, [year, year - 1, year - 2])
   const stats = yearStats(entries, year)
@@ -44,7 +37,7 @@ function YearCard({ entries }: { entries: Entry[] }) {
       )}
     </button>
   )
-}
+})
 
 export function HomeScreen({ name }: { name: string }) {
   const entries = useEntries('weight')
@@ -81,7 +74,6 @@ export function HomeScreen({ name }: { name: string }) {
 
   const save = async () => {
     await saveWeightForDay(shown, takenAt ?? Date.now())
-    haptic()
     setTakenAt(null)
     setJustSaved(true)
   }
@@ -91,8 +83,7 @@ export function HomeScreen({ name }: { name: string }) {
       <section className="hero-gradient px-4 pt-[calc(env(safe-area-inset-top)+2.5rem)] pb-2">
         <p className="text-center text-[15px] font-medium text-white/90">{sv.home.welcome}</p>
         <h1 className="mt-1 text-center text-[34px] font-semibold tracking-tight text-white">{name}</h1>
-        <div className="mt-6 space-y-2">
-          <LatestPill entry={last} />
+        <div className="mt-6">
           <YearCard entries={entries} />
         </div>
       </section>
@@ -104,14 +95,18 @@ export function HomeScreen({ name }: { name: string }) {
         <div className="mt-5">
           <WeightDial value={shown} onChange={changeWeight} />
         </div>
-        <button
-          type="button"
-          disabled={saved}
-          onClick={() => void save()}
-          className="mt-5 w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-card active:scale-[0.99] disabled:bg-ember-500"
-        >
-          {saved ? sv.common.saved : sv.common.save}
-        </button>
+        <div className="mt-5">
+          <HapticTap onTap={() => void save()} disabled={saved}>
+            <button
+              type="button"
+              disabled={saved}
+              onClick={() => void save()}
+              className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-card disabled:bg-ember-500"
+            >
+              {saved ? sv.common.saved : sv.common.save}
+            </button>
+          </HapticTap>
+        </div>
       </section>
     </main>
   )

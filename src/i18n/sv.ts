@@ -20,8 +20,6 @@ export const sv = {
   },
   home: {
     welcome: 'Välkommen tillbaka',
-    latest: (value: string, when: string) => `Senast ${value} · ${when}`,
-    noWeighIn: 'Ingen vägning än',
     today: 'Idag',
     typeValue: 'Skriv in vikt',
   },

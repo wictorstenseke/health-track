@@ -74,21 +74,20 @@ One screen: Namn, Längd (cm), optional "Importera CSV". Button "Kom igång" →
 
 Top to bottom:
 1. **Gradient hero** (orange → red, like reference image 2), extends under status bar. "Välkommen tillbaka" / name.
-2. **Pill**: `Senast 82,4 kg · för 3 dagar sedan`. Empty: `Ingen vägning än`.
-3. **Year chart card** (rounded, grouped with hero):
+2. **Year chart card** (rounded, grouped with hero):
    - Header: current year + change since first weigh-in this year (`−3,1 kg`). Hidden if < 2 entries this year.
    - Current year solid line; previous 2 years as ghost lines (older = fainter), small year labels at line ends.
    - X axis Jan–Dec, full year visible.
    - Tap → weight detail screen.
-4. **Big number** `82,4 kg`; tap → keypad input (`inputmode="decimal"`). No `−`/`+` buttons.
-5. **Date link** under the number: `Idag · ändra` → native date-time picker for backdating. Defaults to now.
-6. **Weight scale**:
+3. **Big number** `82,4 kg`; tap → keypad input (`inputmode="decimal"`). No `−`/`+` buttons.
+4. **Date link** under the number: `Idag · ändra` → native date-time picker for backdating. Defaults to now.
+5. **Weight scale**:
    - Straight pill-shaped band with rounded ends (reference image 3's frame, unbent), **fixed orange needle, scale slides** under it. Ticks fade out towards the ends.
    - Range 60–100 kg (constant). Ticks at 0.5 and 1 kg, labels every 5 kg. ~±4,5 kg visible (tune on device).
    - Drag left/right with momentum (fling capped at ~3 kg travel), snaps to 0.1.
    - Starts at last weight (75,0 if none).
-   - Haptic tick per 0.1 via iOS 18+ `<input type="checkbox" switch>` trick — best effort, drop if flaky.
-7. **Spara** (black pill button) under the scale. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic, `Sparat ✓` for at least 1.5 s, pill + chart update, date resets to now.
+   - Haptic tick per 0.1, best effort: Vibration API on Android; on iOS the `<input type="checkbox" switch>` trick, which only fires from code on iOS 17.4–26.4 (26.5 blocked it).
+6. **Spara** (black pill button) under the scale. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now.
 
 ### Detail screen (`/metric/:metricId`) — weight, waist, hip
 
