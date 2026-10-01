@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
+import { Group, Row, rowClass } from '../components/GroupedList'
 import { HapticTap } from '../components/HapticTap'
 import { ChevronRightIcon } from '../components/icons'
 import { ImportCsv } from '../components/ImportCsv'
@@ -185,21 +186,5 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
         </BottomSheet>
       )}
     </main>
-  )
-}
-
-const rowClass = 'flex min-h-13 w-full items-center justify-between gap-4 px-5'
-
-function Row({ children }: { children: ReactNode }) {
-  return <div className={rowClass}>{children}</div>
-}
-
-/** iOS-style grouped list: a quiet label over one card whose rows are split by hairlines. */
-function Group({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <section>
-      <h2 className="mb-1.5 px-5 text-sm font-medium text-muted">{label}</h2>
-      <div className="divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">{children}</div>
-    </section>
   )
 }

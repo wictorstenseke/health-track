@@ -41,7 +41,8 @@ export const sv = {
   toast: { deleted: 'Mätning raderad', undo: 'Ångra' },
   measures: {
     title: 'Mått',
-    measure: 'Mät',
+    newMeasurement: 'Ny mätning',
+    circumference: 'Omkrets',
     formTitle: 'Nya mått',
     thisYear: (delta: string) => `${delta} i år`,
     invalid: 'Ogiltigt värde',

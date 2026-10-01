@@ -102,8 +102,8 @@ Same component for all metrics:
 
 ### Mått
 
-- Cards: Midja, Höft — latest value, change since first entry this year, current-year sparkline. Tap → detail screen.
-- **Mät** button → batch form: one decimal input per metric + date-time (default now). Saves only filled fields, all with same `takenAt`.
+- Grouped list like Inställningar, group `Omkrets`: one row per metric (Midja, Höft) — name and change since first entry this year left; current-year sparkline, latest value and chevron right. Tap → detail screen.
+- Last row **+ Ny mätning** (ember) → batch form: one decimal input per metric + date-time (default now). Saves only filled fields, all with same `takenAt`.
 
 ### Inställningar
 
