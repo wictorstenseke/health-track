@@ -34,6 +34,7 @@ export const sv = {
     bmi: 'BMI',
     sameDate: (date: string, then: string, now: string, diff: string) => `${date}: ${then} → nu ${now} (${diff})`,
     entries: 'Alla mätningar',
+    count: (n: number) => (n === 1 ? '1 mätning' : `${n} mätningar`),
     empty: 'Inga mätningar än',
   },
   sheet: { title: 'Ändra mätning', when: 'Tidpunkt' },

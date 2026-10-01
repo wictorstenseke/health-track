@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { EntrySheet } from '../components/EntrySheet'
-import { ChevronLeftIcon } from '../components/icons'
+import { ChevronDownIcon, ChevronLeftIcon } from '../components/icons'
 import { UndoToast } from '../components/UndoToast'
 import { yearColor, YearChart } from '../components/YearChart'
 import { restoreEntry } from '../db/entries'
@@ -15,6 +15,8 @@ import { useDark } from '../lib/theme'
 export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heightCm: number | null }) {
   const entries = useEntries(metricId)
   const [hiddenYears, setHiddenYears] = useState<number[]>([])
+  // Years whose accordion the user flipped away from its default (only the newest year starts open).
+  const [flippedYears, setFlippedYears] = useState<number[]>([])
   const [editing, setEditing] = useState<Entry | null>(null)
   const [undo, setUndo] = useState<Entry | null>(null)
   const dismissUndo = useCallback(() => setUndo(null), [])
@@ -25,14 +27,21 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   const series = yearSeries(entries, years.filter((y) => !hiddenYears.includes(y)))
   const last = latest(entries)
   const comparison = sameDateLastYear(entries, Date.now())
-  const toggleYear = (y: number) => setHiddenYears((h) => (h.includes(y) ? h.filter((x) => x !== y) : [...h, y]))
+  const toggle = (list: number[], y: number) => (list.includes(y) ? list.filter((x) => x !== y) : [...list, y])
+  const toggleYear = (y: number) => setHiddenYears((h) => toggle(h, y))
+  const isOpen = (y: number) => (y === years[0]) !== flippedYears.includes(y)
 
-  const months: { label: string; rows: Array<Entry & { delta: number | null }> }[] = []
+  type Month = { label: string; rows: Array<Entry & { delta: number | null }> }
+  const entryYears: { year: number; count: number; months: Month[] }[] = []
   for (const row of withDeltas(entries).reverse()) {
+    const year = new Date(row.takenAt).getFullYear()
+    if (entryYears.at(-1)?.year !== year) entryYears.push({ year, count: 0, months: [] })
+    const group = entryYears.at(-1)!
+    group.count++
     const label = formatMonthYear(row.takenAt)
-    const group = months.at(-1)
-    if (group?.label === label) group.rows.push(row)
-    else months.push({ label, rows: [row] })
+    const month = group.months.at(-1)
+    if (month?.label === label) month.rows.push(row)
+    else group.months.push({ label, rows: [row] })
   }
 
   return (
@@ -66,6 +75,62 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
             </div>
             <YearChart series={series} height={240} variant="full" />
           </section>
+
+          <h2 className="mt-8 mb-2 px-1 text-lg font-semibold">{sv.detail.entries}</h2>
+          <div className="space-y-3">
+          {entryYears.map(({ year, count, months }) => {
+            const open = isOpen(year)
+            return (
+              <section key={year} className="overflow-hidden rounded-[28px] bg-surface shadow-card">
+                <button
+                  type="button"
+                  onClick={() => setFlippedYears((f) => toggle(f, year))}
+                  aria-expanded={open}
+                  aria-controls={`entries-${year}`}
+                  className="flex w-full items-center justify-between px-4 py-3.5 text-left"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="size-2.5 rounded-full" style={{ background: yearColor(year, dark) }} />
+                    <span className="text-base font-semibold">{year}</span>
+                    <span className="text-sm text-faint">{sv.detail.count(count)}</span>
+                  </span>
+                  <span className={`text-faint transition-transform duration-300 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}>
+                    <ChevronDownIcon />
+                  </span>
+                </button>
+                {/* 0fr → 1fr animates the height; inert keeps the collapsed rows out of tab order. */}
+                <div
+                  id={`entries-${year}`}
+                  inert={!open}
+                  className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+                >
+                  <div className="overflow-hidden">
+                    {months.map((m) => (
+                      <div key={m.label}>
+                        <h3 className="border-t border-line px-4 pt-3 pb-1 text-sm font-medium text-faint">{m.label}</h3>
+                        <ul>
+                          {m.rows.map((r) => (
+                            <li key={r.id} className="border-t border-line first:border-t-0">
+                              <button type="button" onClick={() => setEditing(r)} className="flex w-full items-center justify-between px-4 py-3 text-left">
+                                <span>
+                                  {formatRowDate(r.takenAt)} <span className="text-sm text-faint">{formatTime(r.takenAt)}</span>
+                                </span>
+                                <span className="tabular-nums">
+                                  <span className="font-semibold">{formatValue(r.value, unit)}</span>
+                                  {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-faint">{formatDelta(r.delta)}</span>}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )
+          })}
+          </div>
 
           {(comparison || (metricId === 'weight' && heightCm && last)) && (
             <section className="mt-3 space-y-1 rounded-[28px] bg-surface p-4 text-base shadow-card">
@@ -118,27 +183,6 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
             </table>
           </section>
 
-          <h2 className="mt-8 mb-2 px-1 text-lg font-semibold">{sv.detail.entries}</h2>
-          {months.map((m) => (
-            <section key={m.label} className="mb-4">
-              <h3 className="mb-1 px-1 text-sm font-medium text-faint">{m.label}</h3>
-              <ul className="overflow-hidden rounded-[22px] bg-surface shadow-card">
-                {m.rows.map((r) => (
-                  <li key={r.id} className="border-t border-line first:border-t-0">
-                    <button type="button" onClick={() => setEditing(r)} className="flex w-full items-center justify-between px-4 py-3 text-left">
-                      <span>
-                        {formatRowDate(r.takenAt)} <span className="text-sm text-faint">{formatTime(r.takenAt)}</span>
-                      </span>
-                      <span className="tabular-nums">
-                        <span className="font-semibold">{formatValue(r.value, unit)}</span>
-                        {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-faint">{formatDelta(r.delta)}</span>}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
         </>
       )}
 
