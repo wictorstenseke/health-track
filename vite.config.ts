@@ -4,12 +4,17 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// The commit hash (set by GitHub Actions) lets the phone show which build it is running.
+const version = process.env.npm_package_version ?? 'dev'
+const sha = process.env.GITHUB_SHA?.slice(0, 7)
+const appVersion = sha ? `${version}+${sha}` : version
+
 // https://vite.dev/config/
 export default defineConfig({
   // GitHub Pages serves the repo at /health-track/
   base: '/health-track/',
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'dev'),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   server: { host: true },
   plugins: [

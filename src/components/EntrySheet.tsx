@@ -37,7 +37,7 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
         <DecimalField label={sv.metrics[entry.metricId]} unit={METRICS[entry.metricId].unit} value={text} onChange={setText} invalid={!valid} />
       )}
       <div className="my-5">
-        <DateTimeField value={takenAt} onChange={(ts) => setTakenAt(ts ?? Date.now())} />
+        <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
       </div>
       <div className="flex gap-3">
         <button type="button" onClick={() => void remove()} className="flex-1 rounded-full bg-red-50 py-4 font-semibold text-red-600">

@@ -17,7 +17,12 @@ export function DateTimeField({ value, onChange }: { value: number | null; onCha
         type="datetime-local"
         className="absolute inset-0 opacity-0"
         value={toLocalIso(value ?? Date.now())}
-        onChange={(e) => onChange(parseLocalIso(e.target.value))}
+        max={toLocalIso(Date.now())}
+        // `max` is only a hint to the picker; typed or pasted values can still be in the future.
+        onChange={(e) => {
+          const ts = parseLocalIso(e.target.value)
+          onChange(ts === null ? null : Math.min(ts, Date.now()))
+        }}
       />
     </label>
   )

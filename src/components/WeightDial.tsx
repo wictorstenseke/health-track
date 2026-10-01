@@ -124,7 +124,8 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
   }
 
   const needleTop = polar(0, ARC_RADIUS + 6, CX, CY)
-  const needleBottom = polar(0, ARC_RADIUS - 52, CX, CY)
+  // Ends just past the major tick (length 24) so it stays clear of the scale labels.
+  const needleBottom = polar(0, ARC_RADIUS - 28, CX, CY)
 
   return (
     <svg
