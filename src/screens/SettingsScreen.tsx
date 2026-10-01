@@ -199,7 +199,7 @@ function Group({ label, children }: { label: string; children: ReactNode }) {
   return (
     <section>
       <h2 className="mb-1.5 px-5 text-sm font-medium text-muted">{label}</h2>
-      <div className="divide-y divide-line overflow-hidden rounded-[28px] bg-surface shadow-card">{children}</div>
+      <div className="divide-y divide-line overflow-hidden rounded-[20px] bg-surface shadow-card">{children}</div>
     </section>
   )
 }
