@@ -151,7 +151,7 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 
 - Manifest: name/short_name `Vågen`, `display: standalone`, theme/background colours from palette.
 - Icon: orange→red gradient square with white dial/needle glyph. SVG source → PNG 180 (apple-touch), 192, 512, maskable 512.
-- Precache app shell + fonts. Silent auto-update; IndexedDB untouched by updates.
+- Precache app shell + fonts. The app checks for a new build on launch and on returning to the foreground; installing it is a tap in Inställningar (`Uppdatera`), never an automatic reload. IndexedDB untouched by updates.
 
 ## Testing
 
