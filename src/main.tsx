@@ -4,6 +4,8 @@ import { App } from './App'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { requestPersistentStorage } from './db/persist'
 import './index.css'
+// Registers the service worker and starts watching for new builds.
+import './lib/pwa'
 
 void requestPersistentStorage()
 // Screens restore their own scroll position (App.tsx); the browser's own restore would fight it on back.

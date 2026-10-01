@@ -9,6 +9,7 @@ import { sv } from '../i18n/sv'
 import { exportCsv } from '../io/csvFiles'
 import { formatRelativeDay, parseDecimal } from '../lib/format'
 import { isValidHeight } from '../lib/metrics'
+import { checkForUpdate, installUpdate, useUpdateStatus } from '../lib/pwa'
 import { navigate } from '../lib/router'
 import { setDark, useDark } from '../lib/theme'
 
@@ -29,6 +30,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
     else if (heightValue !== null && !heightInvalid) void setHeightCm(heightValue)
   }
 
+  const update = useUpdateStatus()
   const dark = useDark()
   const toggleDark = () => setDark(!dark)
 
@@ -115,7 +117,28 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
       <button type="button" onClick={() => void deleteAll()} className="w-full rounded-full bg-red-500/10 py-3 font-semibold text-red-600 dark:text-red-400">
         {sv.settings.deleteAll}
       </button>
-      <p className="text-center text-xs text-faint">{sv.settings.version(__APP_VERSION__)}</p>
+      <div className="space-y-2 text-center">
+        {update === 'ready' ? (
+          <button type="button" onClick={() => void installUpdate()} className="w-full rounded-full bg-ink py-3 font-semibold text-on-ink">
+            {sv.settings.installUpdate}
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={update === 'checking'}
+            onClick={() => void checkForUpdate()}
+            className="w-full rounded-full bg-fill py-3 font-semibold disabled:opacity-40"
+          >
+            {update === 'checking' ? sv.settings.checking : sv.settings.checkUpdate}
+          </button>
+        )}
+        {(update === 'latest' || update === 'failed') && (
+          <p role="status" className="text-sm text-muted">
+            {update === 'latest' ? sv.settings.upToDate : sv.settings.updateFailed}
+          </p>
+        )}
+        <p className="text-xs text-faint">{sv.settings.version(__APP_VERSION__)}</p>
+      </div>
     </main>
   )
 }

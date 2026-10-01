@@ -62,6 +62,11 @@ export const sv = {
     confirmDeleteAll: 'Radera all data? Det går inte att ångra.',
     confirmDeleteAllAgain: 'Är du helt säker? Alla mätningar försvinner.',
     version: (v: string) => `Version ${v}`,
+    checkUpdate: 'Sök efter uppdatering',
+    checking: 'Söker…',
+    upToDate: 'Du har senaste versionen',
+    updateFailed: 'Kunde inte söka. Är du online?',
+    installUpdate: 'Ny version finns – uppdatera',
   },
   import: {
     button: 'Importera CSV',
