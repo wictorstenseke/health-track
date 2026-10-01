@@ -71,6 +71,25 @@ describe('entries', () => {
     expect(await importRows(rows)).toEqual({ added: 0, skipped: 1 })
   })
 
+  it('restores a full backup across all metrics after wiping the data', async () => {
+    // Seconds/millis, and two weights in the same minute with different values.
+    await addEntry('weight', 82.4, at(1) + 23_456)
+    await addEntry('weight', 82.1, at(1) + 41_789)
+    await addEntry('waist', 92.5, at(2) + 7_123)
+    await addEntry('hip', 101.5, at(3) + 59_999)
+    const identity = (entries: Array<{ metricId: string; value: number; takenAt: number }>) =>
+      entries.map((e) => [e.metricId, e.value, Math.floor(e.takenAt / 60_000)]).sort()
+    const before = identity(await getAllEntries())
+
+    const csv = toCsv(await getAllEntries())
+    await clearAllData()
+    const result = parseCsv(csv)
+    expect(result.errors).toEqual([])
+    expect(await importRows(result.rows)).toEqual({ added: 4, skipped: 0 })
+
+    expect(identity(await getAllEntries())).toEqual(before)
+  })
+
   it('clears everything', async () => {
     await addEntry('weight', 82.4, at(1))
     await setName('Wictor')
