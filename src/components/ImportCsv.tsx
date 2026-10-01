@@ -29,7 +29,7 @@ export function ImportCsv() {
 
   return (
     <div>
-      <label className="block w-full cursor-pointer rounded-full bg-zinc-100 py-3 text-center font-semibold">
+      <label className="block w-full cursor-pointer rounded-full bg-fill py-3 text-center font-semibold">
         {sv.import.button}
         <input
           type="file"
@@ -40,12 +40,12 @@ export function ImportCsv() {
         />
       </label>
       {preview && (
-        <div className="mt-3 rounded-2xl bg-zinc-50 p-4 text-sm">
+        <div className="mt-3 rounded-2xl bg-fill/50 p-4 text-sm">
           <p className="font-medium">
             {summary ? sv.import.found(summary.count, formatDate(summary.from), formatDate(summary.to)) : sv.import.nothingFound}
           </p>
           {preview.rows.length > 0 && (
-            <div className="mt-1 text-xs text-zinc-500">
+            <div className="mt-1 text-xs text-muted">
               <p>{sv.import.sample}</p>
               <ul>
                 {preview.rows.slice(0, 3).map((row, i) => (
@@ -57,7 +57,7 @@ export function ImportCsv() {
             </div>
           )}
           {preview.errors.length > 0 && (
-            <details className="mt-2 text-zinc-500">
+            <details className="mt-2 text-muted">
               <summary>{sv.import.invalid(preview.errors.length)}</summary>
               <ul className="mt-1 space-y-0.5 font-mono text-xs break-all">
                 {preview.errors.map((e) => (
@@ -67,21 +67,21 @@ export function ImportCsv() {
             </details>
           )}
           <div className="mt-3 flex gap-2">
-            <button type="button" onClick={() => setPreview(null)} className="flex-1 rounded-full bg-white py-2.5 font-semibold">
+            <button type="button" onClick={() => setPreview(null)} className="flex-1 rounded-full bg-surface py-2.5 font-semibold">
               {sv.common.cancel}
             </button>
             <button
               type="button"
               disabled={!summary}
               onClick={() => void confirm()}
-              className="flex-1 rounded-full bg-ink py-2.5 font-semibold text-white disabled:opacity-40"
+              className="flex-1 rounded-full bg-ink py-2.5 font-semibold text-on-ink disabled:opacity-40"
             >
               {sv.import.confirm}
             </button>
           </div>
         </div>
       )}
-      {message && <p className="mt-2 text-center text-sm text-zinc-500">{message}</p>}
+      {message && <p className="mt-2 text-center text-sm text-muted">{message}</p>}
     </div>
   )
 }

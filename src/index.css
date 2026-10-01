@@ -1,18 +1,48 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
 
+/* Dark mode is a setting, not the system's (lib/theme.ts): `dark:` follows `<html data-theme="dark">`. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --color-ember-300: #ffb08a;
   --color-ember-400: #ff7a3d;
   --color-ember-500: #ff5a1f;
   --color-ember-600: #e8410f;
-  --color-ink: #141416;
+  /* Theme colours, light here and dark below: page, cards, text (and the pill buttons), text on those
+     buttons, secondary and tertiary text, input and chip fills, hairlines, toasts. */
   --color-canvas: #f2f2f4;
+  --color-surface: #fff;
+  --color-ink: #141416;
+  --color-on-ink: #fff;
+  --color-muted: #71717a;
+  --color-faint: #a1a1aa;
+  --color-fill: #f4f4f5;
+  --color-line: #f4f4f5;
+  --color-raised: #141416;
+  /* The scale's rim, a gradient from end to mid to end (WeightPicker, WeightDial). */
+  --color-rim-end: #ffd2bd;
+  --color-rim-mid: #ff9466;
   --shadow-card: 0 18px 40px -24px rgb(20 20 22 / 0.35), 0 2px 6px rgb(20 20 22 / 0.04);
 }
 
 @layer base {
+  /* Soft charcoal; native controls (date picker, keyboard) go dark too. */
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --color-canvas: #121214;
+    --color-surface: #1e1e21;
+    --color-ink: #f2f2f4;
+    --color-on-ink: #141416;
+    --color-muted: #a1a1aa;
+    --color-faint: #71717a;
+    --color-fill: #2a2a2e;
+    --color-line: #2a2a2e;
+    --color-raised: #2c2c30;
+    --color-rim-end: #5a2a19;
+    --color-rim-mid: #d9612f;
+  }
   :root {
     /* Floating tab bar (TabBar.tsx), shared with anything that must sit above it. */
     --tab-bar-bottom: max(0.75rem, calc(env(safe-area-inset-bottom) - 0.5rem));

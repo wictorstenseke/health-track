@@ -10,6 +10,7 @@ import { formatDate, formatDelta, formatMonthYear, formatNumber, formatRowDate, 
 import { METRICS, type Entry, type MetricId } from '../lib/metrics'
 import { goBack } from '../lib/router'
 import { bmi, latest, sameDateLastYear, withDeltas, yearSeries, yearsDescending, yearStats } from '../lib/stats'
+import { useDark } from '../lib/theme'
 
 export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heightCm: number | null }) {
   const entries = useEntries(metricId)
@@ -17,6 +18,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   const [editing, setEditing] = useState<Entry | null>(null)
   const [undo, setUndo] = useState<Entry | null>(null)
   const dismissUndo = useCallback(() => setUndo(null), [])
+  const dark = useDark()
 
   const unit = METRICS[metricId].unit
   const years = yearsDescending(entries)
@@ -44,10 +46,10 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
       </header>
 
       {entries.length === 0 ? (
-        <p className="mt-16 text-center text-zinc-400">{sv.detail.empty}</p>
+        <p className="mt-16 text-center text-faint">{sv.detail.empty}</p>
       ) : (
         <>
-          <section className="mt-3 rounded-[28px] bg-white p-4 shadow-card">
+          <section className="mt-3 rounded-[28px] bg-surface p-4 shadow-card">
             <div className="mb-2 flex flex-wrap gap-2">
               {years.map((y) => (
                 <button
@@ -55,9 +57,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
                   type="button"
                   onClick={() => toggleYear(y)}
                   aria-pressed={!hiddenYears.includes(y)}
-                  className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium aria-[pressed=false]:opacity-40"
+                  className="flex items-center gap-1.5 rounded-full bg-fill px-3 py-1 text-sm font-medium aria-[pressed=false]:opacity-40"
                 >
-                  <span className="size-2.5 rounded-full" style={{ background: yearColor(y) }} />
+                  <span className="size-2.5 rounded-full" style={{ background: yearColor(y, dark) }} />
                   {y}
                 </button>
               ))}
@@ -66,14 +68,14 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
           </section>
 
           {(comparison || (metricId === 'weight' && heightCm && last)) && (
-            <section className="mt-3 space-y-1 rounded-[28px] bg-white p-4 text-base shadow-card">
+            <section className="mt-3 space-y-1 rounded-[28px] bg-surface p-4 text-base shadow-card">
               {metricId === 'weight' && heightCm && last && (
                 <p>
                   <span className="font-semibold">{sv.detail.bmi}</span> {formatNumber(bmi(last.value, heightCm))}
                 </p>
               )}
               {comparison && (
-                <p className="text-zinc-600">
+                <p className="text-ink/75">
                   {sv.detail.sameDate(
                     formatDate(comparison.date),
                     formatValue(comparison.then, unit),
@@ -85,9 +87,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
             </section>
           )}
 
-          <section className="mt-3 overflow-hidden rounded-[28px] bg-white shadow-card">
+          <section className="mt-3 overflow-hidden rounded-[28px] bg-surface shadow-card">
             <table className="w-full text-right text-sm tabular-nums">
-              <thead className="text-zinc-400">
+              <thead className="text-faint">
                 <tr>
                   <th className="py-3 pl-4 text-left font-medium">{sv.detail.year}</th>
                   <th className="font-medium">{sv.detail.first}</th>
@@ -102,7 +104,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
                   const s = yearStats(entries, y)
                   if (!s) return null
                   return (
-                    <tr key={y} className="border-t border-zinc-100">
+                    <tr key={y} className="border-t border-line">
                       <td className="py-2.5 pl-4 text-left font-semibold">{y}</td>
                       <td>{formatNumber(s.first)}</td>
                       <td>{formatNumber(s.latest)}</td>
@@ -119,17 +121,17 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
           <h2 className="mt-8 mb-2 px-1 text-lg font-semibold">{sv.detail.entries}</h2>
           {months.map((m) => (
             <section key={m.label} className="mb-4">
-              <h3 className="mb-1 px-1 text-sm font-medium text-zinc-400">{m.label}</h3>
-              <ul className="overflow-hidden rounded-[22px] bg-white shadow-card">
+              <h3 className="mb-1 px-1 text-sm font-medium text-faint">{m.label}</h3>
+              <ul className="overflow-hidden rounded-[22px] bg-surface shadow-card">
                 {m.rows.map((r) => (
-                  <li key={r.id} className="border-t border-zinc-100 first:border-t-0">
+                  <li key={r.id} className="border-t border-line first:border-t-0">
                     <button type="button" onClick={() => setEditing(r)} className="flex w-full items-center justify-between px-4 py-3 text-left">
                       <span>
-                        {formatRowDate(r.takenAt)} <span className="text-sm text-zinc-400">{formatTime(r.takenAt)}</span>
+                        {formatRowDate(r.takenAt)} <span className="text-sm text-faint">{formatTime(r.takenAt)}</span>
                       </span>
                       <span className="tabular-nums">
                         <span className="font-semibold">{formatValue(r.value, unit)}</span>
-                        {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-zinc-400">{formatDelta(r.delta)}</span>}
+                        {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-faint">{formatDelta(r.delta)}</span>}
                       </span>
                     </button>
                   </li>

@@ -18,7 +18,7 @@ export function ErrorToast() {
   return (
     <div
       role="alert"
-      className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] mx-auto flex max-w-md items-center justify-between rounded-full bg-ink px-5 py-3 text-white shadow-xl"
+      className="fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-[60] mx-auto flex max-w-md items-center justify-between rounded-full bg-raised px-5 py-3 text-white shadow-xl"
     >
       <span>{sv.errors.failed}</span>
       <button type="button" onClick={() => window.location.reload()} className="font-semibold text-ember-400">

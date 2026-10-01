@@ -140,9 +140,9 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
     >
       <defs>
         <linearGradient id="dial-rim" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="#ffd2bd" />
-          <stop offset="0.5" stopColor="#ff9466" />
-          <stop offset="1" stopColor="#ffd2bd" />
+          <stop offset="0" style={{ stopColor: 'var(--color-rim-end)' }} />
+          <stop offset="0.5" style={{ stopColor: 'var(--color-rim-mid)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--color-rim-end)' }} />
         </linearGradient>
       </defs>
       {!bare && (
@@ -154,7 +154,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
             width={BAND.width - BAND.rim * 2}
             height={BAND.height - BAND.rim * 2}
             rx={BAND.height / 2 - BAND.rim}
-            fill="#fff"
+            style={{ fill: 'var(--color-surface)' }}
           />
         </>
       )}
@@ -167,7 +167,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
               y1={TICK_TOP}
               x2={x}
               y2={TICK_TOP + TICK_LENGTH[t.kind]}
-              stroke={t.kind === 'major' ? '#141416' : '#a1a1aa'}
+              style={{ stroke: t.kind === 'major' ? 'var(--color-ink)' : 'var(--color-faint)' }}
               strokeWidth={t.kind === 'minor' ? 1.5 : 2}
               strokeLinecap="round"
             />
@@ -179,7 +179,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
                 dominantBaseline="middle"
                 fontSize={14}
                 fontWeight={500}
-                fill="#141416"
+                style={{ fill: 'var(--color-ink)' }}
               >
                 {t.value}
               </text>
@@ -188,7 +188,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
         )
       })}
       {/* Ends just past the major tick (length 24) so it stays clear of the scale labels. */}
-      <line x1={CX} y1={TICK_TOP - 6} x2={CX} y2={TICK_TOP + 28} stroke="#ff5a1f" strokeWidth={3} strokeLinecap="round" />
+      <line x1={CX} y1={TICK_TOP - 6} x2={CX} y2={TICK_TOP + 28} style={{ stroke: 'var(--color-ember-500)' }} strokeWidth={3} strokeLinecap="round" />
     </svg>
   )
 }

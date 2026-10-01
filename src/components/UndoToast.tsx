@@ -13,7 +13,7 @@ export function UndoToast({ message, onUndo, onDismiss }: { message: string; onU
   return (
     <div
       role="status"
-      className="fixed inset-x-4 bottom-[calc(var(--tab-bar-top)+0.5rem)] z-40 mx-auto flex max-w-md items-center justify-between rounded-full bg-ink px-5 py-3 text-white shadow-xl"
+      className="fixed inset-x-4 bottom-[calc(var(--tab-bar-top)+0.5rem)] z-40 mx-auto flex max-w-md items-center justify-between rounded-full bg-raised px-5 py-3 text-white shadow-xl"
     >
       <span>{message}</span>
       <button type="button" onClick={onUndo} className="font-semibold text-ember-400">

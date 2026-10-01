@@ -12,9 +12,9 @@ export function BottomSheet({ title, onClose, children }: { title: string; onClo
 
   return (
     <div className="fixed inset-0 z-50 flex items-end" role="dialog" aria-modal="true" aria-label={title}>
-      <button type="button" aria-label={sv.common.cancel} className="sheet-backdrop absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="sheet-panel relative mx-auto w-full max-w-md rounded-t-[28px] bg-white px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl">
-        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-zinc-200" />
+      <button type="button" aria-label={sv.common.cancel} className="sheet-backdrop absolute inset-0 bg-black/30 dark:bg-black/50" onClick={onClose} />
+      <div className="sheet-panel relative mx-auto w-full max-w-md rounded-t-[28px] bg-surface px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl">
+        <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-faint/30" />
         <h2 className="mb-2 text-center text-lg font-semibold">{title}</h2>
         {children}
       </div>

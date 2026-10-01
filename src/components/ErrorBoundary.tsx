@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { failed: 
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-full bg-ink px-6 py-3 font-semibold text-white"
+          className="rounded-full bg-ink px-6 py-3 font-semibold text-on-ink"
         >
           {sv.errors.reload}
         </button>

@@ -17,12 +17,12 @@ function MetricCard({ metricId }: { metricId: MetricId }) {
     <button
       type="button"
       onClick={() => navigate({ name: 'metric', metricId })}
-      className="flex w-full items-center justify-between rounded-[28px] bg-white p-5 text-left shadow-card"
+      className="flex w-full items-center justify-between rounded-[28px] bg-surface p-5 text-left shadow-card"
     >
       <div>
-        <p className="text-sm font-medium text-zinc-500">{sv.metrics[metricId]}</p>
+        <p className="text-sm font-medium text-muted">{sv.metrics[metricId]}</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums">{last ? formatValue(last.value, METRICS[metricId].unit) : '–'}</p>
-        {stats && stats.count >= 2 && <p className="mt-0.5 text-sm text-zinc-500">{sv.measures.thisYear(formatDelta(stats.change))}</p>}
+        {stats && stats.count >= 2 && <p className="mt-0.5 text-sm text-muted">{sv.measures.thisYear(formatDelta(stats.change))}</p>}
       </div>
       <Sparkline values={pointsInYear(entries, year).map((p) => p.value)} />
     </button>
@@ -35,7 +35,7 @@ export function MeasuresScreen() {
     <main className="px-4 pt-(--screen-top) pb-28">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold tracking-tight">{sv.measures.title}</h1>
-        <button type="button" onClick={() => setMeasuring(true)} className="rounded-full bg-ink px-5 py-2.5 font-semibold text-white">
+        <button type="button" onClick={() => setMeasuring(true)} className="rounded-full bg-ink px-5 py-2.5 font-semibold text-on-ink">
           {sv.measures.measure}
         </button>
       </header>

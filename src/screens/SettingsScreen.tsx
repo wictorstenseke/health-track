@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DecimalField, TextField } from '../components/Fields'
+import { HapticTap } from '../components/HapticTap'
 import { ImportCsv } from '../components/ImportCsv'
 import { clearAllData } from '../db/entries'
 import { useAllEntries } from '../db/hooks'
@@ -9,8 +10,9 @@ import { exportCsv } from '../io/csvFiles'
 import { formatRelativeDay, parseDecimal } from '../lib/format'
 import { isValidHeight } from '../lib/metrics'
 import { navigate } from '../lib/router'
+import { setDark, useDark } from '../lib/theme'
 
-const card = 'rounded-[28px] bg-white p-5 shadow-card'
+const card = 'rounded-[28px] bg-surface p-5 shadow-card'
 
 export function SettingsScreen({ profile }: { profile: Profile }) {
   const [name, setNameText] = useState(profile.name)
@@ -26,6 +28,9 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
     if (height.trim() === '') void setHeightCm(null)
     else if (heightValue !== null && !heightInvalid) void setHeightCm(heightValue)
   }
+
+  const dark = useDark()
+  const toggleDark = () => setDark(!dark)
 
   const [exportFailed, setExportFailed] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -62,6 +67,28 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
         <DecimalField label={sv.settings.height} unit="cm" value={height} onChange={setHeight} onBlur={saveHeight} invalid={heightInvalid} />
       </section>
 
+      <section className={`${card} space-y-4`}>
+        <h2 className="text-lg font-semibold">{sv.settings.appearance}</h2>
+        <div className="flex items-center justify-between">
+          <span id="dark-mode">{sv.settings.darkMode}</span>
+          {/* iOS-style switch; HapticTap gives the tap a haptic tick. */}
+          <HapticTap onTap={toggleDark}>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={dark}
+              aria-labelledby="dark-mode"
+              onClick={toggleDark}
+              className={`flex h-[31px] w-[51px] items-center rounded-full p-0.5 transition-colors duration-200 ${dark ? 'bg-ember-500' : 'bg-faint/40'}`}
+            >
+              <span
+                className={`size-[27px] rounded-full bg-white shadow-[0_2px_6px_rgb(0_0_0/0.2)] transition-transform duration-200 ${dark ? 'translate-x-5' : ''}`}
+              />
+            </button>
+          </HapticTap>
+        </div>
+      </section>
+
       <section className={`${card} space-y-3`}>
         <h2 className="text-lg font-semibold">{sv.settings.data}</h2>
         <ImportCsv />
@@ -69,26 +96,26 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
           type="button"
           disabled={exporting}
           onClick={() => void runExport()}
-          className="w-full rounded-full bg-ink py-3 font-semibold text-white disabled:opacity-40"
+          className="w-full rounded-full bg-ink py-3 font-semibold text-on-ink disabled:opacity-40"
         >
           {sv.settings.exportCsv}
         </button>
         {exportFailed && (
-          <p role="alert" className="text-center text-sm text-red-600">
+          <p role="alert" className="text-center text-sm text-red-600 dark:text-red-400">
             {sv.settings.exportFailed}
           </p>
         )}
-        <p className="text-center text-sm text-zinc-500">
+        <p className="text-center text-sm text-muted">
           {profile.lastExportAt === null
             ? sv.settings.neverExported
             : sv.settings.lastExport(formatRelativeDay(profile.lastExportAt, Date.now()))}
         </p>
       </section>
 
-      <button type="button" onClick={() => void deleteAll()} className="w-full rounded-full bg-red-50 py-3 font-semibold text-red-600">
+      <button type="button" onClick={() => void deleteAll()} className="w-full rounded-full bg-red-500/10 py-3 font-semibold text-red-600 dark:text-red-400">
         {sv.settings.deleteAll}
       </button>
-      <p className="text-center text-xs text-zinc-400">{sv.settings.version(__APP_VERSION__)}</p>
+      <p className="text-center text-xs text-faint">{sv.settings.version(__APP_VERSION__)}</p>
     </main>
   )
 }

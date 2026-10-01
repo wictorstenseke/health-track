@@ -28,19 +28,19 @@ export function SetupScreen() {
         </div>
       </section>
       <div className="mt-4 space-y-4 px-4">
-        <section className="space-y-4 rounded-[28px] bg-white p-5 shadow-card">
+        <section className="space-y-4 rounded-[28px] bg-surface p-5 shadow-card">
           <TextField label={sv.setup.nameLabel} value={name} onChange={setNameText} autoComplete="given-name" />
           <DecimalField label={sv.setup.heightLabel} unit="cm" value={height} onChange={setHeight} invalid={!heightOk} />
         </section>
-        <section className="rounded-[28px] bg-white p-5 shadow-card">
-          <p className="mb-3 text-sm font-medium text-zinc-500">{sv.setup.importLabel}</p>
+        <section className="rounded-[28px] bg-surface p-5 shadow-card">
+          <p className="mb-3 text-sm font-medium text-muted">{sv.setup.importLabel}</p>
           <ImportCsv />
         </section>
         <button
           type="button"
           disabled={!canStart}
           onClick={() => void start()}
-          className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-white disabled:opacity-40"
+          className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-on-ink disabled:opacity-40"
         >
           {sv.setup.start}
         </button>

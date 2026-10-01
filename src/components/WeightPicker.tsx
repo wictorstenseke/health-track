@@ -40,7 +40,7 @@ export function WeightValue({
           <span ref={numberRef} className="inline-block">
             {formatNumber(value)}
           </span>
-          <span className="ml-1 text-lg font-medium text-zinc-400">kg</span>
+          <span className="ml-1 text-lg font-medium text-faint">kg</span>
         </button>
       )}
     </div>
@@ -69,10 +69,10 @@ export function WeightScale({
 }) {
   return (
     // Same rim colours and 8 px rim as the dial's own band.
-    <div className="rounded-[40px] bg-linear-to-r from-[#ffd2bd] via-[#ff9466] to-[#ffd2bd] p-2">
-      <div className="rounded-[32px] bg-white py-5">
+    <div className="rounded-[40px] bg-linear-to-r from-rim-end via-rim-mid to-rim-end p-2">
+      <div className="rounded-[32px] bg-surface py-5">
         <WeightValue value={value} onChange={onChange} numberRef={numberRef} />
-        {caption && <p className="text-center text-sm text-zinc-500">{caption}</p>}
+        {caption && <p className="text-center text-sm text-muted">{caption}</p>}
         <div className="mt-4">
           <WeightDial value={value} onChange={onChange} bare />
         </div>

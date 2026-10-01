@@ -26,7 +26,7 @@ const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; m
     <button
       type="button"
       onClick={() => navigate({ name: 'metric', metricId: 'weight' })}
-      className="block w-full rounded-[28px] bg-white p-4 pb-2 text-left shadow-card"
+      className="block w-full rounded-[28px] bg-surface p-4 pb-2 text-left shadow-card"
     >
       <div className="flex items-baseline justify-between px-1">
         <span className="text-lg font-semibold">{year}</span>
@@ -35,7 +35,7 @@ const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; m
       {series.length > 0 ? (
         <YearChart series={series} height={120} variant="card" mark={mark} />
       ) : (
-        <p className="py-10 text-center text-sm text-zinc-400">{sv.common.noData}</p>
+        <p className="py-10 text-center text-sm text-faint">{sv.common.noData}</p>
       )}
     </button>
   )
@@ -126,7 +126,7 @@ export function HomeScreen({ name }: { name: string }) {
               onChange={changeDate}
               label={sv.home.changeDate}
               // Tinted while backdated, next to the date shown under the number.
-              className={`size-10 justify-center rounded-full ${takenAt === null ? 'bg-zinc-100 text-ink' : 'bg-ember-500/10 text-ember-600'}`}
+              className={`size-10 justify-center rounded-full ${takenAt === null ? 'bg-fill text-ink' : 'bg-ember-500/10 text-ember-600 dark:text-ember-400'}`}
             >
               <CalendarIcon />
             </DateTimeField>
@@ -137,7 +137,7 @@ export function HomeScreen({ name }: { name: string }) {
               type="button"
               disabled={saved}
               onClick={() => void save()}
-              className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-white transition-colors duration-300 disabled:bg-ember-500"
+              className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-on-ink transition-colors duration-300 disabled:bg-ember-500 disabled:text-white"
             >
               {saved ? sv.common.saved : sv.common.save}
             </button>

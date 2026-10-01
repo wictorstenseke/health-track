@@ -50,6 +50,8 @@ export const sv = {
     profile: 'Profil',
     name: 'Namn',
     height: 'Längd (cm)',
+    appearance: 'Utseende',
+    darkMode: 'Mörkt läge',
     data: 'Data',
     exportCsv: 'Exportera CSV',
     lastExport: (when: string) => `Senaste export: ${when}`,

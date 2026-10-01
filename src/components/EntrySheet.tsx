@@ -40,14 +40,14 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
         <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
       </div>
       <div className="flex gap-3">
-        <button type="button" onClick={() => void remove()} className="flex-1 rounded-full bg-red-50 py-4 font-semibold text-red-600">
+        <button type="button" onClick={() => void remove()} className="flex-1 rounded-full bg-red-500/10 py-4 font-semibold text-red-600 dark:text-red-400">
           {sv.common.delete}
         </button>
         <button
           type="button"
           disabled={!valid}
           onClick={() => void save()}
-          className="flex-[2] rounded-full bg-ink py-4 font-semibold text-white disabled:opacity-40"
+          className="flex-[2] rounded-full bg-ink py-4 font-semibold text-on-ink disabled:opacity-40"
         >
           {sv.common.save}
         </button>

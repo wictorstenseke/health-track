@@ -108,6 +108,7 @@ Same component for all metrics:
 ### Inställningar
 
 - Namn, Längd (cm)
+- Utseende: `Mörkt läge` switch (iOS-style, ember when on, haptic tap). Off by default; doesn't follow the phone's setting.
 - Importera CSV
 - Exportera CSV + quiet text `Senaste export: för 23 dagar sedan`
 - Radera all data (two confirms)
@@ -139,7 +140,7 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 
 ## Look
 
-- Light only. Reference image 2: orange→red gradient hero, white/soft-grey cards, large radii, soft shadows, black pill buttons. Dial styled after reference image 3, recoloured to app palette.
+- Light by default, dark as a setting (soft charcoal: page #121214, cards #1e1e21, text #f2f2f4; ember unchanged; the hero image stays). Colours are theme tokens in `index.css` (`canvas`, `surface`, `ink`, `on-ink`, `muted`, `faint`, `fill`, `line`, `raised`, `rim-*`) switched by `<html data-theme="dark">`; SVG colours the theme can't reach through CSS come from `useDark()`. The choice lives in localStorage (`vagen-theme`) so an inline script in `index.html` applies it before the first paint, and `theme-color` follows the page colour. Reference image 2: orange→red gradient hero, white/soft-grey cards, large radii, soft shadows, black pill buttons. Dial styled after reference image 3, recoloured to app palette.
 - iOS: `viewport-fit=cover`, safe-area insets, `overscroll-behavior: none`. Status bar `apple-mobile-web-app-status-bar-style: default` with `theme-color` canvas grey: on iOS 26 Home Screen apps, `black-translucent` makes the web view one status-bar height too short (gap under the tab bar, WebKit bug 301108), and iOS tints a see-through bar from the page. The status-bar style is read at install time, so changing it needs a reinstall. iOS 26 also blurs and fades ~30 pt below the status bar over whatever sits there (measured on device, can't be turned off), so every screen starts its content at `--screen-top` (safe area + 2.25rem).
 - Type scale (Tailwind sizes only, no one-off px): 36 `4xl` display (the weight number) · 30 `3xl` screen titles (name on Hem, Mått, Inställningar, detail, setup) · 24 `2xl` card values · 18 `lg` card/section/sheet titles, primary buttons and the `kg` after the weight number · 16 `base` body, inputs, secondary buttons · 14 `sm` labels, date link, month headers, chips, the detail table · 12 `xs` captions (version, import details). Semibold for 18 and up; medium for labels; `tracking-tight` for 24 and up.
 - Layout: content and cards sit 16 px from the screen edges, header card included. Hem's header card: the left-aligned welcome line and name (tight, no gap) sit centred between the card's top and the nested chart card (64 px each side); the text starts where the chart card's "2026" does.

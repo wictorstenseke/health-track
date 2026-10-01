@@ -29,10 +29,10 @@ export function DateTimeField({
 }) {
   return (
     // Size and text styling only for the default text, so `children` (an icon button) can set their own.
-    <label className={`relative flex items-center ${children ? '' : 'w-fit text-sm text-zinc-500'} ${className}`}>
+    <label className={`relative flex items-center ${children ? '' : 'w-fit text-sm text-muted'} ${className}`}>
       {children ?? (
         <span>
-          {dateTimeLabel(value)} · <span className="font-medium text-ember-600">{sv.common.change}</span>
+          {dateTimeLabel(value)} · <span className="font-medium text-ember-600 dark:text-ember-400">{sv.common.change}</span>
         </span>
       )}
       <input
