@@ -73,8 +73,8 @@ One screen: Namn, Längd (cm), optional "Importera CSV". Button "Kom igång" →
 ### Hem
 
 Top to bottom:
-1. **Gradient hero** (orange → red, like reference image 2). In the installed iOS app it starts below the opaque light-grey status bar; in a browser it can extend under it. "Välkommen tillbaka" / name.
-2. **Year chart card** (rounded, grouped with hero):
+1. **Header card** (like reference image 2): a rounded card inset from the screen edges, just below the status bar, filled with a vivid blurred colour image (`src/assets/hero.jpg` via `.hero-gradient`, zoomed in on its orange middle; ember orange while it loads). Setup's title card uses the same. "Välkommen tillbaka" / name.
+2. **Year chart card** (white, nested in the header card with an 8 px gradient border):
    - Header: current year + change since first weigh-in this year (`−3,1 kg`). Hidden if < 2 entries this year.
    - Current year solid line; previous 2 years as ghost lines (older = fainter), small year labels at line ends.
    - X axis Jan–Dec, full year visible.

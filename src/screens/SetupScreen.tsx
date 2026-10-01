@@ -22,10 +22,12 @@ export function SetupScreen() {
 
   return (
     <main className="min-h-dvh pb-10">
-      <section className="hero-gradient px-4 pt-[calc(env(safe-area-inset-top)+4rem)] pb-12 text-center">
-        <h1 className="text-[32px] font-semibold tracking-tight text-white">{sv.setup.title}</h1>
+      <section className="px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+        <div className="hero-gradient rounded-[36px] px-4 pt-14 pb-14 text-center">
+          <h1 className="text-[32px] font-semibold tracking-tight text-white">{sv.setup.title}</h1>
+        </div>
       </section>
-      <div className="-mt-6 space-y-4 px-4">
+      <div className="mt-4 space-y-4 px-4">
         <section className="space-y-4 rounded-[28px] bg-white p-5 shadow-card">
           <TextField label={sv.setup.nameLabel} value={name} onChange={setNameText} autoComplete="given-name" />
           <DecimalField label={sv.setup.heightLabel} unit="cm" value={height} onChange={setHeight} invalid={!heightOk} />

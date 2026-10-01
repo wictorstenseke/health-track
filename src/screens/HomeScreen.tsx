@@ -80,11 +80,14 @@ export function HomeScreen({ name }: { name: string }) {
 
   return (
     <main className="pb-28">
-      <section className="hero-gradient px-4 pt-[calc(env(safe-area-inset-top)+2.5rem)] pb-2">
-        <p className="text-center text-[15px] font-medium text-white/90">{sv.home.welcome}</p>
-        <h1 className="mt-1 text-center text-[34px] font-semibold tracking-tight text-white">{name}</h1>
-        <div className="mt-6">
-          <YearCard entries={entries} />
+      <section className="px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+        {/* Radius = the chart card's 28px + this 8px padding, so the corners run parallel. */}
+        <div className="hero-gradient rounded-[36px] p-2 pt-10">
+          <p className="text-center text-[15px] font-medium text-white/90">{sv.home.welcome}</p>
+          <h1 className="mt-1 text-center text-[34px] font-semibold tracking-tight text-white">{name}</h1>
+          <div className="mt-6">
+            <YearCard entries={entries} />
+          </div>
         </div>
       </section>
       <section className="px-4 pt-5">
