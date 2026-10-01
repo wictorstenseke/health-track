@@ -6,7 +6,7 @@ import { yearColor, YearChart } from '../components/YearChart'
 import { restoreEntry } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
-import { formatDate, formatDelta, formatMonthYear, formatNumber, formatRowDate, formatTime, formatValue } from '../lib/format'
+import { formatDate, formatDelta, formatNumber, formatRowDate, formatTime, formatValue } from '../lib/format'
 import { METRICS, type Entry, type MetricId } from '../lib/metrics'
 import { goBack } from '../lib/router'
 import { bmi, latest, sameDateLastYear, withDeltas, yearSeries, yearsDescending, yearStats } from '../lib/stats'
@@ -31,17 +31,12 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   const toggleYear = (y: number) => setHiddenYears((h) => toggle(h, y))
   const isOpen = (y: number) => (y === years[0]) !== flippedYears.includes(y)
 
-  type Month = { label: string; rows: Array<Entry & { delta: number | null }> }
-  const entryYears: { year: number; count: number; months: Month[] }[] = []
+  const entryYears: { year: number; rows: Array<Entry & { delta: number | null }> }[] = []
   for (const row of withDeltas(entries).reverse()) {
     const year = new Date(row.takenAt).getFullYear()
-    if (entryYears.at(-1)?.year !== year) entryYears.push({ year, count: 0, months: [] })
-    const group = entryYears.at(-1)!
-    group.count++
-    const label = formatMonthYear(row.takenAt)
-    const month = group.months.at(-1)
-    if (month?.label === label) month.rows.push(row)
-    else group.months.push({ label, rows: [row] })
+    const group = entryYears.at(-1)
+    if (group?.year === year) group.rows.push(row)
+    else entryYears.push({ year, rows: [row] })
   }
 
   return (
@@ -78,7 +73,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
 
           <h2 className="mt-8 mb-2 px-1 text-lg font-semibold">{sv.detail.entries}</h2>
           <div className="space-y-3">
-          {entryYears.map(({ year, count, months }) => {
+          {entryYears.map(({ year, rows }) => {
             const open = isOpen(year)
             return (
               <section key={year} className="overflow-hidden rounded-[28px] bg-surface shadow-card">
@@ -92,7 +87,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
                   <span className="flex items-center gap-2">
                     <span className="size-2.5 rounded-full" style={{ background: yearColor(year, dark) }} />
                     <span className="text-base font-semibold">{year}</span>
-                    <span className="text-sm text-faint">{sv.detail.count(count)}</span>
+                    <span className="text-sm text-faint">{sv.detail.count(rows.length)}</span>
                   </span>
                   <span className={`text-faint transition-transform duration-300 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`}>
                     <ChevronDownIcon />
@@ -105,26 +100,21 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
                   className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                 >
                   <div className="overflow-hidden">
-                    {months.map((m) => (
-                      <div key={m.label}>
-                        <h3 className="border-t border-line px-4 pt-3 pb-1 text-sm font-medium text-faint">{m.label}</h3>
-                        <ul>
-                          {m.rows.map((r) => (
-                            <li key={r.id} className="border-t border-line first:border-t-0">
-                              <button type="button" onClick={() => setEditing(r)} className="flex w-full items-center justify-between px-4 py-3 text-left">
-                                <span>
-                                  {formatRowDate(r.takenAt)} <span className="text-sm text-faint">{formatTime(r.takenAt)}</span>
-                                </span>
-                                <span className="tabular-nums">
-                                  <span className="font-semibold">{formatValue(r.value, unit)}</span>
-                                  {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-faint">{formatDelta(r.delta)}</span>}
-                                </span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    <ul className="border-t border-line">
+                      {rows.map((r) => (
+                        <li key={r.id} className="border-t border-line first:border-t-0">
+                          <button type="button" onClick={() => setEditing(r)} className="flex w-full items-center justify-between px-4 py-3 text-left">
+                            <span>
+                              {formatRowDate(r.takenAt)} <span className="text-sm text-faint">{formatTime(r.takenAt)}</span>
+                            </span>
+                            <span className="tabular-nums">
+                              <span className="font-semibold">{formatValue(r.value, unit)}</span>
+                              {r.delta !== null && <span className="ml-2 inline-block w-11 text-sm text-faint">{formatDelta(r.delta)}</span>}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </section>

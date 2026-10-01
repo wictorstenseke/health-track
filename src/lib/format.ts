@@ -8,13 +8,11 @@ const num = new Intl.NumberFormat(LOCALE, oneDecimal)
 const signed = new Intl.NumberFormat(LOCALE, { ...oneDecimal, signDisplay: 'exceptZero' })
 const dayMonthYear = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' })
 const weekdayDayMonth = new Intl.DateTimeFormat(LOCALE, { weekday: 'short', day: 'numeric', month: 'short' })
-const monthYear = new Intl.DateTimeFormat(LOCALE, { month: 'long', year: 'numeric' })
 const time = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' })
 const monthNarrow = new Intl.DateTimeFormat(LOCALE, { month: 'narrow' })
 
 // sv-SE short months end with a dot ("okt."); the design uses "okt".
 const stripDots = (s: string) => s.replace(/\./g, '')
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 /** 82,4 */
 export const formatNumber = (v: number) => num.format(v)
@@ -26,8 +24,6 @@ export const formatDelta = (d: number) => signed.format(d)
 export const formatDate = (ts: number) => stripDots(dayMonthYear.format(ts))
 /** ons 30 sep */
 export const formatRowDate = (ts: number) => stripDots(weekdayDayMonth.format(ts))
-/** Oktober 2026 */
-export const formatMonthYear = (ts: number) => capitalize(monthYear.format(ts))
 /** 07:32 */
 export const formatTime = (ts: number) => time.format(ts)
 /** J, F, M … for month index 0–11 */

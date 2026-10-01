@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  formatDate, formatDelta, formatMonthInitial, formatMonthYear, formatNumber, formatRelativeDay,
+  formatDate, formatDelta, formatMonthInitial, formatNumber, formatRelativeDay,
   formatRowDate, formatTime, formatValue, parseDecimal,
 } from './format'
 
@@ -23,7 +23,6 @@ describe('dates', () => {
   it('formats without trailing dots', () => {
     expect(formatDate(ts)).toBe('1 okt 2026')
     expect(formatRowDate(new Date(2026, 8, 30).getTime())).toBe('ons 30 sep')
-    expect(formatMonthYear(ts)).toBe('Oktober 2026')
     expect(formatTime(ts)).toBe('07:32')
     expect(formatMonthInitial(0)).toBe('J')
     expect(formatMonthInitial(9)).toBe('O')
