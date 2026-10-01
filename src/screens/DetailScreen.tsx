@@ -40,7 +40,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         <button type="button" onClick={goBack} aria-label={sv.common.back} className="-ml-2 rounded-full p-2">
           <ChevronLeftIcon />
         </button>
-        <h1 className="text-2xl font-semibold tracking-tight">{sv.metrics[metricId]}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{sv.metrics[metricId]}</h1>
       </header>
 
       {entries.length === 0 ? (
@@ -66,7 +66,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
           </section>
 
           {(comparison || (metricId === 'weight' && heightCm && last)) && (
-            <section className="mt-3 space-y-1 rounded-[28px] bg-white p-4 text-[15px] shadow-card">
+            <section className="mt-3 space-y-1 rounded-[28px] bg-white p-4 text-base shadow-card">
               {metricId === 'weight' && heightCm && last && (
                 <p>
                   <span className="font-semibold">{sv.detail.bmi}</span> {formatNumber(bmi(last.value, heightCm))}
@@ -86,7 +86,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
           )}
 
           <section className="mt-3 overflow-hidden rounded-[28px] bg-white shadow-card">
-            <table className="w-full text-right text-[13px] tabular-nums">
+            <table className="w-full text-right text-sm tabular-nums">
               <thead className="text-zinc-400">
                 <tr>
                   <th className="py-3 pl-4 text-left font-medium">{sv.detail.year}</th>
@@ -116,7 +116,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
             </table>
           </section>
 
-          <h2 className="mt-8 mb-2 px-1 text-xl font-semibold">{sv.detail.entries}</h2>
+          <h2 className="mt-8 mb-2 px-1 text-lg font-semibold">{sv.detail.entries}</h2>
           {months.map((m) => (
             <section key={m.label} className="mb-4">
               <h3 className="mb-1 px-1 text-sm font-medium text-zinc-400">{m.label}</h3>

@@ -22,9 +22,9 @@ export function SetupScreen() {
 
   return (
     <main className="min-h-dvh pb-10">
-      <section className="px-3 pt-(--screen-top)">
-        <div className="hero-gradient rounded-[36px] px-4 pt-14 pb-14 text-center">
-          <h1 className="text-[32px] font-semibold tracking-tight text-white">{sv.setup.title}</h1>
+      <section className="px-4 pt-(--screen-top)">
+        <div className="hero-gradient rounded-[36px] px-4 py-12 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-white">{sv.setup.title}</h1>
         </div>
       </section>
       <div className="mt-4 space-y-4 px-4">

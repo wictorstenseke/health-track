@@ -142,6 +142,8 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 
 - Light only. Reference image 2: orange→red gradient hero, white/soft-grey cards, large radii, soft shadows, black pill buttons. Dial styled after reference image 3, recoloured to app palette.
 - iOS: `viewport-fit=cover`, safe-area insets, `overscroll-behavior: none`. Status bar `apple-mobile-web-app-status-bar-style: default` with `theme-color` canvas grey: on iOS 26 Home Screen apps, `black-translucent` makes the web view one status-bar height too short (gap under the tab bar, WebKit bug 301108), and iOS tints a see-through bar from the page. The status-bar style is read at install time, so changing it needs a reinstall. iOS 26 also blurs and fades ~30 pt below the status bar over whatever sits there (measured on device, can't be turned off), so every screen starts its content at `--screen-top` (safe area + 2.25rem).
+- Type scale (Tailwind sizes only, no one-off px): 48 `5xl` display (the weight number) · 30 `3xl` screen titles (name on Hem, Mått, Inställningar, detail, setup) · 24 `2xl` card values and the `kg` suffix · 18 `lg` card/section/sheet titles and primary buttons · 16 `base` body, inputs, secondary buttons · 14 `sm` labels, date link, month headers, chips, the detail table · 12 `xs` captions (version, import details). Semibold for 18 and up; medium for labels; `tracking-tight` for 24 and up.
+- Layout: content and cards sit 16 px from the screen edges, header card included (32 px above the welcome line, 4 px to the name, 24 px to the nested chart card).
 - Locale: Swedish. `82,4 kg`, `1 okt 2026`, 24 h, week starts Monday. `Intl` with `sv-SE`. All strings in `src/i18n/sv.ts`.
 
 ## PWA
