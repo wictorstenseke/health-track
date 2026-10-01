@@ -2,6 +2,7 @@ import { Dexie } from 'dexie'
 import type { CsvRow } from '../lib/csv'
 import { newId } from '../lib/id'
 import { roundValue, type Entry, type MetricId } from '../lib/metrics'
+import { latestOnDay } from '../lib/stats'
 import { db } from './db'
 
 function makeEntry(metricId: MetricId, value: number, takenAt: number, now = Date.now()): Entry {
@@ -24,6 +25,15 @@ export async function addEntries(items: { metricId: MetricId; value: number }[],
 
 export async function updateEntry(id: string, changes: { value: number; takenAt: number }): Promise<void> {
   await db.entries.update(id, { value: roundValue(changes.value), takenAt: changes.takenAt, updatedAt: Date.now() })
+}
+
+/** Hem keeps one weight per day: saving again replaces that day's newest weight. */
+export async function saveWeightForDay(value: number, takenAt: number): Promise<void> {
+  await db.transaction('rw', db.entries, async () => {
+    const sameDay = latestOnDay(await getEntries('weight'), takenAt)
+    if (sameDay) await updateEntry(sameDay.id, { value, takenAt })
+    else await addEntry('weight', value, takenAt)
+  })
 }
 
 /** Returns the deleted entry so the caller can offer undo. */

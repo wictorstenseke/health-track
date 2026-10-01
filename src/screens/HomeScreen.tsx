@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { DateTimeField } from '../components/DateTimeField'
-import { WeightPicker } from '../components/WeightPicker'
+import { WeightDial } from '../components/WeightDial'
+import { WeightValue } from '../components/WeightPicker'
 import { YearChart } from '../components/YearChart'
-import { addEntry } from '../db/entries'
+import { saveWeightForDay } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
 import { DEFAULT_WEIGHT, toDialValue } from '../lib/dialMath'
@@ -10,7 +11,7 @@ import { formatDelta, formatRelativeDay, formatValue } from '../lib/format'
 import { haptic } from '../lib/haptics'
 import type { Entry } from '../lib/metrics'
 import { navigate } from '../lib/router'
-import { latest, yearSeries, yearStats } from '../lib/stats'
+import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
 
 const SAVED_MS = 1500
 
@@ -51,23 +52,38 @@ export function HomeScreen({ name }: { name: string }) {
   const [weight, setWeight] = useState<number | null>(null)
   /** null = now */
   const [takenAt, setTakenAt] = useState<number | null>(null)
-  const [saved, setSaved] = useState(false)
+  /** Brief confirmation, also for a backdated save (the date then resets to today). */
+  const [justSaved, setJustSaved] = useState(false)
 
   useEffect(() => {
-    if (!saved) return
-    const t = setTimeout(() => setSaved(false), SAVED_MS)
+    if (!justSaved) return
+    const t = setTimeout(() => setJustSaved(false), SAVED_MS)
     return () => clearTimeout(t)
-  }, [saved])
+  }, [justSaved])
 
   const last = latest(entries)
+  // Whenever the latest weight changes (a save here, an edit on the detail screen) the dial follows it again.
+  // Resetting only now, not right after saving, keeps the dial from jumping back while the data catches up.
+  useEffect(() => setWeight(null), [last?.id, last?.value, last?.takenAt])
+
   const shown = weight ?? toDialValue(last?.value ?? DEFAULT_WEIGHT)
+  const savedOnDay = latestOnDay(entries, takenAt ?? Date.now())
+  const saved = justSaved || savedOnDay?.value === shown
+
+  const changeWeight = (value: number) => {
+    setWeight(value)
+    setJustSaved(false)
+  }
+  const changeDate = (ts: number | null) => {
+    setTakenAt(ts)
+    setJustSaved(false)
+  }
 
   const save = async () => {
-    await addEntry('weight', shown, takenAt ?? Date.now())
+    await saveWeightForDay(shown, takenAt ?? Date.now())
     haptic()
-    setWeight(null)
     setTakenAt(null)
-    setSaved(true)
+    setJustSaved(true)
   }
 
   return (
@@ -80,16 +96,19 @@ export function HomeScreen({ name }: { name: string }) {
           <YearCard entries={entries} />
         </div>
       </section>
-      <section className="px-4 pt-3">
-        <WeightPicker value={shown} onChange={setWeight} />
-        <div className="mt-3">
-          <DateTimeField value={takenAt} onChange={setTakenAt} />
+      <section className="px-4 pt-5">
+        <WeightValue value={shown} onChange={changeWeight} />
+        <div className="mt-1">
+          <DateTimeField value={takenAt} onChange={changeDate} />
+        </div>
+        <div className="mt-5">
+          <WeightDial value={shown} onChange={changeWeight} />
         </div>
         <button
           type="button"
           disabled={saved}
           onClick={() => void save()}
-          className="mt-4 w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-card active:scale-[0.99] disabled:bg-ember-500"
+          className="mt-5 w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-card active:scale-[0.99] disabled:bg-ember-500"
         >
           {saved ? sv.common.saved : sv.common.save}
         </button>

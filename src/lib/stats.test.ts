@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bmi, latest, sameDateLastYear, valueAt, withDeltas, yearSeries, yearsDescending, yearStats } from './stats'
+import { bmi, latest, latestOnDay, sameDateLastYear, valueAt, withDeltas, yearSeries, yearsDescending, yearStats } from './stats'
 
 const at = (y: number, m: number, d: number, h = 8) => new Date(y, m - 1, d, h).getTime()
 const p = (y: number, m: number, d: number, value: number) => ({ takenAt: at(y, m, d), value })
@@ -20,6 +20,17 @@ describe('latest / yearsDescending', () => {
   })
   it('lists distinct years newest first', () => {
     expect(yearsDescending(points)).toEqual([2026, 2025, 2024])
+  })
+})
+
+describe('latestOnDay', () => {
+  const p = (d: number, h: number, value: number) => ({ takenAt: new Date(2026, 9, d, h).getTime(), value })
+  it("returns that calendar day's newest point", () => {
+    const points = [p(1, 7, 80), p(1, 21, 81), p(2, 7, 82)]
+    expect(latestOnDay(points, new Date(2026, 9, 1, 12).getTime())).toEqual(p(1, 21, 81))
+  })
+  it('returns undefined when the day has no points', () => {
+    expect(latestOnDay([p(1, 23, 80), p(3, 0, 82)], new Date(2026, 9, 2, 12).getTime())).toBeUndefined()
   })
 })
 

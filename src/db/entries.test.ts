@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { db } from './db'
 import {
-  addEntries, addEntry, clearAllData, deleteEntry, getAllEntries, getEntries, importRows, restoreEntry, updateEntry,
+  addEntries, addEntry, clearAllData, deleteEntry, getAllEntries, getEntries, importRows, restoreEntry, saveWeightForDay, updateEntry,
 } from './entries'
 import { getProfile, setName } from './settings'
 import { parseCsv, toCsv } from '../lib/csv'
@@ -42,6 +42,24 @@ describe('entries', () => {
     expect(updated?.value).toBe(82.4)
     expect(updated?.takenAt).toBe(at(2))
     expect(updated!.updatedAt).toBeGreaterThanOrEqual(e.updatedAt)
+  })
+
+  it('saves a weight for a day without one', async () => {
+    await addEntry('weight', 80, at(1))
+    await saveWeightForDay(79.4, at(2))
+    expect((await getEntries('weight')).map((e) => [e.value, e.takenAt])).toEqual([[80, at(1)], [79.4, at(2)]])
+  })
+
+  it("replaces the day's newest weight instead of adding a second one", async () => {
+    const early = await addEntry('weight', 81, at(1) - 3_600_000)
+    const newest = await addEntry('weight', 80, at(1))
+    const waist = await addEntry('waist', 92, at(1))
+    await saveWeightForDay(79.44, at(1) + 1_800_000)
+    expect(await db.entries.get(early.id)).toEqual(early)
+    expect(await db.entries.get(waist.id)).toEqual(waist)
+    const replaced = await db.entries.get(newest.id)
+    expect([replaced?.value, replaced?.takenAt]).toEqual([79.4, at(1) + 1_800_000])
+    expect(await db.entries.count()).toBe(3)
   })
 
   it('deletes and restores', async () => {

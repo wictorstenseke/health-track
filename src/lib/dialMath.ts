@@ -7,8 +7,6 @@ export const DEFAULT_WEIGHT = 75
 export const UNITS_PER_KG = 32
 /** kg visible either side of the needle */
 export const HALF_SPAN_KG = 4.5
-/** Radius where ticks sit; arc length along it equals the scale offset. */
-export const ARC_RADIUS = 300
 
 export function clampDial(v: number): number {
   return Math.min(DIAL_MAX, Math.max(DIAL_MIN, v))
@@ -46,13 +44,9 @@ export function visibleTicks(center: number, halfSpanKg = HALF_SPAN_KG): Tick[] 
   return ticks
 }
 
-export function angleFor(offset: number): number {
-  return offset / ARC_RADIUS
-}
-
-/** Point at `angle` (radians, 0 = straight up, positive = clockwise) on a circle around (cx, cy). */
-export function polar(angle: number, radius: number, cx: number, cy: number): { x: number; y: number } {
-  return { x: cx + radius * Math.sin(angle), y: cy - radius * Math.cos(angle) }
+/** Tick opacity by distance from the needle: solid in the middle, fading out at the ends of the scale. */
+export function edgeFade(offset: number): number {
+  return Math.max(0, 1 - (Math.abs(offset) / (HALF_SPAN_KG * UNITS_PER_KG)) ** 4)
 }
 
 /** Friction per 16 ms frame */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  angleFor, clampDial, clampVelocity, MAX_FLING_VELOCITY, momentumStep, polar, toDialValue, UNITS_PER_KG, valueAfterDrag, visibleTicks,
+  clampDial, clampVelocity, edgeFade, HALF_SPAN_KG, MAX_FLING_VELOCITY, momentumStep, toDialValue, UNITS_PER_KG, valueAfterDrag, visibleTicks,
 } from './dialMath'
 
 describe('clampDial / toDialValue', () => {
@@ -39,14 +39,16 @@ describe('visibleTicks', () => {
   })
 })
 
-describe('geometry', () => {
-  it('puts offset 0 straight above the centre', () => {
-    const p = polar(angleFor(0), 100, 180, 320)
-    expect(p.x).toBeCloseTo(180, 5)
-    expect(p.y).toBeCloseTo(220, 5)
+describe('edgeFade', () => {
+  const edge = HALF_SPAN_KG * UNITS_PER_KG
+  it('is fully visible at the needle and gone at the ends of the scale', () => {
+    expect(edgeFade(0)).toBe(1)
+    expect(edgeFade(edge)).toBe(0)
+    expect(edgeFade(-edge)).toBe(0)
   })
-  it('puts positive offsets to the right', () => {
-    expect(polar(angleFor(50), 300, 180, 320).x).toBeGreaterThan(180)
+  it('fades only near the ends', () => {
+    expect(edgeFade(edge / 2)).toBeGreaterThan(0.9)
+    expect(edgeFade(edge * 0.9)).toBeLessThan(edgeFade(edge / 2))
   })
 })
 

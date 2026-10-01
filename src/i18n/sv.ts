@@ -23,8 +23,6 @@ export const sv = {
     latest: (value: string, when: string) => `Senast ${value} · ${when}`,
     noWeighIn: 'Ingen vägning än',
     today: 'Idag',
-    decrease: 'Minska 0,1 kg',
-    increase: 'Öka 0,1 kg',
     typeValue: 'Skriv in vikt',
   },
   detail: {

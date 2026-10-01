@@ -1,30 +1,18 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { sv } from '../i18n/sv'
-import {
-  angleFor, ARC_RADIUS, clampVelocity, DIAL_MAX, DIAL_MIN, HALF_SPAN_KG, momentumStep, polar, toDialValue, UNITS_PER_KG, valueAfterDrag,
-  visibleTicks,
-} from '../lib/dialMath'
+import { clampVelocity, DIAL_MAX, DIAL_MIN, edgeFade, momentumStep, toDialValue, UNITS_PER_KG, valueAfterDrag, visibleTicks } from '../lib/dialMath'
 import { haptic } from '../lib/haptics'
 import { roundValue } from '../lib/metrics'
 
-// Geometry (SVG units). Ticks sit on ARC_RADIUS around (CX, CY); the needle is fixed at the top.
+// Geometry (SVG units). A straight pill-shaped band; ticks hang from its top edge; the needle is fixed in the middle.
 const VIEW_W = 360
-const VIEW_H = 130
+const BAND = { x: 2, y: 2, width: VIEW_W - 4, height: 80, rim: 8 }
+const VIEW_H = BAND.y * 2 + BAND.height
 const CX = VIEW_W / 2
-const CY = 20 + ARC_RADIUS
-const BAND_RADIUS = ARC_RADIUS - 30
-const BAND_WIDTH = 80
-const MAX_ANGLE = angleFor(HALF_SPAN_KG * UNITS_PER_KG)
-const BAND_ANGLE = MAX_ANGLE + 0.04
+const TICK_TOP = BAND.y + 10
 const TICK_LENGTH = { major: 24, mid: 16, minor: 10 } as const
-const LABEL_RADIUS = ARC_RADIUS - 38
+const LABEL_Y = TICK_TOP + 38
 const FLING_PAUSE_MS = 80
-
-function arcPath(radius: number, halfAngle: number): string {
-  const start = polar(-halfAngle, radius, CX, CY)
-  const end = polar(halfAngle, radius, CX, CY)
-  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 1 ${end.x} ${end.y}`
-}
 
 interface Drag {
   startX: number
@@ -61,7 +49,7 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
     frame.current = null
   }
 
-  // Follow outside changes (± buttons, typed value) while the user is not touching the dial.
+  // Follow outside changes (typed value, new data) while the user is not touching the dial.
   useEffect(() => {
     if (drag.current || frame.current !== null) return
     const next = toDialValue(value)
@@ -123,10 +111,6 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
     frame.current = requestAnimationFrame(step)
   }
 
-  const needleTop = polar(0, ARC_RADIUS + 6, CX, CY)
-  // Ends just past the major tick (length 24) so it stays clear of the scale labels.
-  const needleBottom = polar(0, ARC_RADIUS - 28, CX, CY)
-
   return (
     <svg
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
@@ -148,30 +132,32 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
           <stop offset="1" stopColor="#ffd2bd" />
         </linearGradient>
       </defs>
-      <path d={arcPath(BAND_RADIUS, BAND_ANGLE)} fill="none" stroke="url(#dial-rim)" strokeWidth={BAND_WIDTH} strokeLinecap="round" />
-      <path d={arcPath(BAND_RADIUS, BAND_ANGLE)} fill="none" stroke="#fff" strokeWidth={BAND_WIDTH - 16} strokeLinecap="round" />
+      <rect x={BAND.x} y={BAND.y} width={BAND.width} height={BAND.height} rx={BAND.height / 2} fill="url(#dial-rim)" />
+      <rect
+        x={BAND.x + BAND.rim}
+        y={BAND.y + BAND.rim}
+        width={BAND.width - BAND.rim * 2}
+        height={BAND.height - BAND.rim * 2}
+        rx={BAND.height / 2 - BAND.rim}
+        fill="#fff"
+      />
       {visibleTicks(pos).map((t) => {
-        const angle = angleFor(t.offset)
-        const outer = polar(angle, ARC_RADIUS, CX, CY)
-        const inner = polar(angle, ARC_RADIUS - TICK_LENGTH[t.kind], CX, CY)
-        const label = polar(angle, LABEL_RADIUS, CX, CY)
-        const fade = Math.max(0, 1 - (Math.abs(angle) / MAX_ANGLE) ** 4)
+        const x = CX + t.offset
         return (
-          <g key={t.value} opacity={fade}>
+          <g key={t.value} opacity={edgeFade(t.offset)}>
             <line
-              x1={outer.x}
-              y1={outer.y}
-              x2={inner.x}
-              y2={inner.y}
+              x1={x}
+              y1={TICK_TOP}
+              x2={x}
+              y2={TICK_TOP + TICK_LENGTH[t.kind]}
               stroke={t.kind === 'major' ? '#141416' : '#a1a1aa'}
               strokeWidth={t.kind === 'minor' ? 1.5 : 2}
               strokeLinecap="round"
             />
             {t.kind === 'major' && (
               <text
-                x={label.x}
-                y={label.y}
-                transform={`rotate(${(angle * 180) / Math.PI} ${label.x} ${label.y})`}
+                x={x}
+                y={LABEL_Y}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize={14}
@@ -184,7 +170,8 @@ export function WeightDial({ value, onChange }: { value: number; onChange: (valu
           </g>
         )
       })}
-      <line x1={needleTop.x} y1={needleTop.y} x2={needleBottom.x} y2={needleBottom.y} stroke="#ff5a1f" strokeWidth={3} strokeLinecap="round" />
+      {/* Ends just past the major tick (length 24) so it stays clear of the scale labels. */}
+      <line x1={CX} y1={TICK_TOP - 6} x2={CX} y2={TICK_TOP + 28} stroke="#ff5a1f" strokeWidth={3} strokeLinecap="round" />
     </svg>
   )
 }

@@ -1,4 +1,4 @@
-import { calendarDaysBetween, chartDay, yearOf } from './dates'
+import { calendarDaysBetween, chartDay, startOfLocalDay, yearOf } from './dates'
 import { roundValue } from './metrics'
 
 export interface Point {
@@ -13,6 +13,12 @@ export function sortByTime<T extends Point>(points: T[]): T[] {
 
 export function latest<T extends Point>(points: T[]): T | undefined {
   return points.reduce<T | undefined>((best, p) => (!best || p.takenAt > best.takenAt ? p : best), undefined)
+}
+
+/** The newest point on the same local calendar day as `ts`. */
+export function latestOnDay<T extends Point>(points: T[], ts: number): T | undefined {
+  const day = startOfLocalDay(ts)
+  return latest(points.filter((p) => startOfLocalDay(p.takenAt) === day))
 }
 
 /** Distinct years present, newest first. */
