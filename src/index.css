@@ -53,6 +53,16 @@
   .sheet-backdrop {
     animation: fade-in 200ms ease-out both;
   }
+  /* Active tab icon (TabBar.tsx): a quick squash and spring as the pill arrives. */
+  .tab-pop {
+    display: block;
+    animation: tab-pop 380ms cubic-bezier(0.3, 1.25, 0.5, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tab-pop {
+      animation: none;
+    }
+  }
 }
 
 @keyframes sheet-up {
@@ -61,6 +71,18 @@
   }
   to {
     transform: translateY(0);
+  }
+}
+
+@keyframes tab-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 

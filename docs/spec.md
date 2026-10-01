@@ -62,7 +62,7 @@ Rules:
 
 ## Screens
 
-Bottom tab bar: **Hem · Mått · Inställningar**, a floating glass capsule (Instagram-style): fully rounded, inset from the screen edges, translucent white with blur. Icons only (names via `aria-label`); the active tab sits on a grey pill. Its position lives in CSS variables (`--tab-bar-*`) so toasts can sit above it.
+Bottom tab bar: **Hem · Mått · Inställningar**, a floating glass capsule (Instagram-style): fully rounded, 240 px wide at most and centred, translucent white with blur. Icons only (names via `aria-label`); a grey pill slides under the active tab (slight spring) and its icon pops. Its position lives in CSS variables (`--tab-bar-*`) so toasts can sit above it.
 
 Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, waist/hip → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab. Tabs are buttons that replace the current history entry (like a native tab bar). No route changes go through followed links, because iOS Home Screen apps can turn a followed link into a page load.
 
