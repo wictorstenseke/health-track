@@ -107,12 +107,13 @@ Same component for all metrics:
 
 ### Inställningar
 
-- Namn, Längd (cm)
-- Utseende: `Mörkt läge` switch (iOS-style, ember when on, haptic tap). Off by default; doesn't follow the phone's setting.
-- Importera CSV
-- Exportera CSV + quiet text `Senaste export: för 23 dagar sedan`
-- Radera all data (two confirms)
-- App version
+iOS-style grouped list: a quiet group label over one card, rows split by hairlines, label left and value or control right.
+
+- **Profil**: Namn, Längd (editable in place, value right-aligned, `cm` after it)
+- **Utseende**: `Mörkt läge` switch (iOS-style, ember when on, haptic tap). Off by default; doesn't follow the phone's setting.
+- **Data**: Importera CSV (row with chevron; the preview opens inside the card) · Exportera CSV with quiet text `Senaste export för 23 dagar sedan` under it
+- **Om appen**: Version · Sök efter uppdatering (status right; `Ny version finns` + ember `Uppdatera` when a build is waiting)
+- Radera all data: solid red button at the bottom → action sheet with two confirms
 
 ## CSV
 

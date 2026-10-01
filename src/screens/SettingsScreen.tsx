@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { DecimalField, TextField } from '../components/Fields'
+import { useState, type ReactNode } from 'react'
+import { BottomSheet } from '../components/BottomSheet'
 import { HapticTap } from '../components/HapticTap'
+import { ChevronRightIcon } from '../components/icons'
 import { ImportCsv } from '../components/ImportCsv'
 import { clearAllData } from '../db/entries'
 import { useAllEntries } from '../db/hooks'
@@ -12,8 +13,6 @@ import { isValidHeight } from '../lib/metrics'
 import { checkForUpdate, installUpdate, useUpdateStatus } from '../lib/pwa'
 import { navigate } from '../lib/router'
 import { setDark, useDark } from '../lib/theme'
-
-const card = 'rounded-[28px] bg-surface p-5 shadow-card'
 
 export function SettingsScreen({ profile }: { profile: Profile }) {
   const [name, setNameText] = useState(profile.name)
@@ -52,26 +51,48 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
     }
   }
 
+  const [confirmStep, setConfirmStep] = useState<0 | 1 | 2>(0)
   const deleteAll = async () => {
-    if (!window.confirm(sv.settings.confirmDeleteAll) || !window.confirm(sv.settings.confirmDeleteAllAgain)) return
     await clearAllData()
     // Back to the start route so the app lands on Hem after the new setup.
     navigate({ name: 'home' })
   }
 
   return (
-    <main className="space-y-4 px-4 pt-(--screen-top) pb-28">
+    <main className="space-y-7 px-4 pt-(--screen-top) pb-28">
       <h1 className="text-3xl font-semibold tracking-tight">{sv.settings.title}</h1>
 
-      <section className={`${card} space-y-4`}>
-        <h2 className="text-lg font-semibold">{sv.settings.profile}</h2>
-        <TextField label={sv.settings.name} value={name} onChange={setNameText} onBlur={saveName} autoComplete="given-name" />
-        <DecimalField label={sv.settings.height} unit="cm" value={height} onChange={setHeight} onBlur={saveHeight} invalid={heightInvalid} />
-      </section>
+      <Group label={sv.settings.profile}>
+        <Row>
+          <label htmlFor="settings-name">{sv.settings.name}</label>
+          <input
+            id="settings-name"
+            className="min-w-0 flex-1 bg-transparent text-right text-muted outline-none focus:text-ink"
+            value={name}
+            autoComplete="given-name"
+            onChange={(e) => setNameText(e.target.value)}
+            onBlur={saveName}
+          />
+        </Row>
+        <Row>
+          <label htmlFor="settings-height">{sv.settings.heightLabel}</label>
+          <span className="flex items-baseline gap-1 text-muted">
+            <input
+              id="settings-height"
+              inputMode="decimal"
+              className="w-16 bg-transparent text-right tabular-nums outline-none focus:text-ink aria-[invalid=true]:text-red-600 dark:aria-[invalid=true]:text-red-400"
+              value={height}
+              aria-invalid={heightInvalid ? true : undefined}
+              onChange={(e) => setHeight(e.target.value)}
+              onBlur={saveHeight}
+            />
+            cm
+          </span>
+        </Row>
+      </Group>
 
-      <section className={`${card} space-y-4`}>
-        <h2 className="text-lg font-semibold">{sv.settings.appearance}</h2>
-        <div className="flex items-center justify-between">
+      <Group label={sv.settings.appearance}>
+        <Row>
           <span id="dark-mode">{sv.settings.darkMode}</span>
           {/* iOS-style switch; HapticTap gives the tap a haptic tick. */}
           <HapticTap onTap={toggleDark}>
@@ -88,57 +109,97 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
               />
             </button>
           </HapticTap>
-        </div>
-      </section>
+        </Row>
+      </Group>
 
-      <section className={`${card} space-y-3`}>
-        <h2 className="text-lg font-semibold">{sv.settings.data}</h2>
-        <ImportCsv />
-        <button
-          type="button"
-          disabled={exporting}
-          onClick={() => void runExport()}
-          className="w-full rounded-full bg-ink py-3 font-semibold text-on-ink disabled:opacity-40"
-        >
-          {sv.settings.exportCsv}
+      <Group label={sv.settings.data}>
+        <ImportCsv variant="row" />
+        <button type="button" disabled={exporting} onClick={() => void runExport()} className={`${rowClass} py-2.5 text-left disabled:opacity-40`}>
+          <span>
+            <span className="block">{sv.settings.exportCsv}</span>
+            <span className="block text-sm text-muted">
+              {profile.lastExportAt === null
+                ? sv.settings.neverExported
+                : sv.settings.lastExport(formatRelativeDay(profile.lastExportAt, Date.now()))}
+            </span>
+          </span>
+          <span className="text-faint">
+            <ChevronRightIcon />
+          </span>
         </button>
         {exportFailed && (
-          <p role="alert" className="text-center text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="px-5 py-3 text-sm text-red-600 dark:text-red-400">
             {sv.settings.exportFailed}
           </p>
         )}
-        <p className="text-center text-sm text-muted">
-          {profile.lastExportAt === null
-            ? sv.settings.neverExported
-            : sv.settings.lastExport(formatRelativeDay(profile.lastExportAt, Date.now()))}
-        </p>
-      </section>
+      </Group>
 
-      <button type="button" onClick={() => void deleteAll()} className="w-full rounded-full bg-red-500/10 py-3 font-semibold text-red-600 dark:text-red-400">
-        {sv.settings.deleteAll}
-      </button>
-      <div className="space-y-2 text-center">
+      <Group label={sv.settings.about}>
+        <Row>
+          <span>{sv.settings.version}</span>
+          <span className="text-muted tabular-nums">{__APP_VERSION__}</span>
+        </Row>
         {update === 'ready' ? (
-          <button type="button" onClick={() => void installUpdate()} className="w-full rounded-full bg-ink py-3 font-semibold text-on-ink">
-            {sv.settings.installUpdate}
+          <button type="button" onClick={() => void installUpdate()} className={rowClass}>
+            <span>{sv.settings.updateReady}</span>
+            <span className="rounded-full bg-ember-500 px-3.5 py-1 text-sm font-semibold text-white">{sv.settings.installUpdate}</span>
           </button>
         ) : (
-          <button
-            type="button"
-            disabled={update === 'checking'}
-            onClick={() => void checkForUpdate()}
-            className="w-full rounded-full bg-fill py-3 font-semibold disabled:opacity-40"
-          >
-            {update === 'checking' ? sv.settings.checking : sv.settings.checkUpdate}
+          <button type="button" disabled={update === 'checking'} onClick={() => void checkForUpdate()} className={`${rowClass} text-left`}>
+            <span>{sv.settings.checkUpdate}</span>
+            <span role="status" className="text-sm text-muted">
+              {update === 'checking'
+                ? sv.settings.checking
+                : update === 'latest'
+                  ? sv.settings.upToDate
+                  : update === 'failed'
+                    ? sv.settings.updateFailed
+                    : ''}
+            </span>
           </button>
         )}
-        {(update === 'latest' || update === 'failed') && (
-          <p role="status" className="text-sm text-muted">
-            {update === 'latest' ? sv.settings.upToDate : sv.settings.updateFailed}
+      </Group>
+
+      <button type="button" onClick={() => setConfirmStep(1)} className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white">
+        {sv.settings.deleteAll}
+      </button>
+
+      {confirmStep > 0 && (
+        <BottomSheet title={sv.settings.deleteAll} onClose={() => setConfirmStep(0)}>
+          <p className="mb-5 px-2 text-center text-muted">
+            {confirmStep === 1 ? sv.settings.confirmDeleteAll : sv.settings.confirmDeleteAllAgain}
           </p>
-        )}
-        <p className="text-xs text-faint">{sv.settings.version(__APP_VERSION__)}</p>
-      </div>
+          <div className="space-y-2">
+            {/* Two steps on purpose: everything goes and there is no undo. */}
+            <button
+              type="button"
+              onClick={() => (confirmStep === 1 ? setConfirmStep(2) : void deleteAll())}
+              className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white"
+            >
+              {confirmStep === 1 ? sv.settings.deleteAll : sv.settings.deleteAllFinal}
+            </button>
+            <button type="button" onClick={() => setConfirmStep(0)} className="w-full rounded-full bg-fill py-3 text-lg font-semibold">
+              {sv.common.cancel}
+            </button>
+          </div>
+        </BottomSheet>
+      )}
     </main>
+  )
+}
+
+const rowClass = 'flex min-h-13 w-full items-center justify-between gap-4 px-5'
+
+function Row({ children }: { children: ReactNode }) {
+  return <div className={rowClass}>{children}</div>
+}
+
+/** iOS-style grouped list: a quiet label over one card whose rows are split by hairlines. */
+function Group({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <section>
+      <h2 className="mb-1.5 px-5 text-sm font-medium text-muted">{label}</h2>
+      <div className="divide-y divide-line overflow-hidden rounded-[28px] bg-surface shadow-card">{children}</div>
+    </section>
   )
 }

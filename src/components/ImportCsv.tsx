@@ -5,9 +5,11 @@ import { readCsvFiles, type ReadResult } from '../io/csvFiles'
 import { summarize } from '../lib/csv'
 import { formatDate, formatValue } from '../lib/format'
 import { METRICS } from '../lib/metrics'
+import { ChevronRightIcon } from './icons'
 
-/** Pick one or more CSV files → preview → confirm. */
-export function ImportCsv() {
+/** Pick one or more CSV files → preview → confirm. `row` is the settings-list look. */
+export function ImportCsv({ variant = 'button' }: { variant?: 'button' | 'row' }) {
+  const row = variant === 'row'
   const [preview, setPreview] = useState<ReadResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const summary = preview && summarize(preview.rows)
@@ -29,8 +31,19 @@ export function ImportCsv() {
 
   return (
     <div>
-      <label className="block w-full cursor-pointer rounded-full bg-fill py-3 text-center font-semibold">
+      <label
+        className={
+          row
+            ? 'flex min-h-13 w-full cursor-pointer items-center justify-between px-5'
+            : 'block w-full cursor-pointer rounded-full bg-fill py-3 text-center font-semibold'
+        }
+      >
         {sv.import.button}
+        {row && (
+          <span className="text-faint">
+            <ChevronRightIcon />
+          </span>
+        )}
         <input
           type="file"
           accept=".csv,text/csv,text/plain"
@@ -40,7 +53,7 @@ export function ImportCsv() {
         />
       </label>
       {preview && (
-        <div className="mt-3 rounded-2xl bg-fill/50 p-4 text-sm">
+        <div className={`rounded-2xl bg-fill/50 p-4 text-sm ${row ? 'mx-4 mb-4' : 'mt-3'}`}>
           <p className="font-medium">
             {summary ? sv.import.found(summary.count, formatDate(summary.from), formatDate(summary.to)) : sv.import.nothingFound}
           </p>
@@ -81,7 +94,7 @@ export function ImportCsv() {
           </div>
         </div>
       )}
-      {message && <p className="mt-2 text-center text-sm text-muted">{message}</p>}
+      {message && <p className={`text-sm text-muted ${row ? 'px-5 pb-3' : 'mt-2 text-center'}`}>{message}</p>}
     </div>
   )
 }
