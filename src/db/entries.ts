@@ -49,7 +49,9 @@ export async function getAllEntries(): Promise<Entry[]> {
   return db.entries.orderBy('takenAt').toArray()
 }
 
-const identity = (e: { metricId: string; takenAt: number; value: number }) => `${e.metricId}|${e.takenAt}|${roundValue(e.value)}`
+/** Minute precision: CSV export writes HH:mm, so re-importing our own export must match entries saved with seconds. */
+const identity = (e: { metricId: string; takenAt: number; value: number }) =>
+  `${e.metricId}|${Math.floor(e.takenAt / 60_000)}|${roundValue(e.value)}`
 
 /** Adds CSV rows, skipping any row identical to an existing entry (or an earlier row), so re-import is safe. */
 export async function importRows(rows: CsvRow[]): Promise<{ added: number; skipped: number }> {

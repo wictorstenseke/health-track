@@ -4,6 +4,7 @@ import {
   addEntries, addEntry, clearAllData, deleteEntry, getAllEntries, getEntries, importRows, restoreEntry, updateEntry,
 } from './entries'
 import { getProfile, setName } from './settings'
+import { parseCsv, toCsv } from '../lib/csv'
 
 const at = (d: number) => new Date(2026, 8, d, 8).getTime()
 
@@ -62,6 +63,12 @@ describe('entries', () => {
     expect(await importRows(rows)).toEqual({ added: 1, skipped: 2 })
     expect(await importRows(rows)).toEqual({ added: 0, skipped: 3 })
     expect(await db.entries.count()).toBe(2)
+  })
+
+  it('re-importing our own export adds nothing, even for entries saved with seconds', async () => {
+    await addEntry('weight', 82.4, at(1) + 23_456)
+    const { rows } = parseCsv(toCsv(await getAllEntries()))
+    expect(await importRows(rows)).toEqual({ added: 0, skipped: 1 })
   })
 
   it('clears everything', async () => {
