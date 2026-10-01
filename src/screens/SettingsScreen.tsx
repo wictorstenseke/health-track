@@ -33,7 +33,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
   const entries = useAllEntries()
 
   const runExport = async () => {
-    if (!entries || exporting) return
+    if (exporting) return
     setExportFailed(false)
     setExporting(true)
     try {
@@ -67,7 +67,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
         <ImportCsv />
         <button
           type="button"
-          disabled={!entries || exporting}
+          disabled={exporting}
           onClick={() => void runExport()}
           className="w-full rounded-full bg-ink py-3 font-semibold text-white disabled:opacity-40"
         >

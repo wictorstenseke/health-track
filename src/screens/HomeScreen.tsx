@@ -59,7 +59,6 @@ export function HomeScreen({ name }: { name: string }) {
     return () => clearTimeout(t)
   }, [saved])
 
-  if (!entries) return null
   const last = latest(entries)
   const shown = weight ?? toDialValue(last?.value ?? DEFAULT_WEIGHT)
 

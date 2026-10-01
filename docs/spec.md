@@ -64,6 +64,8 @@ Rules:
 
 Bottom tab bar: **Hem · Mått · Inställningar**.
 
+Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, waist/hip → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab.
+
 ### Setup (first launch, when no `name`)
 
 One screen: Namn, Längd (cm), optional "Importera CSV". Button "Kom igång" → Hem. All editable later in Inställningar.

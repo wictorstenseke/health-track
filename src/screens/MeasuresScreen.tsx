@@ -9,7 +9,7 @@ import { navigate } from '../lib/router'
 import { latest, pointsInYear, yearStats } from '../lib/stats'
 
 function MetricCard({ metricId }: { metricId: MetricId }) {
-  const entries = useEntries(metricId) ?? []
+  const entries = useEntries(metricId)
   const year = new Date().getFullYear()
   const last = latest(entries)
   const stats = yearStats(entries, year)

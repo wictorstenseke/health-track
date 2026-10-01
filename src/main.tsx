@@ -6,6 +6,8 @@ import { requestPersistentStorage } from './db/persist'
 import './index.css'
 
 void requestPersistentStorage()
+// Screens restore their own scroll position (App.tsx); the browser's own restore would fight it on back.
+history.scrollRestoration = 'manual'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

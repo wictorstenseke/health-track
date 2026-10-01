@@ -25,19 +25,54 @@ export function routeToHash(route: Route): string {
   }
 }
 
-export function navigate(route: Route): void {
-  window.location.hash = routeToHash(route)
+export type TabName = 'home' | 'measures' | 'settings'
+
+/** The tab a route lives under: a detail screen belongs to the tab whose card opens it. */
+export function tabOf(route: Route): TabName {
+  if (route.name !== 'metric') return route.name
+  return route.metricId === 'weight' ? 'home' : 'measures'
 }
 
-/** Back within the app, or home when the page was opened directly on a sub-route. */
+/** Written on every history entry the app pushes, so back knows the previous entry is the app too. */
+export const APP_HISTORY_STATE = { pushedByApp: true } as const
+
+/**
+ * `history.length` can't tell: it also counts pages before the app and forward entries, so from a detail
+ * screen opened directly (link, bookmark, PWA launch) `history.back()` would leave the app.
+ */
+export function backTarget(historyState: unknown, route: Route): 'history' | Route {
+  const pushedByApp = typeof historyState === 'object' && historyState !== null && 'pushedByApp' in historyState
+  return pushedByApp ? 'history' : { name: tabOf(route) }
+}
+
+/** `pushState` fires no event, so subscribers are told directly. */
+const listeners = new Set<() => void>()
+const notify = () => listeners.forEach((l) => l())
+
+export function navigate(route: Route): void {
+  window.history.pushState(APP_HISTORY_STATE, '', routeToHash(route))
+  notify()
+}
+
 export function goBack(): void {
-  if (window.history.length > 1) window.history.back()
-  else navigate({ name: 'home' })
+  const target = backTarget(window.history.state, parseHash(window.location.hash))
+  if (target === 'history') {
+    window.history.back()
+    return
+  }
+  window.history.replaceState(null, '', routeToHash(target))
+  notify()
 }
 
 function subscribe(onChange: () => void): () => void {
+  listeners.add(onChange)
+  window.addEventListener('popstate', onChange)
   window.addEventListener('hashchange', onChange)
-  return () => window.removeEventListener('hashchange', onChange)
+  return () => {
+    listeners.delete(onChange)
+    window.removeEventListener('popstate', onChange)
+    window.removeEventListener('hashchange', onChange)
+  }
 }
 
 export function useRoute(): Route {
