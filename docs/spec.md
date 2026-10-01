@@ -79,15 +79,14 @@ Top to bottom:
    - Current year solid line; previous 2 years as ghost lines (older = fainter), small year labels at line ends.
    - X axis Jan–Dec, full year visible.
    - Tap → weight detail screen.
-3. **Registrera** section heading (18 px).
-4. **Weight entry**: one band (the dial's rim + white inside; 20 px padding top and bottom) holding, top to bottom: the number `82,4 kg` (tap → keypad input, `inputmode="decimal"`; the picked date and time under it only while backdated), 16 px to the scale (no band of its own, tick labels every 5 kg; it shows ~±5,2 kg so the ticks run out to just inside the band's edges), 20 px to the buttons (see 5). Hem fits an iPhone 17 Pro screen without scrolling.
+3. **Weight entry** (16 px below the header card): one band (the dial's rim + white inside; 20 px padding top and bottom) holding, top to bottom: the number `82,4 kg` (tap → keypad input, `inputmode="decimal"`; the picked date and time under it only while backdated), 16 px to the scale (no band of its own, tick labels every 5 kg; it shows ~±5,2 kg so the ticks run out to just inside the band's edges), 20 px to the buttons (see 4). Hem fits an iPhone 17 Pro screen without scrolling.
    Scale details:
    - Straight pill-shaped band with rounded ends (reference image 3's frame, unbent), **fixed orange needle, scale slides** under it. Ticks fade out towards the ends.
    - Range 60–100 kg (constant). Ticks at 0.5 and 1 kg, labels every 5 kg. ~±4,5 kg visible (tune on device).
    - Drag left/right with momentum (fling capped at ~3 kg travel), snaps to 0.1.
    - Starts at last weight (75,0 if none).
    - Haptic tick per 0.1, best effort: Vibration API on Android; on iOS the `<input type="checkbox" switch>` trick, which only fires from code on iOS 17.4–26.4 (26.5 blocked it).
-5. **Buttons** under the scale, both 40 px: a round calendar icon button on the left, 20 px in (opens the native date-time picker for backdating; defaults to now; tinted orange while backdated), and the **Spara** pill centred in the band. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now.
+4. **Buttons** under the scale, both 40 px: a round calendar icon button on the left, 20 px in (opens the native date-time picker for backdating; defaults to now; tinted orange while backdated), and the **Spara** pill centred in the band. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now.
 
 ### Detail screen (`/metric/:metricId`) — weight, waist, hip
 

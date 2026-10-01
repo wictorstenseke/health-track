@@ -21,7 +21,6 @@ export const sv = {
   home: {
     welcome: 'Välkommen tillbaka',
     today: 'Idag',
-    register: 'Registrera',
     changeDate: 'Ändra datum',
     typeValue: 'Skriv in vikt',
   },

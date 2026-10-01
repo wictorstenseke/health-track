@@ -94,38 +94,35 @@ export function HomeScreen({ name }: { name: string }) {
           </div>
         </div>
       </section>
-      <section className="px-4 pt-6">
-        <h2 className="text-lg font-semibold">{sv.home.register}</h2>
-        <div className="mt-3">
-          {/* The date only shows when it isn't today, so a backdated save is never a surprise. */}
-          <WeightScale
-            value={shown}
-            onChange={changeWeight}
-            caption={takenAt !== null && dateTimeLabel(takenAt)}
-            start={
-              <DateTimeField
-                value={takenAt}
-                onChange={changeDate}
-                label={sv.home.changeDate}
-                // Tinted while backdated, next to the date shown under the number.
-                className={`size-10 justify-center rounded-full ${takenAt === null ? 'bg-zinc-100 text-ink' : 'bg-ember-500/10 text-ember-600'}`}
-              >
-                <CalendarIcon />
-              </DateTimeField>
-            }
-          >
-            <HapticTap onTap={() => void save()} disabled={saved}>
-              <button
-                type="button"
-                disabled={saved}
-                onClick={() => void save()}
-                className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-white transition-colors duration-300 disabled:bg-ember-500"
-              >
-                {saved ? sv.common.saved : sv.common.save}
-              </button>
-            </HapticTap>
-          </WeightScale>
-        </div>
+      <section className="px-4 pt-4">
+        {/* The date only shows when it isn't today, so a backdated save is never a surprise. */}
+        <WeightScale
+          value={shown}
+          onChange={changeWeight}
+          caption={takenAt !== null && dateTimeLabel(takenAt)}
+          start={
+            <DateTimeField
+              value={takenAt}
+              onChange={changeDate}
+              label={sv.home.changeDate}
+              // Tinted while backdated, next to the date shown under the number.
+              className={`size-10 justify-center rounded-full ${takenAt === null ? 'bg-zinc-100 text-ink' : 'bg-ember-500/10 text-ember-600'}`}
+            >
+              <CalendarIcon />
+            </DateTimeField>
+          }
+        >
+          <HapticTap onTap={() => void save()} disabled={saved}>
+            <button
+              type="button"
+              disabled={saved}
+              onClick={() => void save()}
+              className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-white transition-colors duration-300 disabled:bg-ember-500"
+            >
+              {saved ? sv.common.saved : sv.common.save}
+            </button>
+          </HapticTap>
+        </WeightScale>
       </section>
     </main>
   )
