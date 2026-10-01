@@ -1,13 +1,15 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateTimeField, dateTimeLabel } from '../components/DateTimeField'
 import { HapticTap } from '../components/HapticTap'
 import { CalendarIcon } from '../components/icons'
 import { WeightScale } from '../components/WeightPicker'
-import { YearChart } from '../components/YearChart'
+import { YearChart, type ChartMark } from '../components/YearChart'
 import { saveWeightForDay } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
+import { chartDay } from '../lib/dates'
 import { DEFAULT_WEIGHT, toDialValue } from '../lib/dialMath'
+import { flyToMark } from '../lib/flight'
 import { formatDelta } from '../lib/format'
 import type { Entry } from '../lib/metrics'
 import { navigate } from '../lib/router'
@@ -16,7 +18,7 @@ import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
 const SAVED_MS = 1500
 
 // Memo: the dial re-renders Hem on every 0.1 kg step, and redrawing the Recharts chart each time made dragging stutter.
-const YearCard = memo(function YearCard({ entries }: { entries: Entry[] }) {
+const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; mark?: ChartMark }) {
   const year = new Date().getFullYear()
   const series = yearSeries(entries, [year, year - 1, year - 2])
   const stats = yearStats(entries, year)
@@ -31,7 +33,7 @@ const YearCard = memo(function YearCard({ entries }: { entries: Entry[] }) {
         {stats && stats.count >= 2 && <span className="text-lg font-semibold tabular-nums">{formatDelta(stats.change)} kg</span>}
       </div>
       {series.length > 0 ? (
-        <YearChart series={series} height={120} variant="card" />
+        <YearChart series={series} height={120} variant="card" mark={mark} />
       ) : (
         <p className="py-10 text-center text-sm text-zinc-400">{sv.common.noData}</p>
       )}
@@ -47,6 +49,9 @@ export function HomeScreen({ name }: { name: string }) {
   const [takenAt, setTakenAt] = useState<number | null>(null)
   /** Brief confirmation, also for a backdated save (the date then resets to today). */
   const [justSaved, setJustSaved] = useState(false)
+  /** The weight just saved: the chart marks it and the number flies there. */
+  const [landing, setLanding] = useState<{ value: number; takenAt: number } | null>(null)
+  const numberRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     if (!justSaved) return
@@ -58,6 +63,17 @@ export function HomeScreen({ name }: { name: string }) {
   // Whenever the latest weight changes (a save here, an edit on the detail screen) the dial follows it again.
   // Resetting only now, not right after saving, keeps the dial from jumping back while the data catches up.
   useEffect(() => setWeight(null), [last?.id, last?.value, last?.takenAt])
+
+  // The chart draws the mark once the save is in the entries, so it sits where the point does. One flight per mark.
+  const onMark = useCallback((el: SVGGElement | null) => {
+    if (!el || el.dataset.flown || !numberRef.current) return
+    el.dataset.flown = 'true'
+    void flyToMark(numberRef.current, el).then(() => setLanding(null))
+  }, [])
+  const mark = useMemo(() => {
+    if (!landing || !entries.some((e) => e.value === landing.value && e.takenAt === landing.takenAt)) return undefined
+    return { x: chartDay(landing.takenAt), y: landing.value, ref: onMark }
+  }, [landing, entries, onMark])
 
   const shown = weight ?? toDialValue(last?.value ?? DEFAULT_WEIGHT)
   const savedOnDay = latestOnDay(entries, takenAt ?? Date.now())
@@ -73,9 +89,12 @@ export function HomeScreen({ name }: { name: string }) {
   }
 
   const save = async () => {
-    await saveWeightForDay(shown, takenAt ?? Date.now())
+    const at = takenAt ?? Date.now()
+    await saveWeightForDay(shown, at)
     setTakenAt(null)
     setJustSaved(true)
+    // The card only charts this year and the two before.
+    if (new Date(at).getFullYear() >= new Date().getFullYear() - 2) setLanding({ value: shown, takenAt: at })
   }
 
   return (
@@ -90,7 +109,7 @@ export function HomeScreen({ name }: { name: string }) {
             <h1 className="text-3xl leading-8 font-semibold tracking-tight text-white">{name}</h1>
           </div>
           <div className="mt-16">
-            <YearCard entries={entries} />
+            <YearCard entries={entries} mark={mark} />
           </div>
         </div>
       </section>
@@ -99,6 +118,7 @@ export function HomeScreen({ name }: { name: string }) {
         <WeightScale
           value={shown}
           onChange={changeWeight}
+          numberRef={numberRef}
           caption={takenAt !== null && dateTimeLabel(takenAt)}
           start={
             <DateTimeField

@@ -1,11 +1,19 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type ReactNode, type Ref } from 'react'
 import { sv } from '../i18n/sv'
 import { toDialValue } from '../lib/dialMath'
 import { formatNumber, parseDecimal } from '../lib/format'
 import { WeightDial } from './WeightDial'
 
-/** Big number; tap it to type a value. Values stay within the dial range. */
-export function WeightValue({ value, onChange }: { value: number; onChange: (value: number) => void }) {
+/** Big number; tap it to type a value. Values stay within the dial range. `numberRef`: the digits, without "kg". */
+export function WeightValue({
+  value,
+  onChange,
+  numberRef,
+}: {
+  value: number
+  onChange: (value: number) => void
+  numberRef?: Ref<HTMLSpanElement>
+}) {
   const [typing, setTyping] = useState(false)
 
   const commitTyped = (text: string) => {
@@ -29,7 +37,9 @@ export function WeightValue({ value, onChange }: { value: number; onChange: (val
         />
       ) : (
         <button type="button" aria-label={sv.home.typeValue} onClick={() => setTyping(true)} className="text-4xl font-semibold tracking-tight tabular-nums">
-          {formatNumber(value)}
+          <span ref={numberRef} className="inline-block">
+            {formatNumber(value)}
+          </span>
           <span className="ml-1 text-lg font-medium text-zinc-400">kg</span>
         </button>
       )}
@@ -45,12 +55,14 @@ export function WeightValue({ value, onChange }: { value: number; onChange: (val
 export function WeightScale({
   value,
   onChange,
+  numberRef,
   caption,
   start,
   children,
 }: {
   value: number
   onChange: (value: number) => void
+  numberRef?: Ref<HTMLSpanElement>
   caption?: ReactNode
   start: ReactNode
   children: ReactNode
@@ -59,7 +71,7 @@ export function WeightScale({
     // Same rim colours and 8 px rim as the dial's own band.
     <div className="rounded-[40px] bg-linear-to-r from-[#ffd2bd] via-[#ff9466] to-[#ffd2bd] p-2">
       <div className="rounded-[32px] bg-white py-5">
-        <WeightValue value={value} onChange={onChange} />
+        <WeightValue value={value} onChange={onChange} numberRef={numberRef} />
         {caption && <p className="text-center text-sm text-zinc-500">{caption}</p>}
         <div className="mt-4">
           <WeightDial value={value} onChange={onChange} bare />

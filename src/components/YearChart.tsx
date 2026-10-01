@@ -1,9 +1,12 @@
-import { LabelList, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import type { RefCallback } from 'react'
+import { LabelList, Line, LineChart, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { CHART_DAY_MAX, MONTH_START_DAYS } from '../lib/dates'
 import { formatMonthInitial } from '../lib/format'
 import type { YearSeries } from '../lib/stats'
 
 const AXIS_TICK = { fontSize: 11, fill: '#a1a1aa' }
+/** The mark's circles scale around their own centre. */
+const MARK_ORIGIN = { transformBox: 'fill-box', transformOrigin: 'center' } as const
 
 /** Current year in ember, older years as fading ink ghosts. */
 export function yearColor(year: number, currentYear = new Date().getFullYear()): string {
@@ -14,8 +17,21 @@ export function yearColor(year: number, currentYear = new Date().getFullYear()):
   return 'rgb(20 20 22 / 0.18)'
 }
 
+/** A point to mark (chart coordinates), drawn hidden: `ref` gets a `<g>` of ring + dot to animate. */
+export type ChartMark = { x: number; y: number; ref: RefCallback<SVGGElement> }
+
 /** `series` newest first. Lines are drawn oldest first so the current year sits on top. */
-export function YearChart({ series, height, variant }: { series: YearSeries[]; height: number; variant: 'card' | 'full' }) {
+export function YearChart({
+  series,
+  height,
+  variant,
+  mark,
+}: {
+  series: YearSeries[]
+  height: number
+  variant: 'card' | 'full'
+  mark?: ChartMark
+}) {
   const currentYear = new Date().getFullYear()
   const full = variant === 'full'
   return (
@@ -70,6 +86,19 @@ export function YearChart({ series, height, variant }: { series: YearSeries[]; h
             </Line>
           )
         })}
+        {mark && (
+          <ReferenceDot
+            key={`${mark.x}:${mark.y}`}
+            x={mark.x}
+            y={mark.y}
+            shape={({ cx, cy }) => (
+              <g ref={mark.ref} opacity={0}>
+                <circle cx={cx} cy={cy} r={4} fill="none" stroke="#ff5a1f" strokeWidth={1.5} style={MARK_ORIGIN} />
+                <circle cx={cx} cy={cy} r={4} fill="#ff5a1f" stroke="#fff" strokeWidth={1.5} style={MARK_ORIGIN} />
+              </g>
+            )}
+          />
+        )}
       </LineChart>
     </ResponsiveContainer>
   )
