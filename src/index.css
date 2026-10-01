@@ -18,6 +18,9 @@
     --tab-bar-bottom: max(0.75rem, calc(env(safe-area-inset-bottom) - 0.5rem));
     --tab-bar-height: 3.875rem;
     --tab-bar-top: calc(var(--tab-bar-bottom) + var(--tab-bar-height));
+    /* iOS 26 blurs and fades ~30 pt below the status bar over whatever sits there (measured on device; a page
+       can't turn it off), so every screen starts its content below that band. */
+    --screen-top: calc(env(safe-area-inset-top) + 2.25rem);
   }
   html {
     background: var(--color-canvas);

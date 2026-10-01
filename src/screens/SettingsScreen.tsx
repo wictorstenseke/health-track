@@ -53,7 +53,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
   }
 
   return (
-    <main className="space-y-4 px-4 pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-28">
+    <main className="space-y-4 px-4 pt-(--screen-top) pb-28">
       <h1 className="text-3xl font-semibold tracking-tight">{sv.settings.title}</h1>
 
       <section className={`${card} space-y-4`}>

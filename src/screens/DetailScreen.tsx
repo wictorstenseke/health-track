@@ -36,7 +36,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   return (
     <main className="px-4 pb-28">
       {/* Sticky: in the installed iOS app this button is the only way back (no browser back, no swipe). */}
-      <header className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-canvas/85 px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2 backdrop-blur-xl">
+      <header className="sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-canvas/85 px-4 pt-(--screen-top) pb-2 backdrop-blur-xl">
         <button type="button" onClick={goBack} aria-label={sv.common.back} className="-ml-2 rounded-full p-2">
           <ChevronLeftIcon />
         </button>

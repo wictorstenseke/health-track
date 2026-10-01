@@ -80,7 +80,7 @@ export function HomeScreen({ name }: { name: string }) {
 
   return (
     <main className="pb-28">
-      <section className="px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)]">
+      <section className="px-3 pt-(--screen-top)">
         {/* Radius = the chart card's 28px + this 8px padding, so the corners run parallel. */}
         <div className="hero-gradient rounded-[36px] p-2 pt-10">
           <p className="text-center text-[15px] font-medium text-white/90">{sv.home.welcome}</p>

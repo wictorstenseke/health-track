@@ -32,7 +32,7 @@ function MetricCard({ metricId }: { metricId: MetricId }) {
 export function MeasuresScreen() {
   const [measuring, setMeasuring] = useState(false)
   return (
-    <main className="px-4 pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-28">
+    <main className="px-4 pt-(--screen-top) pb-28">
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-semibold tracking-tight">{sv.measures.title}</h1>
         <button type="button" onClick={() => setMeasuring(true)} className="rounded-full bg-ink px-5 py-2.5 font-semibold text-white">
