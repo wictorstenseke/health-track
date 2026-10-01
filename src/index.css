@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-ember-300: #ffb08a;
+  --color-ember-400: #ff7a3d;
+  --color-ember-500: #ff5a1f;
+  --color-ember-600: #e8410f;
+  --color-ink: #141416;
+  --color-canvas: #f2f2f4;
+  --shadow-card: 0 18px 40px -24px rgb(20 20 22 / 0.35), 0 2px 6px rgb(20 20 22 / 0.04);
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  /* iOS zooms into inputs with font-size below 16px */
+  input {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .hero-gradient {
+    background:
+      radial-gradient(90% 70% at 0% 0%, rgb(120 128 145 / 0.9) 0%, transparent 60%),
+      radial-gradient(120% 90% at 100% 0%, #ff3a14 0%, transparent 65%),
+      linear-gradient(180deg, #ff6a2b 0%, #ff4d1a 55%, var(--color-canvas) 100%);
+  }
+  .sheet-panel {
+    animation: sheet-up 280ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  .sheet-backdrop {
+    animation: fade-in 200ms ease-out both;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
