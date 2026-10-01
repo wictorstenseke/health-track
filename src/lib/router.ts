@@ -49,19 +49,20 @@ export function backTarget(historyState: unknown, route: Route): 'history' | Rou
 const listeners = new Set<() => void>()
 const notify = () => listeners.forEach((l) => l())
 
-export function navigate(route: Route): void {
-  window.history.pushState(APP_HISTORY_STATE, '', routeToHash(route))
+/**
+ * Detail screens push an entry so back returns to their tab; tab switches replace it, like a native tab bar.
+ * Always through the history API: iOS Home Screen apps can treat a followed link as a page load.
+ */
+export function navigate(route: Route, { replace = false } = {}): void {
+  if (replace) window.history.replaceState(null, '', routeToHash(route))
+  else window.history.pushState(APP_HISTORY_STATE, '', routeToHash(route))
   notify()
 }
 
 export function goBack(): void {
   const target = backTarget(window.history.state, parseHash(window.location.hash))
-  if (target === 'history') {
-    window.history.back()
-    return
-  }
-  window.history.replaceState(null, '', routeToHash(target))
-  notify()
+  if (target === 'history') window.history.back()
+  else navigate(target, { replace: true })
 }
 
 function subscribe(onChange: () => void): () => void {

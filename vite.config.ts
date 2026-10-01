@@ -32,7 +32,7 @@ export default defineConfig({
         orientation: 'portrait',
         start_url: '.',
         scope: '.',
-        theme_color: '#ff5a1f',
+        theme_color: '#f2f2f4',
         background_color: '#f2f2f4',
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },

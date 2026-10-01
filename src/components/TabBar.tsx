@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 import { sv } from '../i18n/sv'
-import { routeToHash, type TabName } from '../lib/router'
+import { navigate, type TabName } from '../lib/router'
 import { HomeIcon, RulerIcon, SlidersIcon } from './icons'
 
 const TABS: { name: TabName; label: string; Icon: ComponentType }[] = [
@@ -15,14 +15,15 @@ export function TabBar({ active }: { active: TabName }) {
       <ul className="mx-auto flex max-w-md">
         {TABS.map(({ name, label, Icon }) => (
           <li key={name} className="flex-1">
-            <a
-              href={routeToHash({ name })}
+            <button
+              type="button"
+              onClick={() => navigate({ name }, { replace: true })}
               aria-current={active === name ? 'page' : undefined}
-              className={`flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${active === name ? 'text-ink' : 'text-zinc-400'}`}
+              className={`flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${active === name ? 'text-ink' : 'text-zinc-400'}`}
             >
               <Icon />
               {label}
-            </a>
+            </button>
           </li>
         ))}
       </ul>

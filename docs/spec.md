@@ -64,7 +64,7 @@ Rules:
 
 Bottom tab bar: **Hem · Mått · Inställningar**.
 
-Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, waist/hip → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab.
+Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, waist/hip → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab. Tabs are buttons that replace the current history entry (like a native tab bar). No route changes go through followed links, because iOS Home Screen apps can turn a followed link into a page load.
 
 ### Setup (first launch, when no `name`)
 
@@ -73,7 +73,7 @@ One screen: Namn, Längd (cm), optional "Importera CSV". Button "Kom igång" →
 ### Hem
 
 Top to bottom:
-1. **Gradient hero** (orange → red, like reference image 2), extends under status bar. "Välkommen tillbaka" / name.
+1. **Gradient hero** (orange → red, like reference image 2). In the installed iOS app it starts below the opaque light-grey status bar; in a browser it can extend under it. "Välkommen tillbaka" / name.
 2. **Year chart card** (rounded, grouped with hero):
    - Header: current year + change since first weigh-in this year (`−3,1 kg`). Hidden if < 2 entries this year.
    - Current year solid line; previous 2 years as ghost lines (older = fainter), small year labels at line ends.
@@ -141,7 +141,7 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 ## Look
 
 - Light only. Reference image 2: orange→red gradient hero, white/soft-grey cards, large radii, soft shadows, black pill buttons. Dial styled after reference image 3, recoloured to app palette.
-- iOS: `viewport-fit=cover`, safe-area insets, `apple-mobile-web-app-status-bar-style: black-translucent`, `overscroll-behavior: none`.
+- iOS: `viewport-fit=cover`, safe-area insets, `overscroll-behavior: none`. Status bar `apple-mobile-web-app-status-bar-style: default` with `theme-color` canvas grey: on iOS 26 Home Screen apps, `black-translucent` makes the web view one status-bar height too short (gap under the tab bar, WebKit bug 301108), and iOS tints a see-through bar from the page. The status-bar style is read at install time, so changing it needs a reinstall.
 - Locale: Swedish. `82,4 kg`, `1 okt 2026`, 24 h, week starts Monday. `Intl` with `sv-SE`. All strings in `src/i18n/sv.ts`.
 
 ## PWA
