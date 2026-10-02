@@ -7,3 +7,9 @@ coverage
 
 # Third-party design references: kept locally, never published
 docs/design/reference-*.png
+
+# Secrets and local agent state
+.env
+.env.*
+!.env.example
+.claude/
