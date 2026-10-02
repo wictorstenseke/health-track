@@ -145,7 +145,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
         )}
       </Group>
 
-      <button type="button" onClick={() => setConfirmStep(1)} className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white">
+      <button type="button" onClick={() => setConfirmStep(1)} className="mx-auto block h-10 rounded-full bg-red-600 px-5 text-base font-semibold text-white">
         {sv.settings.deleteAll}
       </button>
 

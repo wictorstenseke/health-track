@@ -137,7 +137,7 @@ export function HomeScreen({ name }: { name: string }) {
               type="button"
               disabled={saved}
               onClick={() => void save()}
-              className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-on-ink transition-colors duration-300 disabled:bg-ember-500 disabled:text-white"
+              className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-on-ink transition-colors duration-300 disabled:bg-fill disabled:text-muted"
             >
               {saved ? sv.common.saved : sv.common.save}
             </button>
