@@ -111,6 +111,13 @@
     4px 5px 0 #9a3412;
 }
 
+/* Small Bungee text over the header cards, such as the line above the name: the sticker's outline without
+   its shadow, which crowds letters this small. */
+@utility text-sticker-outline {
+  -webkit-text-stroke: 2px #9a3412;
+  paint-order: stroke fill;
+}
+
 @layer components {
   /* Header cards: a blurred colour image, zoomed in on its vivid middle; ember orange while it loads. */
   .hero-gradient {
