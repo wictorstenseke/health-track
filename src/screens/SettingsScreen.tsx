@@ -154,17 +154,17 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
           <p className="mb-5 px-2 text-center text-muted">
             {confirmStep === 1 ? sv.settings.confirmDeleteAll : sv.settings.confirmDeleteAllAgain}
           </p>
-          <div className="space-y-2">
+          <div className="flex justify-center gap-3">
+            <button type="button" onClick={() => setConfirmStep(0)} className="h-10 rounded-full bg-fill px-5 text-base font-semibold">
+              {sv.common.cancel}
+            </button>
             {/* Two steps on purpose: everything goes and there is no undo. */}
             <button
               type="button"
               onClick={() => (confirmStep === 1 ? setConfirmStep(2) : void deleteAll())}
-              className="w-full rounded-full bg-red-600 py-3 text-lg font-semibold text-white"
+              className="h-10 rounded-full bg-red-600 px-5 text-base font-semibold text-white"
             >
               {confirmStep === 1 ? sv.settings.deleteAll : sv.settings.deleteAllFinal}
-            </button>
-            <button type="button" onClick={() => setConfirmStep(0)} className="w-full rounded-full bg-fill py-3 text-lg font-semibold">
-              {sv.common.cancel}
             </button>
           </div>
         </BottomSheet>

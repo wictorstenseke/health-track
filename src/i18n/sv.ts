@@ -8,6 +8,7 @@ export const sv = {
     save: 'Spara',
     saved: 'Sparat ✓',
     cancel: 'Avbryt',
+    close: 'Stäng',
     delete: 'Radera',
     back: 'Tillbaka',
     change: 'ändra',

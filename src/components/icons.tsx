@@ -61,3 +61,9 @@ export const PlusIcon = () => (
     <path d="M12 5v14M5 12h14" />
   </svg>
 )
+
+export const CloseIcon = () => (
+  <svg {...base}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+)
