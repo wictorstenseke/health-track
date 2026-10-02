@@ -24,7 +24,7 @@ export function SetupScreen() {
   return (
     <main className="space-y-7 px-4 pt-(--screen-top) pb-10">
       <div className="hero-gradient rounded-[36px] px-4 py-12 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight text-white">{sv.setup.title}</h1>
+        <h1 className="font-display text-3xl text-balance text-white text-sticker">{sv.setup.title}</h1>
       </div>
       <Group label={sv.settings.profile}>
         <ProfileRows name={name} onNameChange={setNameText} height={height} onHeightChange={setHeight} heightInvalid={!heightOk} />

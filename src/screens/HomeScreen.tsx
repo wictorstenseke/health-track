@@ -105,8 +105,8 @@ export function HomeScreen({ name }: { name: string }) {
           {/* 8px card border + 20px here = where "2026" starts inside the chart card. Same space above and below:
               the text sits centred between the card's top and the chart. */}
           <div className="px-5">
-            <p className="text-base leading-5 font-medium text-white/90">{sv.home.welcome}</p>
-            <h1 className="text-3xl leading-8 font-semibold tracking-tight text-white">{name}</h1>
+            <p className="text-xs leading-5 font-medium tracking-[0.14em] text-white/90 uppercase">{sv.home.welcome}</p>
+            <h1 className="font-display text-3xl leading-8 text-white text-sticker">{name}</h1>
           </div>
           <div className="mt-16">
             <YearCard entries={entries} mark={mark} />
