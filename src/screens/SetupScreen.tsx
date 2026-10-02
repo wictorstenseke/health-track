@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { DecimalField, TextField } from '../components/Fields'
+import { Group } from '../components/GroupedList'
 import { ImportCsv } from '../components/ImportCsv'
+import { ProfileRows } from '../components/ProfileRows'
 import { setHeightCm, setName } from '../db/settings'
 import { sv } from '../i18n/sv'
 import { parseDecimal } from '../lib/format'
@@ -21,30 +22,24 @@ export function SetupScreen() {
   }
 
   return (
-    <main className="min-h-dvh pb-10">
-      <section className="px-4 pt-(--screen-top)">
-        <div className="hero-gradient rounded-[36px] px-4 py-12 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-white">{sv.setup.title}</h1>
-        </div>
-      </section>
-      <div className="mt-4 space-y-4 px-4">
-        <section className="space-y-4 rounded-[28px] bg-surface p-5 shadow-card">
-          <TextField label={sv.setup.nameLabel} value={name} onChange={setNameText} autoComplete="given-name" />
-          <DecimalField label={sv.setup.heightLabel} unit="cm" value={height} onChange={setHeight} invalid={!heightOk} />
-        </section>
-        <section className="rounded-[28px] bg-surface p-5 shadow-card">
-          <p className="mb-3 text-sm font-medium text-muted">{sv.setup.importLabel}</p>
-          <ImportCsv />
-        </section>
-        <button
-          type="button"
-          disabled={!canStart}
-          onClick={() => void start()}
-          className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-on-ink disabled:opacity-40"
-        >
-          {sv.setup.start}
-        </button>
+    <main className="space-y-7 px-4 pt-(--screen-top) pb-10">
+      <div className="hero-gradient rounded-[36px] px-4 py-12 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight text-white">{sv.setup.title}</h1>
       </div>
+      <Group label={sv.settings.profile}>
+        <ProfileRows name={name} onNameChange={setNameText} height={height} onHeightChange={setHeight} heightInvalid={!heightOk} />
+      </Group>
+      <Group label={sv.setup.importLabel}>
+        <ImportCsv />
+      </Group>
+      <button
+        type="button"
+        disabled={!canStart}
+        onClick={() => void start()}
+        className="w-full rounded-full bg-ink py-3 text-lg font-semibold text-on-ink disabled:opacity-40"
+      >
+        {sv.setup.start}
+      </button>
     </main>
   )
 }

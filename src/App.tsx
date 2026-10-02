@@ -32,7 +32,13 @@ function Screens() {
   useScrollPerScreen(route)
 
   if (!profile) return null
-  if (!profile.name) return <SetupScreen />
+  if (!profile.name) {
+    return (
+      <div className="mx-auto max-w-md">
+        <SetupScreen />
+      </div>
+    )
+  }
 
   return (
     <div className="relative mx-auto max-w-md">

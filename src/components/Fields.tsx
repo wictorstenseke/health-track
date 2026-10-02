@@ -3,31 +3,6 @@ import { useId } from 'react'
 const inputClass =
   'w-full rounded-2xl bg-fill px-4 py-3 text-base outline-none focus:ring-2 focus:ring-ember-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-400'
 
-export function TextField(props: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  onBlur?: () => void
-  autoComplete?: string
-}) {
-  const id = useId()
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-muted">
-        {props.label}
-      </label>
-      <input
-        id={id}
-        className={inputClass}
-        value={props.value}
-        autoComplete={props.autoComplete}
-        onChange={(e) => props.onChange(e.target.value)}
-        onBlur={props.onBlur}
-      />
-    </div>
-  )
-}
-
 /** Free-text decimal input; the caller parses with `parseDecimal` so "82,4" and "82.4" both work. */
 export function DecimalField(props: {
   label: string

@@ -68,7 +68,7 @@ Navigation: hash routes. The three tabs stay mounted, so switching is instant an
 
 ### Setup (first launch, when no `name`)
 
-One screen: Namn, Längd (cm), optional "Importera CSV". Button "Kom igång" → Hem. All editable later in Inställningar.
+One screen, in the grouped-list style of Inställningar: the title card, a **Profil** group with the same Namn and Längd rows as Inställningar (empty fields read `Obligatoriskt` / `Valfritt`), a **Har du gammal data?** group with the Importera CSV row, then the "Kom igång" pill → Hem, enabled once a name is typed. All editable later in Inställningar.
 
 ### Hem
 
@@ -111,7 +111,7 @@ iOS-style grouped list: a quiet group label over one card, rows split by hairlin
 
 - **Profil**: Namn, Längd (editable in place, value right-aligned, `cm` after it)
 - **Utseende**: `Mörkt läge` switch (iOS-style, ember when on, haptic tap). Off by default; doesn't follow the phone's setting.
-- **Data**: Importera CSV (row with chevron; the preview opens inside the card) · Exportera CSV with quiet text `Senaste export för 23 dagar sedan` under it
+- **Data**: Importera CSV (row with chevron; the result shows under it) · Exportera CSV with quiet text `Senaste export för 23 dagar sedan` under it
 - **Om appen**: Version · Sök efter uppdatering (status right; `Ny version finns` + ember `Uppdatera` when a build is waiting)
 - Radera all data: solid red button at the bottom → action sheet with two confirms
 
@@ -137,7 +137,7 @@ Multi-file select. Auto-detects:
 - **Own format**: `takenAt,metric,value`.
 - **Legacy per-year sheets** (Numbers export, e.g. `2024-År 2024 tracking.csv`): date in column 1; header `Vikt`/`Midja`/`Höft` → weight/waist/hip, other columns ignored. No recognised header → weight in column 2. Dates `YYYY-MM-DD` or `D/M` with the year taken from the file name. Values may carry `kg`/`cm`. Waist/hip values repeated from the row above are carried forward, not new measurements → skipped. Date-only rows get `takenAt` 12:00 local (avoids day shift).
 
-Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogiltiga`) → Importera. Rows identical to an existing entry (same metric + takenAt + value) are skipped, so re-import is idempotent. Invalid rows listed, not imported.
+Flow: pick files → imported straight away, no preview or confirm step → result under the row (`Hittade 143 rader (3 jan 2024 – 28 dec 2024)`, `143 importerade, 0 dubbletter hoppades över`, and an expandable `2 ogiltiga rader` list). Rows identical to an existing entry (same metric + takenAt + value) are skipped, so re-import is idempotent. Invalid rows listed, not imported.
 
 ## Look
 

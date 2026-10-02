@@ -4,6 +4,7 @@ import { Group, Row, rowClass } from '../components/GroupedList'
 import { HapticTap } from '../components/HapticTap'
 import { ChevronRightIcon } from '../components/icons'
 import { ImportCsv } from '../components/ImportCsv'
+import { ProfileRows } from '../components/ProfileRows'
 import { clearAllData } from '../db/entries'
 import { useAllEntries } from '../db/hooks'
 import { setHeightCm, setName, type Profile } from '../db/settings'
@@ -64,32 +65,15 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
       <h1 className="text-3xl font-semibold tracking-tight">{sv.settings.title}</h1>
 
       <Group label={sv.settings.profile}>
-        <Row>
-          <label htmlFor="settings-name">{sv.settings.name}</label>
-          <input
-            id="settings-name"
-            className="min-w-0 flex-1 bg-transparent text-right text-muted outline-none focus:text-ink"
-            value={name}
-            autoComplete="given-name"
-            onChange={(e) => setNameText(e.target.value)}
-            onBlur={saveName}
-          />
-        </Row>
-        <Row>
-          <label htmlFor="settings-height">{sv.settings.heightLabel}</label>
-          <span className="flex items-baseline gap-1 text-muted">
-            <input
-              id="settings-height"
-              inputMode="decimal"
-              className="w-16 bg-transparent text-right tabular-nums outline-none focus:text-ink aria-[invalid=true]:text-red-600 dark:aria-[invalid=true]:text-red-400"
-              value={height}
-              aria-invalid={heightInvalid ? true : undefined}
-              onChange={(e) => setHeight(e.target.value)}
-              onBlur={saveHeight}
-            />
-            cm
-          </span>
-        </Row>
+        <ProfileRows
+          name={name}
+          onNameChange={setNameText}
+          onNameBlur={saveName}
+          height={height}
+          onHeightChange={setHeight}
+          onHeightBlur={saveHeight}
+          heightInvalid={heightInvalid}
+        />
       </Group>
 
       <Group label={sv.settings.appearance}>
@@ -114,7 +98,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
       </Group>
 
       <Group label={sv.settings.data}>
-        <ImportCsv variant="row" />
+        <ImportCsv />
         <button type="button" disabled={exporting} onClick={() => void runExport()} className={`${rowClass} py-2.5 text-left disabled:opacity-40`}>
           <span>
             <span className="block">{sv.settings.exportCsv}</span>
