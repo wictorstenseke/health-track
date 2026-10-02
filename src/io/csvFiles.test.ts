@@ -33,7 +33,7 @@ describe('exportCsv', () => {
 
     expect(await done).toBe('shared')
     const file = share.mock.calls[0][0].files?.[0]
-    expect(file?.name).toBe('vagen-2026-10-01.csv')
+    expect(file?.name).toBe('veyin-2026-10-01.csv')
     expect(await file?.text()).toBe(toCsv(rows))
     expect((await getProfile()).lastExportAt).toBe(now)
   })

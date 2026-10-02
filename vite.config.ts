@@ -24,8 +24,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'Vågen',
-        short_name: 'Vågen',
+        name: 'Veyin',
+        short_name: 'Veyin',
         description: 'Vikt och mått, offline.',
         lang: 'sv',
         display: 'standalone',

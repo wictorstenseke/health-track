@@ -4,7 +4,8 @@ import { useSyncExternalStore } from 'react'
  * Dark mode: an on/off setting, kept in localStorage so the inline script in index.html can apply it before
  * the first paint (IndexedDB is async and would flash light). The theme lives on `<html data-theme="dark">`.
  */
-// Prefixed: every app on the origin (GitHub Pages, a shared dev port) shares localStorage.
+// Prefixed: every app on the origin (GitHub Pages, a shared dev port) shares localStorage. The prefix is the
+// app's first name, Vågen; renaming the key would reset the setting.
 const KEY = 'vagen-theme'
 const listeners = new Set<() => void>()
 

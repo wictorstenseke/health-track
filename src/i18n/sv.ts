@@ -1,7 +1,7 @@
 import type { MetricId } from '../lib/metrics'
 
 export const sv = {
-  appName: 'Vågen',
+  appName: 'Veyin',
   tabs: { home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
   metrics: { weight: 'Vikt', waist: 'Midja', hip: 'Höft' } satisfies Record<MetricId, string>,
   common: {
@@ -85,7 +85,7 @@ export const sv = {
   },
   errors: { failed: 'Något gick fel. Ladda om appen.', reload: 'Ladda om' },
   setup: {
-    title: 'Välkommen till Vågen',
+    title: 'Välkommen till Veyin',
     nameLabel: 'Vad heter du?',
     heightLabel: 'Längd (cm)',
     importLabel: 'Har du gammal data?',

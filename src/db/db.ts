@@ -17,6 +17,7 @@ export class VagenDb extends Dexie {
   declare settings: EntityTable<Setting, 'key'>
 
   constructor() {
+    // Named for the app's first name, Vågen; renaming it would leave the stored data behind.
     super('vagen')
     this.version(1).stores({
       entries: 'id, metricId, takenAt, [metricId+takenAt]',

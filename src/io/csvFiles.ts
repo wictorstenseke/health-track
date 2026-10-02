@@ -27,7 +27,7 @@ export async function readCsvFiles(files: File[]): Promise<ReadResult> {
  * async work (the DB read), so everything before the share call must be synchronous.
  */
 export async function exportCsv(entries: CsvRow[], now = Date.now()): Promise<'shared' | 'downloaded' | 'cancelled'> {
-  const filename = `vagen-${toLocalIso(now).slice(0, 10)}.csv`
+  const filename = `veyin-${toLocalIso(now).slice(0, 10)}.csv`
   const file = new File([toCsv(entries)], filename, { type: 'text/csv' })
 
   if (navigator.canShare?.({ files: [file] })) {
