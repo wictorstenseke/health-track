@@ -3,10 +3,10 @@ import { roundValue } from './metrics'
 export const DIAL_MIN = 60
 export const DIAL_MAX = 100
 export const DEFAULT_WEIGHT = 75
-/** Scale spacing in SVG units per kg. Tune on device. */
-export const UNITS_PER_KG = 32
+/** Scale spacing in SVG units per kg (8 per 0.1 kg tick). Tune on device. */
+export const UNITS_PER_KG = 80
 /** kg visible either side of the needle */
-export const HALF_SPAN_KG = 4.5
+export const HALF_SPAN_KG = 1.8
 
 export function clampDial(v: number): number {
   return Math.min(DIAL_MAX, Math.max(DIAL_MIN, v))
@@ -31,14 +31,14 @@ export interface Tick {
   offset: number
 }
 
-/** Ticks every 0.5 kg within the dial range: major (labelled) every 5 kg, mid every 1 kg. */
+/** Ticks every 0.1 kg within the dial range: major (labelled) every 1 kg, mid every 0.5 kg. */
 export function visibleTicks(center: number, halfSpanKg = HALF_SPAN_KG): Tick[] {
   const ticks: Tick[] = []
-  const from = Math.max(Math.ceil((center - halfSpanKg) * 2), DIAL_MIN * 2)
-  const to = Math.min(Math.floor((center + halfSpanKg) * 2), DIAL_MAX * 2)
+  const from = Math.max(Math.ceil((center - halfSpanKg) * 10), DIAL_MIN * 10)
+  const to = Math.min(Math.floor((center + halfSpanKg) * 10), DIAL_MAX * 10)
   for (let k = from; k <= to; k++) {
-    const value = k / 2
-    const kind: TickKind = k % 10 === 0 ? 'major' : k % 2 === 0 ? 'mid' : 'minor'
+    const value = k / 10
+    const kind: TickKind = k % 10 === 0 ? 'major' : k % 5 === 0 ? 'mid' : 'minor'
     ticks.push({ value, kind, offset: (value - center) * UNITS_PER_KG })
   }
   return ticks

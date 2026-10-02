@@ -167,7 +167,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
               y1={TICK_TOP}
               x2={x}
               y2={TICK_TOP + TICK_LENGTH[t.kind]}
-              style={{ stroke: t.kind === 'major' ? 'var(--color-ink)' : 'var(--color-faint)' }}
+              style={{ stroke: t.kind === 'major' ? 'var(--color-scale-major)' : 'var(--color-faint)' }}
               strokeWidth={t.kind === 'minor' ? 1.5 : 2}
               strokeLinecap="round"
             />
@@ -179,7 +179,7 @@ export function WeightDial({ value, onChange, bare = false }: WeightDialProps) {
                 dominantBaseline="middle"
                 fontSize={14}
                 fontWeight={500}
-                style={{ fill: 'var(--color-ink)' }}
+                style={{ fill: 'var(--color-scale-major)' }}
               >
                 {t.value}
               </text>

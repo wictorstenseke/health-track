@@ -24,14 +24,14 @@ describe('valueAfterDrag', () => {
 })
 
 describe('visibleTicks', () => {
-  it('lists half-kg ticks around the value with major every 5 kg', () => {
-    const ticks = visibleTicks(82.4)
-    expect(ticks[0].value).toBe(78)
-    expect(ticks.at(-1)?.value).toBe(86.5)
-    expect(ticks.filter((t) => t.kind === 'major').map((t) => t.value)).toEqual([80, 85])
-    expect(ticks.find((t) => t.value === 83)?.kind).toBe('mid')
-    expect(ticks.find((t) => t.value === 83.5)?.kind).toBe('minor')
-    expect(ticks.find((t) => t.value === 80)?.offset).toBeCloseTo(-2.4 * UNITS_PER_KG, 5)
+  it('lists 0.1 kg ticks around the value with major every 1 kg and mid every 0.5 kg', () => {
+    const ticks = visibleTicks(82.45)
+    expect(ticks[0].value).toBe(80.7)
+    expect(ticks.at(-1)?.value).toBe(84.2)
+    expect(ticks.filter((t) => t.kind === 'major').map((t) => t.value)).toEqual([81, 82, 83, 84])
+    expect(ticks.find((t) => t.value === 82.5)?.kind).toBe('mid')
+    expect(ticks.find((t) => t.value === 82.3)?.kind).toBe('minor')
+    expect(ticks.find((t) => t.value === 81)?.offset).toBeCloseTo(-1.45 * UNITS_PER_KG, 5)
   })
   it('never goes outside the dial range', () => {
     expect(visibleTicks(61)[0].value).toBe(60)

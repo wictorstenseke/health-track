@@ -27,6 +27,8 @@
   /* The scale's rim, a gradient from end to mid to end (WeightPicker, WeightDial). */
   --color-rim-end: #ffd2bd;
   --color-rim-mid: #ff9466;
+  /* The scale's whole-kg ticks and numbers: between ink and muted. */
+  --color-scale-major: #3f3f46;
   --shadow-card: 0 18px 40px -24px rgb(20 20 22 / 0.35), 0 2px 6px rgb(20 20 22 / 0.04);
 }
 
@@ -45,6 +47,7 @@
     --color-raised: #2c2c30;
     --color-rim-end: #5a2a19;
     --color-rim-mid: #d9612f;
+    --color-scale-major: #d4d4d8;
   }
   :root {
     /* Floating tab bar (TabBar.tsx), shared with anything that must sit above it. */
