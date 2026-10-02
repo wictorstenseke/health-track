@@ -16,7 +16,7 @@ const set = (next: UpdateStatus) => {
   listeners.forEach((l) => l())
 }
 
-const updateSW = registerSW({
+registerSW({
   onNeedRefresh: () => set('ready'),
   onRegisteredSW: (_url, r) => {
     registration = r
@@ -47,8 +47,17 @@ export async function checkForUpdate(): Promise<void> {
   }
 }
 
-/** Activates the waiting build and reloads into it. */
-export const installUpdate = () => updateSW(true)
+/**
+ * Activates the waiting build and reloads into it. Not the plugin's `updateSW`: it only reloads if a service
+ * worker controlled the page at launch, so on the first launch after install the button did nothing. Without a
+ * controller nothing waits either (the new build activates at once), so a plain reload is the update.
+ */
+export function installUpdate(): void {
+  const waiting = registration?.waiting
+  if (!waiting) return window.location.reload()
+  navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), { once: true })
+  waiting.postMessage({ type: 'SKIP_WAITING' })
+}
 
 export function useUpdateStatus(): UpdateStatus {
   return useSyncExternalStore(
