@@ -2,7 +2,7 @@ import type { MetricId } from '../lib/metrics'
 
 export const sv = {
   appName: 'Veyin',
-  tabs: { home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
+  tabs: { setup: 'Kom igång', home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
   metrics: { weight: 'Vikt', waist: 'Midja', hip: 'Höft' } satisfies Record<MetricId, string>,
   common: {
     save: 'Spara',
@@ -92,5 +92,8 @@ export const sv = {
     title: 'Välkommen till Veyin',
     importLabel: 'Har du gammal data?',
     start: 'Kom igång',
+    tryDemo: 'Kika runt med exempeldata',
+    tryDemoTail: 'innan du börjar',
+    demoNote: 'Du testar appen med exempeldata. Fyll i dina egna uppgifter för att börja på riktigt, då raderas exempeldatan.',
   },
 }

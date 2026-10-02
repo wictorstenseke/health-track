@@ -4,6 +4,8 @@ export interface Profile {
   name: string
   heightCm: number | null
   lastExportAt: number | null
+  /** Showing the example data from `startDemo` rather than the user's own. */
+  demo: boolean
 }
 
 export async function getProfile(): Promise<Profile> {
@@ -16,6 +18,7 @@ export async function getProfile(): Promise<Profile> {
     name: typeof name === 'string' ? name : '',
     heightCm: typeof heightCm === 'number' ? heightCm : null,
     lastExportAt: typeof lastExportAt === 'number' ? lastExportAt : null,
+    demo: get('demo') === 1,
   }
 }
 

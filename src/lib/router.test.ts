@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { APP_HISTORY_STATE, backTarget, parseHash, routeToHash, tabOf, type Route } from './router'
+import { APP_HISTORY_STATE, backTarget, parseHash, routeToHash, tabOf, tabsFor, type Route } from './router'
 
 describe('router', () => {
   it('parses known hashes', () => {
@@ -7,6 +7,7 @@ describe('router', () => {
     expect(parseHash('#/')).toEqual({ name: 'home' })
     expect(parseHash('#/matt')).toEqual({ name: 'measures' })
     expect(parseHash('#/installningar')).toEqual({ name: 'settings' })
+    expect(parseHash('#/start')).toEqual({ name: 'setup' })
     expect(parseHash('#/metric/waist')).toEqual({ name: 'metric', metricId: 'waist' })
   })
   it('falls back to home for unknown hashes', () => {
@@ -14,7 +15,7 @@ describe('router', () => {
     expect(parseHash('#/nope')).toEqual({ name: 'home' })
   })
   it('round-trips every route', () => {
-    const routes: Route[] = [{ name: 'home' }, { name: 'measures' }, { name: 'settings' }, { name: 'metric', metricId: 'weight' }]
+    const routes: Route[] = [{ name: 'setup' }, { name: 'home' }, { name: 'measures' }, { name: 'settings' }, { name: 'metric', metricId: 'weight' }]
     for (const r of routes) expect(parseHash(routeToHash(r))).toEqual(r)
   })
   it('puts each detail screen under the tab whose card opens it', () => {
@@ -24,6 +25,14 @@ describe('router', () => {
     expect(tabOf({ name: 'metric', metricId: 'weight' })).toBe('home')
     expect(tabOf({ name: 'metric', metricId: 'waist' })).toBe('measures')
     expect(tabOf({ name: 'metric', metricId: 'hip' })).toBe('measures')
+  })
+  it('adds the setup tab first only in demo mode', () => {
+    expect(tabsFor(false)).toEqual(['home', 'measures', 'settings'])
+    expect(tabsFor(true)).toEqual(['setup', 'home', 'measures', 'settings'])
+  })
+  it('shows Hem for the setup route outside demo mode', () => {
+    expect(tabOf({ name: 'setup' }, true)).toBe('setup')
+    expect(tabOf({ name: 'setup' }, false)).toBe('home')
   })
   it('goes back through history only from entries the app pushed itself', () => {
     expect(backTarget(APP_HISTORY_STATE, { name: 'metric', metricId: 'waist' })).toBe('history')

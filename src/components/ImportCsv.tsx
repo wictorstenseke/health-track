@@ -14,8 +14,11 @@ interface ImportResult {
   errors: FileCsvError[]
 }
 
-/** A list row that imports the picked CSV files straight away (duplicates are skipped), then says what it found. */
-export function ImportCsv() {
+/**
+ * A list row that imports the picked CSV files straight away (duplicates are skipped), then says what it found.
+ * `onBeforeImport` runs once files are picked, before they are read (setup in demo mode clears the example data).
+ */
+export function ImportCsv({ onBeforeImport }: { onBeforeImport?: () => Promise<void> }) {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<ImportResult | null>(null)
 
@@ -26,6 +29,7 @@ export function ImportCsv() {
     setBusy(true)
     setResult(null)
     try {
+      await onBeforeImport?.()
       const { rows, errors } = await readCsvFiles(files)
       const summary = summarize(rows)
       const { added, skipped } = summary ? await importRows(rows) : { added: 0, skipped: 0 }

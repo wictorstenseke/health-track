@@ -1,7 +1,7 @@
 import { Dexie, type EntityTable } from 'dexie'
 import type { Entry } from '../lib/metrics'
 
-export type SettingKey = 'name' | 'heightCm' | 'lastExportAt'
+export type SettingKey = 'name' | 'heightCm' | 'lastExportAt' | 'demo'
 
 export interface Setting {
   key: SettingKey

@@ -2,7 +2,7 @@ import { memo, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { ErrorToast } from './components/ErrorToast'
 import { TabBar } from './components/TabBar'
 import { EntriesProvider, useProfile } from './db/hooks'
-import { routeToHash, tabOf, useRoute, type Route } from './lib/router'
+import { routeToHash, tabOf, tabsFor, useRoute, type Route } from './lib/router'
 import { DetailScreen } from './screens/DetailScreen'
 import { HomeScreen } from './screens/HomeScreen'
 import { MeasuresScreen } from './screens/MeasuresScreen'
@@ -32,27 +32,33 @@ function Screens() {
   useScrollPerScreen(route)
 
   if (!profile) return null
-  if (!profile.name) {
-    return (
-      <div className="mx-auto max-w-md">
-        <SetupScreen />
-      </div>
-    )
-  }
+  const setupOnly = !profile.name
+  const tab = tabOf(route, profile.demo)
+  const isDetail = route.name === 'metric'
 
   return (
     <div className="relative mx-auto max-w-md">
-      <TabPanel shown={route.name === 'home'}>
-        <Home name={profile.name} />
-      </TabPanel>
-      <TabPanel shown={route.name === 'measures'}>
-        <Measures />
-      </TabPanel>
-      <TabPanel shown={route.name === 'settings'}>
-        <Settings profile={profile} />
-      </TabPanel>
-      {route.name === 'metric' && <DetailScreen metricId={route.metricId} heightCm={profile.heightCm} />}
-      <TabBar active={tabOf(route)} />
+      {/* Setup keeps this first slot both alone and as the demo's tab, so ending the demo there keeps what was typed. */}
+      {(setupOnly || profile.demo) && (
+        <TabPanel shown={setupOnly || (tab === 'setup' && !isDetail)}>
+          <SetupScreen demo={profile.demo} />
+        </TabPanel>
+      )}
+      {!setupOnly && (
+        <>
+          <TabPanel shown={tab === 'home' && !isDetail}>
+            <Home name={profile.name} />
+          </TabPanel>
+          <TabPanel shown={tab === 'measures' && !isDetail}>
+            <Measures />
+          </TabPanel>
+          <TabPanel shown={tab === 'settings' && !isDetail}>
+            <Settings profile={profile} />
+          </TabPanel>
+          {isDetail && <DetailScreen metricId={route.metricId} heightCm={profile.heightCm} />}
+          <TabBar tabs={tabsFor(profile.demo)} active={tab} />
+        </>
+      )}
     </div>
   )
 }

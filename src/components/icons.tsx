@@ -16,6 +16,13 @@ export const HomeIcon = () => (
   </svg>
 )
 
+export const UserIcon = () => (
+  <svg {...base}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
+  </svg>
+)
+
 export const RulerIcon = () => (
   <svg {...base}>
     <rect x="2.5" y="7" width="19" height="10" rx="2" />

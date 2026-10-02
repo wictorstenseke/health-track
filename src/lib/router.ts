@@ -1,10 +1,11 @@
 import { useSyncExternalStore } from 'react'
 import { isMetricId, type MetricId } from './metrics'
 
-export type Route = { name: 'home' } | { name: 'measures' } | { name: 'settings' } | { name: 'metric'; metricId: MetricId }
+export type Route = { name: 'setup' } | { name: 'home' } | { name: 'measures' } | { name: 'settings' } | { name: 'metric'; metricId: MetricId }
 
 export function parseHash(hash: string): Route {
   const path = hash.replace(/^#/, '')
+  if (path === '/start') return { name: 'setup' }
   if (path === '/matt') return { name: 'measures' }
   if (path === '/installningar') return { name: 'settings' }
   const metric = path.match(/^\/metric\/(\w+)$/)
@@ -14,6 +15,8 @@ export function parseHash(hash: string): Route {
 
 export function routeToHash(route: Route): string {
   switch (route.name) {
+    case 'setup':
+      return '#/start'
     case 'home':
       return '#/'
     case 'measures':
@@ -25,10 +28,19 @@ export function routeToHash(route: Route): string {
   }
 }
 
-export type TabName = 'home' | 'measures' | 'settings'
+export type TabName = 'setup' | 'home' | 'measures' | 'settings'
 
-/** The tab a route lives under: a detail screen belongs to the tab whose card opens it. */
-export function tabOf(route: Route): TabName {
+/** In demo mode the setup screen gets a tab of its own, first, for entering real data. */
+export function tabsFor(demo: boolean): TabName[] {
+  return demo ? ['setup', 'home', 'measures', 'settings'] : ['home', 'measures', 'settings']
+}
+
+/**
+ * The tab a route lives under: a detail screen belongs to the tab whose card opens it.
+ * Outside demo mode there is no setup tab, so its route shows Hem.
+ */
+export function tabOf(route: Route, demo = false): TabName {
+  if (route.name === 'setup') return demo ? 'setup' : 'home'
   if (route.name !== 'metric') return route.name
   return route.metricId === 'weight' ? 'home' : 'measures'
 }
