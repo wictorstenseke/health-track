@@ -71,13 +71,13 @@ export function BottomSheet({ title, onClose, children }: { title: string; onClo
         style={{ translate: `0 ${offset}px` }}
       >
         <div
-          className="-mx-4 cursor-grab touch-none px-4 pt-3 pb-2 select-none"
+          className="-mx-4 cursor-grab touch-none px-4 pt-5 pb-2 select-none"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
-          <div className="mx-auto mb-3 h-1.5 w-17.5 rounded-full bg-faint/30" />
+          <div className="mx-auto mb-5 h-1.5 w-17.5 rounded-full bg-faint/30" />
           <h2 className="px-10 text-center text-lg font-semibold">{title}</h2>
         </div>
         {/* Same inset from the top as from the right edge. */}
