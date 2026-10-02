@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * Dark mode: an on/off setting, kept in localStorage so the inline script in index.html can apply it before
+ * Dark mode: an on/off setting, on by default, kept in localStorage so the inline script in index.html can apply it before
  * the first paint (IndexedDB is async and would flash light). The theme lives on `<html data-theme="dark">`.
  */
 // Prefixed: every app on the origin (GitHub Pages, a shared dev port) shares localStorage. The prefix is the
@@ -21,8 +21,7 @@ export function setDark(on: boolean): void {
   const canvas = getComputedStyle(root).getPropertyValue('--color-canvas').trim()
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', canvas)
   try {
-    if (on) localStorage.setItem(KEY, 'dark')
-    else localStorage.removeItem(KEY)
+    localStorage.setItem(KEY, on ? 'dark' : 'light')
   } catch {
     // Storage blocked: the theme still applies until the app reloads.
   }
