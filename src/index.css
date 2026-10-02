@@ -31,7 +31,7 @@
   /* Soft charcoal; native controls (date picker, keyboard) go dark too. */
   [data-theme="dark"] {
     color-scheme: dark;
-    --color-canvas: #121214;
+    --color-canvas: #1d1b1a;
     --color-surface: #1e1e21;
     --color-ink: #f2f2f4;
     --color-on-ink: #141416;
@@ -65,6 +65,23 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
+  }
+  /* Dark page: a warm sheen over charcoal, glowing ember from the bottom right. On a fixed layer, since iOS
+     ignores background-attachment: fixed; the body goes clear so the layer shows through. */
+  [data-theme="dark"] body {
+    background: none;
+  }
+  [data-theme="dark"] body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(80% 55% at 0% 0%, rgb(255 180 110 / 0.1) 0%, rgb(255 180 110 / 0) 100%),
+      radial-gradient(55% 40% at 100% 100%, rgb(255 140 40 / 0.14) 0%, rgb(255 140 40 / 0) 100%),
+      radial-gradient(130% 80% at 100% 110%, rgb(255 70 10 / 0.28) 0%, rgb(255 70 10 / 0) 60%),
+      linear-gradient(165deg, #1d1b1a 0%, #141312 45%, #0d0c0b 100%);
   }
   /* iOS zooms into inputs with font-size below 16px */
   input {
