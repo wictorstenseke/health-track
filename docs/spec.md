@@ -150,7 +150,7 @@ Flow: parse → preview (`Hittade 143 rader (3 jan 2024 – 28 dec 2024), 2 ogil
 ## PWA
 
 - Manifest: name/short_name `Vågen`, `display: standalone`, theme/background colours from palette.
-- Icon: orange→red gradient square with white dial/needle glyph. SVG source → PNG 180 (apple-touch), 192, 512, maskable 512.
+- Icon: white 3D V (`scripts/icon-logo.png`) on a near-black gradient with an ember glow from the bottom right. `npm run icons` (`scripts/generate-icons.mjs`) draws PNG 64, 180 (apple-touch), 192, 512, maskable 512 (smaller logo) and a rounded-square favicon.ico (16/32/48).
 - Precache app shell + fonts. The app checks for a new build on launch and on returning to the foreground; installing it is a tap in Inställningar (`Uppdatera`), never an automatic reload. IndexedDB untouched by updates.
 
 ## Testing
