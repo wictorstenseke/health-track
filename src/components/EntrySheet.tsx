@@ -39,15 +39,15 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
       <div className="my-5 flex justify-center">
         <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
       </div>
-      <div className="flex gap-3">
-        <button type="button" onClick={() => void remove()} className="flex-1 rounded-full bg-red-500/10 py-4 font-semibold text-red-600 dark:text-red-400">
+      <div className="flex justify-center gap-3">
+        <button type="button" onClick={() => void remove()} className="h-10 rounded-full bg-red-500/10 px-5 text-base font-semibold text-red-600 dark:text-red-400">
           {sv.common.delete}
         </button>
         <button
           type="button"
           disabled={!valid}
           onClick={() => void save()}
-          className="flex-[2] rounded-full bg-ink py-4 font-semibold text-on-ink disabled:opacity-40"
+          className="h-10 rounded-full bg-ink px-5 text-base font-semibold text-on-ink disabled:opacity-40"
         >
           {sv.common.save}
         </button>

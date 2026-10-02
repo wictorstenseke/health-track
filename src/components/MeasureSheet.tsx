@@ -48,7 +48,7 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
         type="button"
         disabled={!canSave}
         onClick={() => void save()}
-        className="w-full rounded-full bg-ink py-4 font-semibold text-on-ink disabled:opacity-40"
+        className="mx-auto block h-10 rounded-full bg-ink px-5 text-base font-semibold text-on-ink disabled:opacity-40"
       >
         {sv.common.save}
       </button>
