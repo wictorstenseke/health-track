@@ -8,7 +8,7 @@ import { isValidValue, METRIC_NAME_MAX, nameProblem, unitOf, type MetricId } fro
 import { BottomSheet } from './BottomSheet'
 import { DateTimeField } from './DateTimeField'
 import { DecimalField, TextField } from './Fields'
-import { PlusIcon } from './icons'
+import { PlusLabel } from './PlusLabel'
 
 /** Names a new measurement type. */
 function NewMetricForm({ onSaved, onCancel }: { onSaved: () => void; onCancel: () => void }) {
@@ -81,7 +81,7 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <BottomSheet title={creating ? sv.measures.newTypeTitle : sv.measures.formTitle} onClose={onClose}>
+    <BottomSheet title={creating ? sv.measures.newType : sv.measures.formTitle} onClose={onClose}>
       {creating ? (
         <NewMetricForm onSaved={() => setCreating(false)} onCancel={() => (metrics.length === 0 ? onClose() : setCreating(false))} />
       ) : (
@@ -99,9 +99,8 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
               />
             ))}
           </div>
-          <button type="button" onClick={() => setCreating(true)} className="mt-4 flex items-center gap-2 font-medium text-ember-600 dark:text-ember-400">
-            <PlusIcon />
-            {sv.measures.newType}
+          <button type="button" onClick={() => setCreating(true)} className="mt-4 block">
+            <PlusLabel>{sv.measures.newType}</PlusLabel>
           </button>
           <div className="my-5 flex justify-center">
             <DateTimeField value={takenAt} onChange={setTakenAt} />

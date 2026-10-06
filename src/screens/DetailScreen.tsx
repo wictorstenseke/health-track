@@ -195,9 +195,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         <button
           type="button"
           onClick={() => setConfirmingDelete(true)}
-          className="mx-auto mt-10 block h-10 rounded-full bg-red-600 px-5 text-base font-semibold text-white"
+          className="mx-auto mt-10 block h-10 max-w-full truncate rounded-full bg-red-600 px-5 text-base font-semibold text-white"
         >
-          {sv.detail.deleteMetric}
+          {sv.detail.deleteMetric(name)}
         </button>
       )}
 
@@ -215,7 +215,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         />
       )}
       {confirmingDelete && (
-        <BottomSheet title={sv.detail.deleteMetric} onClose={() => setConfirmingDelete(false)}>
+        <BottomSheet title={sv.detail.deleteMetric(name)} onClose={() => setConfirmingDelete(false)}>
           <p className="mb-5 px-2 text-center text-muted">{sv.detail.confirmDeleteMetric(name, entries.length)}</p>
           <div className="flex justify-center gap-3">
             <button type="button" onClick={() => setConfirmingDelete(false)} className="h-10 rounded-full bg-fill px-5 text-base font-semibold">

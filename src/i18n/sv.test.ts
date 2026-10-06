@@ -7,6 +7,9 @@ describe('sv', () => {
     expect(sv.detail.confirmDeleteMetric('Bröst', 1)).toBe('Bröst och dess 1 mätning raderas. Det går inte att ångra.')
     expect(sv.detail.confirmDeleteMetric('Bröst', 0)).toBe('Bröst raderas.')
   })
+  it('names the type on its delete button', () => {
+    expect(sv.detail.deleteMetric('Bröst')).toBe('Radera Bröst')
+  })
   it('counts entries', () => {
     expect(sv.detail.count(1)).toBe('1 mätning')
     expect(sv.detail.count(3)).toBe('3 mätningar')

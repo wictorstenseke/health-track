@@ -40,7 +40,7 @@ export const sv = {
     perYear: 'Per år',
     count: countEntries,
     empty: 'Inga mätningar än',
-    deleteMetric: 'Radera mått',
+    deleteMetric: (name: string) => `Radera ${name}`,
     confirmDeleteMetric: (name: string, entries: number) =>
       entries === 0 ? `${name} raderas.` : `${name} och dess ${countEntries(entries)} raderas. Det går inte att ångra.`,
   },
@@ -51,8 +51,7 @@ export const sv = {
     newMeasurement: 'Ny mätning',
     circumference: 'Omkrets',
     formTitle: 'Nya mått',
-    newType: 'Skapa nytt mått',
-    newTypeTitle: 'Nytt mått',
+    newType: 'Ny kategori',
     name: 'Namn',
     nameTaken: 'Finns redan',
     thisYear: (delta: string) => `${delta} i år`,

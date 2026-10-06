@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Group, rowClass } from '../components/GroupedList'
-import { ChevronRightIcon, PlusIcon } from '../components/icons'
+import { ChevronRightIcon } from '../components/icons'
 import { MeasureSheet } from '../components/MeasureSheet'
+import { PlusLabel } from '../components/PlusLabel'
 import { Sparkline } from '../components/Sparkline'
 import { useEntries, useMetrics } from '../db/hooks'
 import { sv } from '../i18n/sv'
@@ -45,13 +46,8 @@ export function MeasuresScreen() {
           {metrics.map((metric) => (
             <MetricRow key={metric.id} metric={metric} />
           ))}
-          <button
-            type="button"
-            onClick={() => setMeasuring(true)}
-            className={`${rowClass} justify-start gap-2 font-medium text-ember-600 dark:text-ember-400`}
-          >
-            <PlusIcon />
-            {sv.measures.newMeasurement}
+          <button type="button" onClick={() => setMeasuring(true)} className={`${rowClass} justify-start`}>
+            <PlusLabel>{sv.measures.newMeasurement}</PlusLabel>
           </button>
         </Group>
       </div>

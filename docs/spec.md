@@ -104,14 +104,14 @@ Same component for all metrics:
 - **Entry list**: all entries, grouped by month, newest first: `ons 30 sep 07:30 · 82,4 kg · −0,3` (time shown since multiple per day are allowed; delta vs previous entry).
 - Tap row → **bottom sheet**: value editor (dial for weight, number input for cm), date-time picker, Spara, Radera.
 - Delete → entry removed + **Ångra** toast (5 s) that restores it.
-- Not for weight: a red **Radera mått** button at the bottom → one confirm sheet (`Bröst och dess 14 mätningar raderas. Det går inte att ångra.`) → back to Mått.
+- Not for weight: a red button named after the type (**Radera Bröst**) at the bottom → one confirm sheet with the same title (`Bröst och dess 14 mätningar raderas. Det går inte att ångra.`) → back to Mått.
 - A route to an id that is neither `weight` nor an existing type shows the Mått tab.
 
 ### Mått
 
 - Grouped list like Inställningar, group `Omkrets`: one row per measurement type, A–Ö (Swedish order) — name, and under it the change since the first entry this year with its unit (`−3,5 cm i år`, shown with two or more entries); current-year sparkline, latest value (`–` when there is none) and chevron right. Tap → detail screen.
 - Last row **+ Ny mätning** (ember) → batch form: one decimal input per type (scrolling inside the sheet when there are many) + date-time (default now). Saves only filled fields, all with same `takenAt`.
-- **Skapa nytt mått** in that sheet swaps it to a name view (`Namn`, `Avbryt`, `Spara`; `Finns redan` for a taken or reserved name). Saving creates the type and returns to the fields, which keep what was typed. With no types the sheet opens on the name view.
+- **Ny kategori** in that sheet swaps it to a name view with the same title (`Namn`, `Avbryt`, `Spara`; `Finns redan` for a taken or reserved name). Saving creates the type and returns to the fields, which keep what was typed. With no types the sheet opens on the name view.
 
 ### Inställningar
 
