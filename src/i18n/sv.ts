@@ -1,3 +1,5 @@
+const countEntries = (n: number) => (n === 1 ? '1 mätning' : `${n} mätningar`)
+
 export const sv = {
   appName: 'Veyin',
   tabs: { setup: 'Kom igång', home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
@@ -36,8 +38,11 @@ export const sv = {
     entries: 'Alla mätningar',
     overview: 'Översikt',
     perYear: 'Per år',
-    count: (n: number) => (n === 1 ? '1 mätning' : `${n} mätningar`),
+    count: countEntries,
     empty: 'Inga mätningar än',
+    deleteMetric: 'Radera mått',
+    confirmDeleteMetric: (name: string, entries: number) =>
+      entries === 0 ? `${name} raderas.` : `${name} och dess ${countEntries(entries)} raderas. Det går inte att ångra.`,
   },
   sheet: { title: 'Ändra mätning', when: 'Tidpunkt' },
   toast: { deleted: 'Mätning raderad', undo: 'Ångra' },

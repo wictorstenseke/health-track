@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { BottomSheet } from '../components/BottomSheet'
 import { EntrySheet } from '../components/EntrySheet'
 import { Group, Row, rowClass } from '../components/GroupedList'
 import { ChevronDownIcon, ChevronLeftIcon } from '../components/icons'
@@ -6,6 +7,7 @@ import { UndoToast } from '../components/UndoToast'
 import { yearColor, YearChart } from '../components/YearChart'
 import { restoreEntry } from '../db/entries'
 import { useEntries, useMetricName } from '../db/hooks'
+import { deleteMetric } from '../db/metrics'
 import { sv } from '../i18n/sv'
 import { formatDate, formatDelta, formatNumber, formatRowDate, formatTime, formatValue } from '../lib/format'
 import { unitOf, WEIGHT_ID, type Entry, type MetricId } from '../lib/metrics'
@@ -22,6 +24,16 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   const [editing, setEditing] = useState<Entry | null>(null)
   const [undo, setUndo] = useState<Entry | null>(null)
   const dismissUndo = useCallback(() => setUndo(null), [])
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const removeMetric = async () => {
+    // A second tap would go back twice, out of the app.
+    if (deleting) return
+    setDeleting(true)
+    await deleteMetric(metricId)
+    // The type is gone, so this screen has already given way to Mått; this takes the route back there as well.
+    goBack()
+  }
   const dark = useDark()
 
   const unit = unitOf(metricId)
@@ -179,6 +191,16 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         </>
       )}
 
+      {metricId !== WEIGHT_ID && (
+        <button
+          type="button"
+          onClick={() => setConfirmingDelete(true)}
+          className="mx-auto mt-10 block h-10 rounded-full bg-red-600 px-5 text-base font-semibold text-white"
+        >
+          {sv.detail.deleteMetric}
+        </button>
+      )}
+
       {editing && <EntrySheet entry={editing} onClose={() => setEditing(null)} onDeleted={setUndo} />}
       {undo && (
         <UndoToast
@@ -191,6 +213,24 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
           }}
           onDismiss={dismissUndo}
         />
+      )}
+      {confirmingDelete && (
+        <BottomSheet title={sv.detail.deleteMetric} onClose={() => setConfirmingDelete(false)}>
+          <p className="mb-5 px-2 text-center text-muted">{sv.detail.confirmDeleteMetric(name, entries.length)}</p>
+          <div className="flex justify-center gap-3">
+            <button type="button" onClick={() => setConfirmingDelete(false)} className="h-10 rounded-full bg-fill px-5 text-base font-semibold">
+              {sv.common.cancel}
+            </button>
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={() => void removeMetric()}
+              className="h-10 rounded-full bg-red-600 px-5 text-base font-semibold text-white disabled:opacity-40"
+            >
+              {sv.common.delete}
+            </button>
+          </div>
+        </BottomSheet>
       )}
     </main>
   )
