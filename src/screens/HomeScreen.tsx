@@ -3,7 +3,7 @@ import { DateField, dateLabel } from '../components/DateField'
 import { HapticTap } from '../components/HapticTap'
 import { CalendarIcon } from '../components/icons'
 import { WeightScale } from '../components/WeightPicker'
-import { YearChart, type ChartMark } from '../components/YearChart'
+import { YearChart, YearPillDot, yearPillClass, type ChartMark } from '../components/YearChart'
 import { saveWeightForDay } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
@@ -14,6 +14,7 @@ import { formatDeltaValue } from '../lib/format'
 import type { Entry } from '../lib/metrics'
 import { navigate } from '../lib/router'
 import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
+import { useDark } from '../lib/theme'
 
 const SAVED_MS = 1500
 
@@ -21,23 +22,45 @@ const SAVED_MS = 1500
 const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; mark?: ChartMark }) {
   const year = new Date().getFullYear()
   const series = yearSeries(entries, [year, year - 1, year - 2])
+  const [hiddenYears, setHiddenYears] = useState<number[]>([])
+  const toggleYear = (y: number) => setHiddenYears((h) => (h.includes(y) ? h.filter((x) => x !== y) : [...h, y]))
   const stats = yearStats(entries, year)
+  const dark = useDark()
   return (
-    <button
-      type="button"
-      onClick={() => navigate({ name: 'metric', metricId: 'weight' })}
-      className="block w-full rounded-[28px] bg-surface p-4 pb-2 text-left shadow-card"
-    >
-      <div className="flex items-baseline justify-between px-1">
-        <span className="text-lg font-semibold">{year}</span>
-        {stats && stats.count >= 2 && <span className="text-lg font-semibold tabular-nums">{formatDeltaValue(stats.change, 'kg')}</span>}
+    <div className="relative rounded-[28px] bg-surface p-4 pb-2 shadow-card">
+      {/* The whole card opens the detail screen. It lies under the content, so the year pills can be buttons of their own. */}
+      <button
+        type="button"
+        onClick={() => navigate({ name: 'metric', metricId: 'weight' })}
+        aria-label={sv.metrics.weight}
+        className="absolute inset-0 rounded-[28px]"
+      />
+      <div className="pointer-events-none relative">
+        <div className="flex items-center justify-between gap-2">
+          {/* The years the chart draws, newest first; a tap hides or shows that year's line. */}
+          <div className="pointer-events-auto flex gap-2">
+            {series.map((s) => (
+              <button
+                key={s.year}
+                type="button"
+                onClick={() => toggleYear(s.year)}
+                aria-pressed={!hiddenYears.includes(s.year)}
+                className={`${yearPillClass} aria-[pressed=false]:opacity-40`}
+              >
+                <YearPillDot year={s.year} dark={dark} />
+                {s.year}
+              </button>
+            ))}
+          </div>
+          {stats && stats.count >= 2 && <span className="pr-1 text-lg font-semibold tabular-nums">{formatDeltaValue(stats.change, 'kg')}</span>}
+        </div>
+        {series.length > 0 ? (
+          <YearChart series={series.filter((s) => !hiddenYears.includes(s.year))} height={120} variant="card" mark={mark} />
+        ) : (
+          <p className="py-10 text-center text-sm text-faint">{sv.common.noData}</p>
+        )}
       </div>
-      {series.length > 0 ? (
-        <YearChart series={series} height={120} variant="card" mark={mark} />
-      ) : (
-        <p className="py-10 text-center text-sm text-faint">{sv.common.noData}</p>
-      )}
-    </button>
+    </div>
   )
 })
 

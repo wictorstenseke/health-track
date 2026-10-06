@@ -4,7 +4,7 @@ import { EntrySheet } from '../components/EntrySheet'
 import { Group, Row, rowClass } from '../components/GroupedList'
 import { ChevronDownIcon, ChevronLeftIcon } from '../components/icons'
 import { UndoToast } from '../components/UndoToast'
-import { yearColor, YearChart } from '../components/YearChart'
+import { yearColor, YearChart, YearPillDot, yearPillClass } from '../components/YearChart'
 import { restoreEntry } from '../db/entries'
 import { useEntries, useMetricName } from '../db/hooks'
 import { deleteMetric } from '../db/metrics'
@@ -75,9 +75,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
                   type="button"
                   onClick={() => toggleYear(y)}
                   aria-pressed={!hiddenYears.includes(y)}
-                  className="flex items-center gap-1.5 rounded-full bg-fill px-3 py-1 text-sm font-medium aria-[pressed=false]:opacity-40"
+                  className={`${yearPillClass} aria-[pressed=false]:opacity-40`}
                 >
-                  <span className="size-2.5 rounded-full" style={{ background: yearColor(y, dark) }} />
+                  <YearPillDot year={y} dark={dark} />
                   {y}
                 </button>
               ))}

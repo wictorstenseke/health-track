@@ -11,6 +11,9 @@ import { unitOf, type Metric } from '../lib/metrics'
 import { navigate } from '../lib/router'
 import { latest, pointsInYear, yearStats } from '../lib/stats'
 
+/** Like `rowClass`, but in three columns: equal sides keep the graph in the middle of the row whatever the name's length. */
+const metricRowClass = 'grid min-h-13 w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-3 text-left'
+
 function MetricRow({ metric }: { metric: Metric }) {
   const entries = useEntries(metric.id)
   const year = new Date().getFullYear()
@@ -18,15 +21,15 @@ function MetricRow({ metric }: { metric: Metric }) {
   const stats = yearStats(entries, year)
   const unit = unitOf(metric.id)
   return (
-    <button type="button" onClick={() => navigate({ name: 'metric', metricId: metric.id })} className={`${rowClass} py-3 text-left`}>
+    <button type="button" onClick={() => navigate({ name: 'metric', metricId: metric.id })} className={metricRowClass}>
       {/* min-w-0 lets a long name truncate instead of pushing the value off the row. */}
       <span className="min-w-0">
         <span className="block truncate">{metric.name}</span>
-        {stats && stats.count >= 2 && <span className="block text-sm text-muted">{sv.measures.thisYear(formatDeltaValue(stats.change, unit))}</span>}
+        {stats && stats.count >= 2 && <span className="block truncate text-sm text-muted">{sv.measures.thisYear(formatDeltaValue(stats.change, unit))}</span>}
       </span>
-      <span className="flex shrink-0 items-center gap-3">
-        <Sparkline values={pointsInYear(entries, year).map((p) => p.value)} />
-        <span className="min-w-16 text-right font-semibold tabular-nums">{last ? formatValue(last.value, unit) : '–'}</span>
+      <Sparkline values={pointsInYear(entries, year).map((p) => p.value)} />
+      <span className="flex items-center justify-end gap-3">
+        <span className="font-semibold tabular-nums">{last ? formatValue(last.value, unit) : '–'}</span>
         <span className="text-faint">
           <ChevronRightIcon />
         </span>
