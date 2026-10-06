@@ -41,15 +41,15 @@ export function demoRows(now: number): CsvRow[] {
     if (random() < 0.5) {
       const at = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 6, 30 + Math.floor(random() * 120)).getTime()
       const weight = 88 - 7 * progress + 1.4 * christmas + 0.8 * summer + (random() + random() - 1) * 0.6
-      rows.push({ metricId: 'weight', takenAt: at, value: roundValue(weight) })
+      rows.push({ metric: 'weight', takenAt: at, value: roundValue(weight) })
     }
 
     if (day === nextMeasure) {
       const at = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 7, Math.floor(random() * 60)).getTime()
       // A tape measure reads in half centimetres.
       const half = (v: number) => roundValue(Math.round(v * 2) / 2)
-      rows.push({ metricId: 'waist', takenAt: at, value: half(97 - 6 * progress + 1.5 * christmas + (random() - 0.5)) })
-      rows.push({ metricId: 'hip', takenAt: at, value: half(105 - 3 * progress + 0.8 * christmas + (random() - 0.5)) })
+      rows.push({ metric: 'waist', takenAt: at, value: half(97 - 6 * progress + 1.5 * christmas + (random() - 0.5)) })
+      rows.push({ metric: 'hip', takenAt: at, value: half(105 - 3 * progress + 0.8 * christmas + (random() - 0.5)) })
       nextMeasure += 24 + Math.floor(random() * 10)
     }
   }

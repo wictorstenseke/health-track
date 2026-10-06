@@ -1,7 +1,7 @@
 import { Dexie } from 'dexie'
 import type { CsvRow } from '../lib/csv'
 import { newId } from '../lib/id'
-import { defaultMetrics, roundValue, type Entry, type MetricId } from '../lib/metrics'
+import { defaultMetrics, resolveLabel, roundValue, type Entry, type Metric, type MetricId } from '../lib/metrics'
 import { latestOnDay } from '../lib/stats'
 import { db } from './db'
 
@@ -63,18 +63,31 @@ export async function getAllEntries(): Promise<Entry[]> {
 const identity = (e: { metricId: string; takenAt: number; value: number }) =>
   `${e.metricId}|${Math.floor(e.takenAt / 60_000)}|${roundValue(e.value)}`
 
-/** Adds CSV rows, skipping any row identical to an existing entry (or an earlier row), so re-import is safe. */
+/**
+ * Adds CSV rows, skipping any row identical to an existing entry (or an earlier row), so re-import is safe.
+ * A row names its metric by a label; a type that isn't stored yet is created along the way.
+ */
 export async function importRows(rows: CsvRow[]): Promise<{ added: number; skipped: number }> {
-  return db.transaction('rw', db.entries, async () => {
+  return db.transaction('rw', db.entries, db.metrics, async () => {
+    const metrics = await db.metrics.toArray()
+    const created: Metric[] = []
     const seen = new Set((await db.entries.toArray()).map(identity))
     const now = Date.now()
     const toAdd: Entry[] = []
     for (const row of rows) {
-      const key = identity(row)
+      const resolved = resolveLabel(row.metric, metrics)
+      if (resolved.create !== undefined) {
+        const metric: Metric = { id: resolved.id, name: resolved.create, createdAt: now }
+        created.push(metric)
+        // Into the list at once, so the next row with this label finds it instead of creating it again.
+        metrics.push(metric)
+      }
+      const key = identity({ metricId: resolved.id, takenAt: row.takenAt, value: row.value })
       if (seen.has(key)) continue
       seen.add(key)
-      toAdd.push(makeEntry(row.metricId, row.value, row.takenAt, now))
+      toAdd.push(makeEntry(resolved.id, row.value, row.takenAt, now))
     }
+    await db.metrics.bulkAdd(created)
     await db.entries.bulkAdd(toAdd)
     return { added: toAdd.length, skipped: rows.length - toAdd.length }
   })

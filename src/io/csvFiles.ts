@@ -23,12 +23,12 @@ export async function readCsvFiles(files: File[]): Promise<ReadResult> {
  * Share sheet on iOS ("Spara i Filer"); download elsewhere, or when sharing fails
  * (e.g. NotAllowedError once the tap's user activation has expired). Only a completed export updates "Senaste export".
  *
- * Entries are passed in rather than read here: iOS rejects `share()` once the tap has passed through
+ * Rows are passed in rather than read here: iOS rejects `share()` once the tap has passed through
  * async work (the DB read), so everything before the share call must be synchronous.
  */
-export async function exportCsv(entries: CsvRow[], now = Date.now()): Promise<'shared' | 'downloaded' | 'cancelled'> {
+export async function exportCsv(rows: CsvRow[], now = Date.now()): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const filename = `veyin-${toLocalIso(now).slice(0, 10)}.csv`
-  const file = new File([toCsv(entries)], filename, { type: 'text/csv' })
+  const file = new File([toCsv(rows)], filename, { type: 'text/csv' })
 
   if (navigator.canShare?.({ files: [file] })) {
     let shared = false

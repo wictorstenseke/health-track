@@ -7,7 +7,7 @@ import { importRows } from './entries'
  * Does nothing if there are entries already, so the demo never mixes with the user's own data.
  */
 export async function startDemo(now = Date.now()): Promise<void> {
-  await db.transaction('rw', db.entries, db.settings, async () => {
+  await db.transaction('rw', db.entries, db.settings, db.metrics, async () => {
     if ((await db.entries.count()) > 0) return
     await importRows(demoRows(now))
     await db.settings.bulkPut([

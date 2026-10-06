@@ -5,7 +5,7 @@ import { isValidValue, roundValue } from './metrics'
 
 const now = new Date(2026, 9, 2, 9, 30).getTime()
 const rows = demoRows(now)
-const of = (metricId: string) => rows.filter((r) => r.metricId === metricId)
+const of = (metric: string) => rows.filter((r) => r.metric === metric)
 
 describe('demoRows', () => {
   it('runs from 1 January two years back up to yesterday, leaving today for the user', () => {
@@ -32,15 +32,15 @@ describe('demoRows', () => {
 
   it('gives only valid values with one decimal', () => {
     for (const r of rows) {
-      expect(isValidValue(r.metricId, r.value)).toBe(true)
+      expect(isValidValue(r.metric, r.value)).toBe(true)
       expect(r.value).toBe(roundValue(r.value))
     }
   })
 
   it('loses weight and centimetres over time', () => {
     const avg = (xs: { value: number }[]) => xs.reduce((s, r) => s + r.value, 0) / xs.length
-    for (const metricId of ['weight', 'waist', 'hip']) {
-      const series = of(metricId)
+    for (const metric of ['weight', 'waist', 'hip']) {
+      const series = of(metric)
       expect(avg(series.slice(-5))).toBeLessThan(avg(series.slice(0, 5)))
     }
   })

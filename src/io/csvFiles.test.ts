@@ -14,14 +14,14 @@ describe('readCsvFiles', () => {
   })
   it('takes the year for day/month dates from the file name', async () => {
     const result = await readCsvFiles([new File(['Datum;Vikt\n2/1;84,2 kg\n'], '2024-År 2024 tracking.csv')])
-    expect(result.rows).toEqual([{ metricId: 'weight', takenAt: new Date(2024, 0, 2, 12).getTime(), value: 84.2 }])
+    expect(result.rows).toEqual([{ metric: 'weight', takenAt: new Date(2024, 0, 2, 12).getTime(), value: 84.2 }])
   })
 })
 
 describe('exportCsv', () => {
   afterEach(() => vi.unstubAllGlobals())
 
-  const rows: CsvRow[] = [{ metricId: 'weight', takenAt: new Date(2026, 9, 1, 7, 32).getTime(), value: 82.4 }]
+  const rows: CsvRow[] = [{ metric: 'weight', takenAt: new Date(2026, 9, 1, 7, 32).getTime(), value: 82.4 }]
   const now = new Date(2026, 9, 1, 9, 0).getTime()
 
   it('calls the share sheet synchronously so iOS keeps the tap activation', async () => {

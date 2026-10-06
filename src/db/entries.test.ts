@@ -5,7 +5,7 @@ import {
 } from './entries'
 import { addMetric, deleteMetric, getMetrics } from './metrics'
 import { getProfile, setName } from './settings'
-import { parseCsv, toCsv } from '../lib/csv'
+import { csvRows, parseCsv, toCsv } from '../lib/csv'
 
 const at = (d: number) => new Date(2026, 8, d, 8).getTime()
 
@@ -75,9 +75,9 @@ describe('entries', () => {
   it('imports rows and skips duplicates, also on re-import', async () => {
     await addEntry('weight', 88.2, at(1))
     const rows = [
-      { metricId: 'weight' as const, takenAt: at(1), value: 88.2 },
-      { metricId: 'weight' as const, takenAt: at(2), value: 87.9 },
-      { metricId: 'weight' as const, takenAt: at(2), value: 87.9 },
+      { metric: 'weight', takenAt: at(1), value: 88.2 },
+      { metric: 'weight', takenAt: at(2), value: 87.9 },
+      { metric: 'weight', takenAt: at(2), value: 87.9 },
     ]
     expect(await importRows(rows)).toEqual({ added: 1, skipped: 2 })
     expect(await importRows(rows)).toEqual({ added: 0, skipped: 3 })
@@ -86,7 +86,7 @@ describe('entries', () => {
 
   it('re-importing our own export adds nothing, even for entries saved with seconds', async () => {
     await addEntry('weight', 82.4, at(1) + 23_456)
-    const { rows } = parseCsv(toCsv(await getAllEntries()))
+    const { rows } = parseCsv(toCsv(csvRows(await getAllEntries(), await getMetrics())))
     expect(await importRows(rows)).toEqual({ added: 0, skipped: 1 })
   })
 
@@ -100,13 +100,59 @@ describe('entries', () => {
       entries.map((e) => [e.metricId, e.value, Math.floor(e.takenAt / 60_000)]).sort()
     const before = identity(await getAllEntries())
 
-    const csv = toCsv(await getAllEntries())
+    const csv = toCsv(csvRows(await getAllEntries(), await getMetrics()))
     await clearAllData()
     const result = parseCsv(csv)
     expect(result.errors).toEqual([])
     expect(await importRows(result.rows)).toEqual({ added: 4, skipped: 0 })
 
     expect(identity(await getAllEntries())).toEqual(before)
+  })
+
+  it('imports an own type by its name and creates it once, whatever the case', async () => {
+    const rows = [
+      { metric: 'Bröst', takenAt: at(1), value: 104.5 },
+      { metric: 'bröst', takenAt: at(2), value: 104 },
+      { metric: 'BRÖST', takenAt: at(3), value: 103.5 },
+    ]
+    expect(await importRows(rows)).toEqual({ added: 3, skipped: 0 })
+    const chest = (await getMetrics()).filter((m) => m.name.toLowerCase() === 'bröst')
+    expect(chest.map((m) => m.name)).toEqual(['Bröst'])
+    expect((await getEntries(chest[0].id)).map((e) => e.value)).toEqual([104.5, 104, 103.5])
+  })
+
+  it('imports into a type that already has that name', async () => {
+    const chest = await addMetric('Bröst')
+    await importRows([{ metric: 'bröst', takenAt: at(1), value: 104.5 }])
+    expect(await db.metrics.count()).toBe(3)
+    expect(await getEntries(chest.id)).toHaveLength(1)
+  })
+
+  it('brings back a deleted default type when a file has it', async () => {
+    await deleteMetric('waist')
+    await importRows([{ metric: 'waist', takenAt: at(1), value: 92.5 }])
+    expect(await db.metrics.get('waist')).toMatchObject({ id: 'waist', name: 'Midja' })
+    expect(await getEntries('waist')).toHaveLength(1)
+  })
+
+  it('restores a backup with own types into an empty app', async () => {
+    const chest = await addMetric('Bröst')
+    const thigh = await addMetric('Lår, vänster')
+    await addEntry('weight', 82.4, at(1))
+    await addEntry(chest.id, 104.5, at(2))
+    await addEntry(thigh.id, 55, at(2))
+    await addEntry('hip', 101.5, at(3))
+
+    const csv = toCsv(csvRows(await getAllEntries(), await getMetrics()))
+    await clearAllData()
+    const result = parseCsv(csv)
+    expect(result.errors).toEqual([])
+    expect(await importRows(result.rows)).toEqual({ added: 4, skipped: 0 })
+
+    const names = new Map((await getMetrics()).map((m) => [m.id, m.name]))
+    expect([...names.values()].sort()).toEqual(['Bröst', 'Höft', 'Lår, vänster', 'Midja'])
+    const restored = (await getAllEntries()).map((e) => `${names.get(e.metricId) ?? e.metricId} ${e.value}`).sort()
+    expect(restored).toEqual(['Bröst 104.5', 'Höft 101.5', 'Lår, vänster 55', 'weight 82.4'])
   })
 
   it('clears everything and puts the default types back', async () => {

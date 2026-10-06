@@ -6,10 +6,11 @@ import { ChevronRightIcon } from '../components/icons'
 import { ImportCsv } from '../components/ImportCsv'
 import { ProfileRows } from '../components/ProfileRows'
 import { clearAllData } from '../db/entries'
-import { useAllEntries } from '../db/hooks'
+import { useAllEntries, useMetrics } from '../db/hooks'
 import { setHeightCm, setName, type Profile } from '../db/settings'
 import { sv } from '../i18n/sv'
 import { exportCsv } from '../io/csvFiles'
+import { csvRows } from '../lib/csv'
 import { formatRelativeDay, parseDecimal } from '../lib/format'
 import { isValidHeight } from '../lib/metrics'
 import { checkForUpdate, installUpdate, useUpdateStatus } from '../lib/pwa'
@@ -39,13 +40,14 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
   const [exporting, setExporting] = useState(false)
   // Loaded up front so the share sheet can open synchronously inside the tap.
   const entries = useAllEntries()
+  const metrics = useMetrics()
 
   const runExport = async () => {
     if (exporting) return
     setExportFailed(false)
     setExporting(true)
     try {
-      await exportCsv(entries)
+      await exportCsv(csvRows(entries, metrics))
     } catch {
       setExportFailed(true)
     } finally {

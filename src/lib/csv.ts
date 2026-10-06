@@ -1,10 +1,11 @@
 import { parseDayMonth, parseLocalIso, toLocalIso } from './dates'
 import { parseDecimal } from './format'
-import { BUILT_IN_IDS, isValidValue, type MetricId } from './metrics'
+import { BUILT_IN_IDS, cleanName, isValidValue, METRIC_NAME_MAX, WEIGHT_ID, type Metric, type MetricId } from './metrics'
 import { sortByTime } from './stats'
 
 export interface CsvRow {
-  metricId: MetricId
+  /** `weight`, `waist`, `hip`, or the name of one of the user's own types. `importRows` turns it into a metric id. */
+  metric: string
   takenAt: number
   value: number
 }
@@ -22,9 +23,22 @@ export interface CsvParseResult {
 
 export const CSV_HEADER = 'takenAt,metric,value'
 
+/** Entries as export rows: a built-in metric goes by its id, an own type by its name. */
+export function csvRows(entries: { metricId: MetricId; takenAt: number; value: number }[], metrics: Metric[]): CsvRow[] {
+  const names = new Map(metrics.map((m) => [m.id, m.name]))
+  return entries.map((e) => ({
+    metric: BUILT_IN_IDS.includes(e.metricId) ? e.metricId : (names.get(e.metricId) ?? e.metricId),
+    takenAt: e.takenAt,
+    value: e.value,
+  }))
+}
+
+/** Quoted when it holds the separator or a quote; a quote inside is doubled. */
+const csvCell = (cell: string) => (/[",]/.test(cell) ? `"${cell.replaceAll('"', '""')}"` : cell)
+
 /** Standard CSV: `,` separator, `.` decimals, local time without offset. */
-export function toCsv(entries: CsvRow[]): string {
-  const lines = sortByTime(entries).map((e) => `${toLocalIso(e.takenAt)},${e.metricId},${e.value.toFixed(1)}`)
+export function toCsv(rows: CsvRow[]): string {
+  const lines = sortByTime(rows).map((r) => `${toLocalIso(r.takenAt)},${csvCell(r.metric)},${r.value.toFixed(1)}`)
   return [CSV_HEADER, ...lines].join('\n') + '\n'
 }
 
@@ -57,12 +71,29 @@ function splitLine(line: string, delimiter: string): string[] {
   return cells
 }
 
-type Columns = Partial<Record<MetricId, number>>
+/** Label → column index. */
+type Columns = Record<string, number>
 type Layout = { kind: 'own'; takenAt: number; metric: number; value: number } | { kind: 'legacy'; columns: Columns }
 
-/** Column headers in the per-year sheets. */
-const LEGACY_HEADERS: Record<string, MetricId> = { vikt: 'weight', midja: 'waist', höft: 'hip', weight: 'weight', waist: 'waist', hip: 'hip' }
-const LEGACY_DEFAULT: Columns = { weight: 1 }
+/**
+ * Other words for the built-in metrics: the column headers in the per-year sheets, and our own ids in any case.
+ * A Map, so that a cell like `constructor` isn't found on Object.prototype.
+ */
+const ALIASES = new Map<string, MetricId>([
+  ['vikt', WEIGHT_ID],
+  ['weight', WEIGHT_ID],
+  ['midja', 'waist'],
+  ['waist', 'waist'],
+  ['höft', 'hip'],
+  ['hip', 'hip'],
+])
+const LEGACY_DEFAULT: Columns = { [WEIGHT_ID]: 1 }
+
+/** A `metric` cell as a label: an alias becomes the built-in id, anything else is the name of an own type. */
+function labelOf(cell: string): string {
+  const name = cleanName(cell)
+  return ALIASES.get(name.toLocaleLowerCase('sv')) ?? name
+}
 
 function layoutFromHeader(header: string[]): Layout {
   const lower = header.map((h) => h.toLowerCase())
@@ -74,8 +105,8 @@ function layoutFromHeader(header: string[]): Layout {
 function legacyColumns(lower: string[]): Columns {
   const columns: Columns = {}
   lower.forEach((h, i) => {
-    const metricId = LEGACY_HEADERS[h]
-    if (i > 0 && metricId) columns[metricId] = i
+    const metric = ALIASES.get(h)
+    if (i > 0 && metric) columns[metric] = i
   })
   return Object.keys(columns).length > 0 ? columns : LEGACY_DEFAULT
 }
@@ -88,6 +119,7 @@ export interface ParseOptions {
 /**
  * Accepts our own export (`takenAt,metric,value`) and legacy per-year sheets (date first, then
  * Vikt/Midja/Höft by header, or weight in column 2 without one). Separator `,` `;` or tab; decimal `.` or `,`.
+ * Knows nothing about the stored types: a row's `metric` is a label for `importRows` to resolve.
  */
 export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseResult {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/)
@@ -96,7 +128,7 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
   const parseDate = (cell: string) => parseLocalIso(cell) ?? (year === undefined ? null : parseDayMonth(cell, year))
   const rows: CsvRow[] = []
   const errors: CsvError[] = []
-  const lastMeasure: Partial<Record<MetricId, number>> = {}
+  const lastMeasure = new Map<string, number>()
   let layout: Layout | null = null
 
   lines.forEach((raw, i) => {
@@ -109,8 +141,9 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
         layout = layoutFromHeader(cells)
         return
       }
-      layout =
-        cells.length >= 3 && BUILT_IN_IDS.includes(cells[1]) ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy', columns: LEGACY_DEFAULT }
+      // Without a header: our own format has the metric second, a sheet has the weight there.
+      const own = cells.length >= 3 && cells[1] !== '' && parseDecimal(cells[1]) === null
+      layout = own ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy', columns: LEGACY_DEFAULT }
     }
 
     if (layout.kind === 'own') {
@@ -127,8 +160,8 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
     }
     for (const row of sheetRows) {
       // Sheets repeat the last waist/hip measurement on every row; only a changed value is a new one.
-      if (row.metricId !== 'weight' && lastMeasure[row.metricId] === row.value) continue
-      lastMeasure[row.metricId] = row.value
+      if (row.metric !== WEIGHT_ID && lastMeasure.get(row.metric) === row.value) continue
+      lastMeasure.set(row.metric, row.value)
       rows.push(row)
     }
   })
@@ -150,20 +183,21 @@ function parseOwnRow(cells: string[], layout: Extract<Layout, { kind: 'own' }>):
   if (dateCell === undefined || metricCell === undefined || valueCell === undefined) return null
   const takenAt = parseLocalIso(dateCell)
   const value = parseDecimal(valueCell)
-  if (takenAt === null || value === null || !BUILT_IN_IDS.includes(metricCell) || !isValidValue(metricCell, value)) return null
-  return { metricId: metricCell, takenAt, value }
+  const metric = labelOf(metricCell)
+  if (takenAt === null || value === null || metric === '' || metric.length > METRIC_NAME_MAX || !isValidValue(metric, value)) return null
+  return { metric, takenAt, value }
 }
 
 /** One reading per filled metric column; null if the date or any filled cell is invalid, or nothing is filled. */
 function parseLegacyRow(cells: string[], columns: Columns, takenAt: number | null): CsvRow[] | null {
   if (takenAt === null) return null
   const rows: CsvRow[] = []
-  for (const [metricId, index] of Object.entries(columns) as [MetricId, number][]) {
+  for (const [metric, index] of Object.entries(columns)) {
     const cell = cells[index] ?? ''
     if (cell === '') continue
     const value = parseDecimal(cell)
-    if (value === null || !isValidValue(metricId, value)) return null
-    rows.push({ metricId, takenAt, value })
+    if (value === null || !isValidValue(metric, value)) return null
+    rows.push({ metric, takenAt, value })
   }
   return rows.length > 0 ? rows : null
 }
