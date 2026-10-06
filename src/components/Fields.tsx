@@ -33,3 +33,41 @@ export function DecimalField(props: {
     </div>
   )
 }
+
+/** One-line text input. `error` shows under the field and marks it invalid; Enter calls `onEnter`. */
+export function TextField(props: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  onEnter?: () => void
+  maxLength?: number
+  error?: string
+  autoFocus?: boolean
+}) {
+  const id = useId()
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-muted">
+        {props.label}
+      </label>
+      <input
+        id={id}
+        className={inputClass}
+        value={props.value}
+        maxLength={props.maxLength}
+        autoFocus={props.autoFocus}
+        autoComplete="off"
+        enterKeyHint="done"
+        aria-invalid={props.error ? true : undefined}
+        aria-describedby={props.error ? `${id}-error` : undefined}
+        onChange={(e) => props.onChange(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && props.onEnter?.()}
+      />
+      {props.error && (
+        <p id={`${id}-error`} role="alert" className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+          {props.error}
+        </p>
+      )}
+    </div>
+  )
+}
