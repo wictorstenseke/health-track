@@ -6,12 +6,12 @@ Personal weight + body-measurement tracker. Offline-first PWA for iPhone (17 Pro
 
 - Log weight in seconds: open app → drag dial → Spara.
 - See this year's progress vs previous years.
-- Track waist + hip separately (Mått tab).
+- Track body measurements separately (Mått tab): Midja and Höft to start with, plus any types the user adds.
 - Data survives: IndexedDB + `navigator.storage.persist()` + CSV export/import.
 
 ## Non-goals (v1)
 
-Custom metrics UI, dark mode, server DB/sync, goal weight, English UI, lb units, notifications, install guide, backup nudge banner.
+Dark mode, server DB/sync, goal weight, English UI, lb units, notifications, install guide, backup nudge banner, renaming or reordering measurement types, units other than cm for them.
 
 ## Stack
 
@@ -34,22 +34,23 @@ Custom metrics UI, dark mode, server DB/sync, goal weight, English UI, lb units,
 
 ## Data model
 
-Metric definitions are code constants in v1 (generic shape so custom metrics can become a DB table later):
+A metric id is a string. `weight` is a code constant (kg, valid 20–300, the metric Hem is built on). Every other metric is a measurement type: a row in the `metrics` table, always cm, valid 1–300. Step 0.1 everywhere.
 
 ```ts
-type MetricId = 'weight' | 'waist' | 'hip'
-interface MetricDef { id: MetricId; unit: 'kg' | 'cm'; validMin: number; validMax: number }
-// all three: valid 20–300 (rejects typos on input/import), step 0.1 everywhere
-// labels ('Vikt', 'Midja', 'Höft') live in src/i18n/sv.ts with all other strings
+type MetricId = string // 'weight', or the id of a measurement type
+interface Metric { id: MetricId; name: string; createdAt: number }
+// defaults: { id: 'waist', name: 'Midja' }, { id: 'hip', name: 'Höft' }; own types get a UUID
+// 'Vikt' and the two default names live in src/i18n/sv.ts; a type is shown by its stored name
 // weight dial range 60–100 is separate: DIAL_MIN/DIAL_MAX in src/lib/dialMath.ts
 ```
 
-Dexie DB `vagen` (the app's first name, Vågen; kept so stored data survives the rename), version 1:
+Dexie DB `vagen` (the app's first name, Vågen; kept so stored data survives the rename), version 2 (version 1 had no `metrics` table; the upgrade adds it with the two defaults):
 
 | table | key | fields | indexes |
 |---|---|---|---|
 | `entries` | `id` (uuid) | `metricId`, `value` (number, 1 decimal), `takenAt` (epoch ms), `createdAt`, `updatedAt` | `metricId`, `takenAt`, `[metricId+takenAt]` |
 | `settings` | `key` | `value` | — |
+| `metrics` | `id` | `name`, `createdAt` (epoch ms) | — |
 
 Settings keys: `name`, `heightCm`, `lastExportAt`.
 
@@ -60,12 +61,15 @@ Rules:
 - Call `navigator.storage.persist()` on app start (best effort; covers "before first save").
 - IDs via own `newId()` — `crypto.randomUUID` is missing on plain-http origins (phone testing over LAN).
 - Height is a profile value (not tracked over time), used for BMI.
+- A type's name: trimmed, 1–30 characters, unique among the types ignoring case, and not `Vikt`, `weight`, `waist` or `hip`.
+- Deleting a type removes it and all its entries in one transaction. No undo.
+- `Radera all data` also resets the types to Midja and Höft.
 
 ## Screens
 
 Bottom tab bar: **Hem · Mått · Inställningar**, a floating glass capsule (Instagram-style): fully rounded, 240 px wide at most and centred, translucent white with blur. Icons only (names via `aria-label`); a grey pill slides under the active tab (slight spring) and its icon pops. An 8 px ember dot sits on the Inställningar icon while a new build is waiting. Its position lives in CSS variables (`--tab-bar-*`) so toasts can sit above it.
 
-Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, waist/hip → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab. Tabs are buttons that replace the current history entry (like a native tab bar). No route changes go through followed links, because iOS Home Screen apps can turn a followed link into a page load.
+Navigation: hash routes. The three tabs stay mounted, so switching is instant and each tab keeps its state and scroll position. All entries and measurement types are held in memory from one live query. Detail screens keep the tab bar (parent tab highlighted: weight → Hem, every measurement type → Mått) and a sticky back button. The installed iOS app has no browser back or swipe-back. Back uses `history.back()` only when the app pushed the current entry; otherwise it goes to the parent tab. Tabs are buttons that replace the current history entry (like a native tab bar). No route changes go through followed links, because iOS Home Screen apps can turn a followed link into a page load.
 
 ### Setup (first launch, when no `name`)
 
@@ -89,7 +93,7 @@ Top to bottom:
    - Haptic tick per 0.1, best effort: Vibration API on Android; on iOS the `<input type="checkbox" switch>` trick, which only fires from code on iOS 17.4–26.4 (26.5 blocked it).
 4. **Buttons** under the scale, both 40 px: a round calendar icon button on the left, 20 px in (opens the native date-time picker for backdating; defaults to now; tinted orange while backdated), and the **Spara** pill centred in the band. Hem keeps one weight per day: saving on a day that already has a weight replaces that day's newest one (detail screens can still hold several, e.g. imported). The button reads `Sparat ✓` (orange, disabled) while the selected day's weight equals the scale; moving the scale switches it back to `Spara`. After save: haptic (the tap toggles a hidden `<input switch>` under a transparent label, the only web haptic iOS 26.5+ still allows), `Sparat ✓` for at least 1.5 s, chart updates, date resets to now. The number flies to the chart: a copy arcs from the scale onto the saved point (0.75 s, shrinking to label size and turning orange) while the number dips out and back, then the point pops with a ring and fades. Only for years the card shows; none with reduced motion.
 
-### Detail screen (`/metric/:metricId`) — weight, waist, hip
+### Detail screen (`/metric/:metricId`) — weight and every measurement type
 
 Same component for all metrics:
 - Big chart: all years overlaid on Jan–Dec axis; toggle chips per year.
@@ -100,11 +104,14 @@ Same component for all metrics:
 - **Entry list**: all entries, grouped by month, newest first: `ons 30 sep 07:30 · 82,4 kg · −0,3` (time shown since multiple per day are allowed; delta vs previous entry).
 - Tap row → **bottom sheet**: value editor (dial for weight, number input for cm), date-time picker, Spara, Radera.
 - Delete → entry removed + **Ångra** toast (5 s) that restores it.
+- Not for weight: a red **Radera mått** button at the bottom → one confirm sheet (`Bröst och dess 14 mätningar raderas. Det går inte att ångra.`) → back to Mått.
+- A route to an id that is neither `weight` nor an existing type shows the Mått tab.
 
 ### Mått
 
-- Grouped list like Inställningar, group `Omkrets`: one row per metric (Midja, Höft) — name and change since first entry this year left; current-year sparkline, latest value and chevron right. Tap → detail screen.
-- Last row **+ Ny mätning** (ember) → batch form: one decimal input per metric + date-time (default now). Saves only filled fields, all with same `takenAt`.
+- Grouped list like Inställningar, group `Omkrets`: one row per measurement type, A–Ö (Swedish order) — name, and under it the change since the first entry this year with its unit (`−3,5 cm i år`, shown with two or more entries); current-year sparkline, latest value (`–` when there is none) and chevron right. Tap → detail screen.
+- Last row **+ Ny mätning** (ember) → batch form: one decimal input per type (scrolling inside the sheet when there are many) + date-time (default now). Saves only filled fields, all with same `takenAt`.
+- **Skapa nytt mått** in that sheet swaps it to a name view (`Namn`, `Avbryt`, `Spara`; `Finns redan` for a taken or reserved name). Saving creates the type and returns to the fields, which keep what was typed. With no types the sheet opens on the name view.
 
 ### Inställningar
 
@@ -130,12 +137,13 @@ takenAt,metric,value
 
 - `takenAt`: local time ISO without offset. `,` delimiter, `.` decimal.
 - Name/height not included.
+- `metric`: `weight`, `waist` and `hip` as those words; an own type by its name, quoted when it has `,` or `"` in it.
 
 ### Import
 
 Multi-file select. Auto-detects:
 - Delimiter `,` or `;`; decimal `.` or `,`.
-- **Own format**: `takenAt,metric,value`.
+- **Own format**: `takenAt,metric,value`. `metric` is a label: `weight`/`vikt` → weight; otherwise the type with that id, then the type with that name (ignoring case); `waist`/`midja` and `hip`/`höft` bring Midja and Höft back if they were deleted; any other name creates a type. So an export restores every type on an empty app. Without a header a file is in this format when its second cell is not a number.
 - **Legacy per-year sheets** (Numbers export, e.g. `2024-År 2024 tracking.csv`): date in column 1; header `Vikt`/`Midja`/`Höft` → weight/waist/hip, other columns ignored. No recognised header → weight in column 2. Dates `YYYY-MM-DD` or `D/M` with the year taken from the file name. Values may carry `kg`/`cm`. Waist/hip values repeated from the row above are carried forward, not new measurements → skipped. Date-only rows get `takenAt` 12:00 local (avoids day shift).
 
 Flow: pick files → imported straight away, no preview or confirm step → result under the row (`Hittade 143 rader (3 jan 2024 – 28 dec 2024)`, `143 importerade, 0 dubbletter hoppades över`, and an expandable `2 ogiltiga rader` list). Rows identical to an existing entry (same metric + takenAt + value) are skipped, so re-import is idempotent. Invalid rows listed, not imported.
@@ -157,9 +165,9 @@ Flow: pick files → imported straight away, no preview or confirm step → resu
 ## Testing
 
 Vitest:
-- CSV parse (own + legacy, `,`/`;`, `.`/`,` decimals, invalid rows, idempotent re-import) and export round-trip.
+- CSV parse (own + legacy, `,`/`;`, `.`/`,` decimals, invalid rows, idempotent re-import) and export round-trip, own types and names that need quoting.
 - Year stats, same-date-last-year interpolation, BMI, deltas.
-- Data layer with fake-indexeddb: add, edit, delete + undo, settings, import dedup. Migration tests arrive with the first schema v2.
+- Data layer with fake-indexeddb: add, edit, delete + undo, settings, import dedup. Schema v1 → v2 migration, creating and deleting measurement types.
 
 No E2E. Dial + visuals checked by hand on iPhone via local network dev URL.
 
