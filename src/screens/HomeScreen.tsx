@@ -10,7 +10,7 @@ import { sv } from '../i18n/sv'
 import { chartDay } from '../lib/dates'
 import { DEFAULT_WEIGHT, toDialValue } from '../lib/dialMath'
 import { flyToMark } from '../lib/flight'
-import { formatDelta } from '../lib/format'
+import { formatDeltaValue } from '../lib/format'
 import type { Entry } from '../lib/metrics'
 import { navigate } from '../lib/router'
 import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
@@ -30,7 +30,7 @@ const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; m
     >
       <div className="flex items-baseline justify-between px-1">
         <span className="text-lg font-semibold">{year}</span>
-        {stats && stats.count >= 2 && <span className="text-lg font-semibold tabular-nums">{formatDelta(stats.change)} kg</span>}
+        {stats && stats.count >= 2 && <span className="text-lg font-semibold tabular-nums">{formatDeltaValue(stats.change, 'kg')}</span>}
       </div>
       {series.length > 0 ? (
         <YearChart series={series} height={120} variant="card" mark={mark} />

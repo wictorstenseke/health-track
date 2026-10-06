@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { sv } from '../i18n/sv'
 import {
-  formatDate, formatDelta, formatMonthInitial, formatNumber, formatRelativeDay,
+  formatDate, formatDelta, formatDeltaValue, formatMonthInitial, formatNumber, formatRelativeDay,
   formatRowDate, formatTime, formatValue, parseDecimal,
 } from './format'
 
@@ -16,6 +17,11 @@ describe('numbers', () => {
     expect(formatDelta(0.3)).toBe('+0,3')
     expect(formatDelta(-0.3)).toBe('−0,3')
     expect(formatDelta(0)).toBe('0,0')
+  })
+  it('puts the unit after a delta', () => {
+    expect(formatDeltaValue(-3.5, 'cm')).toBe('−3,5 cm')
+    expect(formatDeltaValue(0.3, 'kg')).toBe('+0,3 kg')
+    expect(sv.measures.thisYear(formatDeltaValue(-3.5, 'cm'))).toBe('−3,5 cm i år')
   })
 })
 

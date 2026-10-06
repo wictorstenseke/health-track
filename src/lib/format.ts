@@ -20,6 +20,8 @@ export const formatNumber = (v: number) => num.format(v)
 export const formatValue = (v: number, unit: Unit) => `${num.format(v)} ${unit}`
 /** +0,3 / −0,3 / 0,0 */
 export const formatDelta = (d: number) => signed.format(d)
+/** +0,3 kg / −3,5 cm */
+export const formatDeltaValue = (d: number, unit: Unit) => `${signed.format(d)} ${unit}`
 /** 1 okt 2026 */
 export const formatDate = (ts: number) => stripDots(dayMonthYear.format(ts))
 /** ons 30 sep */

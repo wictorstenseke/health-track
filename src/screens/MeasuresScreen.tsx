@@ -5,7 +5,7 @@ import { MeasureSheet } from '../components/MeasureSheet'
 import { Sparkline } from '../components/Sparkline'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
-import { formatDelta, formatValue } from '../lib/format'
+import { formatDeltaValue, formatValue } from '../lib/format'
 import { MEASURE_METRIC_IDS, METRICS, type MetricId } from '../lib/metrics'
 import { navigate } from '../lib/router'
 import { latest, pointsInYear, yearStats } from '../lib/stats'
@@ -19,7 +19,9 @@ function MetricRow({ metricId }: { metricId: MetricId }) {
     <button type="button" onClick={() => navigate({ name: 'metric', metricId })} className={`${rowClass} py-3 text-left`}>
       <span>
         <span className="block">{sv.metrics[metricId]}</span>
-        {stats && stats.count >= 2 && <span className="block text-sm text-muted">{sv.measures.thisYear(formatDelta(stats.change))}</span>}
+        {stats && stats.count >= 2 && (
+          <span className="block text-sm text-muted">{sv.measures.thisYear(formatDeltaValue(stats.change, METRICS[metricId].unit))}</span>
+        )}
       </span>
       <span className="flex items-center gap-3">
         <Sparkline values={pointsInYear(entries, year).map((p) => p.value)} />
