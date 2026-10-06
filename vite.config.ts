@@ -10,6 +10,17 @@ const version = process.env.npm_package_version ?? 'dev'
 const sha = process.env.GITHUB_SHA?.slice(0, 7)
 const appVersion = sha ? `${version}+${sha}` : version
 
+/** The running app fetches this to see whether a waiting update is a major one (lib/release.ts). */
+function versionFile(): Plugin {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version }) })
+    },
+  }
+}
+
 /**
  * GitHub Pages can't send headers, so the CSP is a meta tag. Build only: the dev server injects an inline
  * React Refresh script. Inline scripts (the dark-mode one in index.html) are allowed by hash, computed here.
@@ -53,6 +64,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     contentSecurityPolicy(),
+    versionFile(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],

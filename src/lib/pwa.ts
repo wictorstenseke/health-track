@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { registerSW } from 'virtual:pwa-register'
+import { isMajorUpdate } from './release'
 
 /**
  * An installed iOS app rarely reloads, so a deployed build would otherwise sit unused for days.
@@ -9,6 +10,7 @@ import { registerSW } from 'virtual:pwa-register'
 export type UpdateStatus = 'idle' | 'checking' | 'latest' | 'ready' | 'failed'
 
 let status: UpdateStatus = 'idle'
+let majorUpdate = false
 let registration: ServiceWorkerRegistration | undefined
 const listeners = new Set<() => void>()
 const set = (next: UpdateStatus) => {
@@ -17,7 +19,10 @@ const set = (next: UpdateStatus) => {
 }
 
 registerSW({
-  onNeedRefresh: () => set('ready'),
+  onNeedRefresh: () => {
+    set('ready')
+    void checkMajor()
+  },
   onRegisteredSW: (_url, r) => {
     registration = r
     document.addEventListener('visibilitychange', () => {
@@ -25,6 +30,18 @@ registerSW({
     })
   },
 })
+
+/** A waiting major update says so in Inställningar; offline or in dev there is no file, and no warning. */
+async function checkMajor(): Promise<void> {
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}version.json?t=${Date.now()}`, { cache: 'no-store' })
+    const { version } = (await res.json()) as { version: string }
+    majorUpdate = isMajorUpdate(__APP_VERSION__, version)
+    listeners.forEach((l) => l())
+  } catch {
+    // No warning is better than a wrong one.
+  }
+}
 
 /** Resolves once the check is done; a found build reports itself through `onNeedRefresh`. */
 export async function checkForUpdate(): Promise<void> {
@@ -66,5 +83,16 @@ export function useUpdateStatus(): UpdateStatus {
       return () => listeners.delete(l)
     },
     () => status,
+  )
+}
+
+/** True when the waiting update is a major one: the data may be affected, so export first. */
+export function useMajorUpdate(): boolean {
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l)
+      return () => listeners.delete(l)
+    },
+    () => majorUpdate,
   )
 }

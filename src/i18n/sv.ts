@@ -83,6 +83,7 @@ export const sv = {
     updateFailed: 'Ingen anslutning',
     updateReady: 'Ny version finns',
     installUpdate: 'Uppdatera',
+    majorUpdate: 'Den här uppdateringen kan påverka din data. Exportera CSV först.',
   },
   import: {
     button: 'Importera CSV',

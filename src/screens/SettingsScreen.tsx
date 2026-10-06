@@ -13,7 +13,7 @@ import { exportCsv } from '../io/csvFiles'
 import { csvRows } from '../lib/csv'
 import { formatRelativeDay, parseDecimal } from '../lib/format'
 import { isValidHeight } from '../lib/metrics'
-import { checkForUpdate, installUpdate, useUpdateStatus } from '../lib/pwa'
+import { checkForUpdate, installUpdate, useMajorUpdate, useUpdateStatus } from '../lib/pwa'
 import { navigate } from '../lib/router'
 import { setDark, useDark } from '../lib/theme'
 
@@ -33,6 +33,7 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
   }
 
   const update = useUpdateStatus()
+  const majorUpdate = useMajorUpdate()
   const dark = useDark()
   const toggleDark = () => setDark(!dark)
 
@@ -144,6 +145,11 @@ export function SettingsScreen({ profile }: { profile: Profile }) {
                     : ''}
             </span>
           </button>
+        )}
+        {update === 'ready' && majorUpdate && (
+          <p role="status" className="px-4 pb-3 text-sm text-ember-600 dark:text-ember-400">
+            {sv.settings.majorUpdate}
+          </p>
         )}
       </Group>
 
