@@ -22,8 +22,9 @@ describe('toCsv', () => {
 
 describe('csvRows', () => {
   const metrics = [
+    { id: 'chest', name: 'Bröst', createdAt: 0 },
     { id: 'waist', name: 'Midja', createdAt: 0 },
-    { id: 'abc', name: 'Bröst', createdAt: 0 },
+    { id: 'abc', name: 'Lår', createdAt: 0 },
   ]
 
   it('labels a built-in metric by its id and an own type by its name', () => {
@@ -31,11 +32,12 @@ describe('csvRows', () => {
       [
         { metricId: 'weight', takenAt: 1, value: 82.4 },
         { metricId: 'waist', takenAt: 2, value: 92.5 },
-        { metricId: 'abc', takenAt: 3, value: 104 },
+        { metricId: 'chest', takenAt: 3, value: 104 },
+        { metricId: 'abc', takenAt: 4, value: 55 },
       ],
       metrics,
     )
-    expect(rows.map((r) => r.metric)).toEqual(['weight', 'waist', 'Bröst'])
+    expect(rows.map((r) => r.metric)).toEqual(['weight', 'waist', 'chest', 'Lår'])
   })
   it('keeps only the fields the file has columns for', () => {
     const entry = { id: 'e1', metricId: 'weight', takenAt: 1, value: 82.4, createdAt: 1, updatedAt: 1 }
@@ -57,9 +59,9 @@ describe('parseCsv — own format', () => {
     expect(parseCsv('2026-10-01T07:32,weight,82.4').rows).toEqual([{ metric: 'weight', takenAt: at(2026, 10, 1, 7, 32), value: 82.4 }])
   })
   it('reads the name of an own type, with or without a header', () => {
-    const row = { metric: 'Bröst', takenAt: at(2026, 10, 1, 7, 32), value: 104.5 }
-    expect(parseCsv('takenAt,metric,value\n2026-10-01T07:32,Bröst,104.5\n')).toEqual({ rows: [row], errors: [] })
-    expect(parseCsv('2026-10-01T07:32,Bröst,104.5').rows).toEqual([row])
+    const row = { metric: 'Lår', takenAt: at(2026, 10, 1, 7, 32), value: 55.5 }
+    expect(parseCsv('takenAt,metric,value\n2026-10-01T07:32,Lår,55.5\n')).toEqual({ rows: [row], errors: [] })
+    expect(parseCsv('2026-10-01T07:32,Lår,55.5').rows).toEqual([row])
   })
   it('round-trips names with a comma or a quote', () => {
     const rows = [
@@ -69,8 +71,9 @@ describe('parseCsv — own format', () => {
     expect(parseCsv(toCsv(rows))).toEqual({ rows, errors: [] })
   })
   it('reads a built-in metric under any of its names, in any case', () => {
-    const csv = 'takenAt,metric,value\n2026-10-01T07:32,Vikt,82.4\n2026-10-01T07:33,MIDJA,92.5\n2026-10-01T07:34,Hip,101\n'
-    expect(parseCsv(csv).rows.map((r) => r.metric)).toEqual(['weight', 'waist', 'hip'])
+    const csv =
+      'takenAt,metric,value\n2026-10-01T07:32,Vikt,82.4\n2026-10-01T07:33,MIDJA,92.5\n2026-10-01T07:34,Hip,101\n2026-10-01T07:35,Bröst,104\n2026-10-01T07:36,CHEST,104\n'
+    expect(parseCsv(csv).rows.map((r) => r.metric)).toEqual(['weight', 'waist', 'hip', 'chest', 'chest'])
   })
   it('checks a value against the range of its kind', () => {
     const csv = 'takenAt,metric,value\n2026-10-01T07:32,Handled,16.5\n2026-10-01T07:33,weight,16.5\n2026-10-01T07:34,Handled,0.5\n'
@@ -174,6 +177,13 @@ describe('parseCsv — Numbers export (day/month dates, year from file name)', (
       { metric: 'waist', takenAt: at(2024, 1, 2), value: 102 },
       { metric: 'waist', takenAt: at(2024, 1, 8), value: 100.3 },
       { metric: 'waist', takenAt: at(2024, 1, 23), value: 97 },
+    ])
+  })
+  it('imports Bröst as chest, skipping values carried forward from the row above', () => {
+    expect(parseCsv(sheet, { year: 2024 }).rows.filter((r) => r.metric === 'chest')).toEqual([
+      { metric: 'chest', takenAt: at(2024, 1, 2), value: 101 },
+      { metric: 'chest', takenAt: at(2024, 1, 8), value: 100.4 },
+      { metric: 'chest', takenAt: at(2024, 1, 23), value: 98.8 },
     ])
   })
   it('imports Höft as hip', () => {

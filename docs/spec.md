@@ -6,7 +6,7 @@ Personal weight + body-measurement tracker. Offline-first PWA for iPhone (17 Pro
 
 - Log weight in seconds: open app → drag dial → Spara.
 - See this year's progress vs previous years.
-- Track body measurements separately (Mått tab): Midja and Höft to start with, plus any types the user adds.
+- Track body measurements separately (Mått tab): Bröst, Midja and Höft to start with, plus any types the user adds.
 - Data survives: IndexedDB + `navigator.storage.persist()` + CSV export/import.
 
 ## Non-goals (v1)
@@ -39,12 +39,12 @@ A metric id is a string. `weight` is a code constant (kg, valid 20–300, the me
 ```ts
 type MetricId = string // 'weight', or the id of a measurement type
 interface Metric { id: MetricId; name: string; createdAt: number }
-// defaults: { id: 'waist', name: 'Midja' }, { id: 'hip', name: 'Höft' }; own types get a UUID
-// 'Vikt' and the two default names live in src/i18n/sv.ts; a type is shown by its stored name
+// defaults: { id: 'chest', name: 'Bröst' }, { id: 'waist', name: 'Midja' }, { id: 'hip', name: 'Höft' }; own types get a UUID
+// 'Vikt' and the three default names live in src/i18n/sv.ts; a type is shown by its stored name
 // weight dial range 60–100 is separate: DIAL_MIN/DIAL_MAX in src/lib/dialMath.ts
 ```
 
-Dexie DB `vagen` (the app's first name, Vågen; kept so stored data survives the rename), version 2 (version 1 had no `metrics` table; the upgrade adds it with the two defaults):
+Dexie DB `vagen` (the app's first name, Vågen; kept so stored data survives the rename), version 3 (version 2 added the `metrics` table with Midja and Höft; version 3 adds Bröst, unless the user already has a type by that name):
 
 | table | key | fields | indexes |
 |---|---|---|---|
@@ -61,9 +61,9 @@ Rules:
 - Call `navigator.storage.persist()` on app start (best effort; covers "before first save").
 - IDs via own `newId()` — `crypto.randomUUID` is missing on plain-http origins (phone testing over LAN).
 - Height is a profile value (not tracked over time), used for BMI.
-- A type's name: trimmed, 1–30 characters, unique among the types ignoring case, and not `Vikt`, `weight`, `waist` or `hip`.
+- A type's name: trimmed, 1–30 characters, unique among the types ignoring case, and not `Vikt`, `weight`, `chest`, `waist` or `hip`.
 - Deleting a type removes it and all its entries in one transaction. No undo.
-- `Radera all data` also resets the types to Midja and Höft.
+- `Radera all data` also resets the types to Bröst, Midja and Höft.
 
 ## Screens
 
@@ -137,14 +137,14 @@ takenAt,metric,value
 
 - `takenAt`: local time ISO without offset. `,` delimiter, `.` decimal.
 - Name/height not included.
-- `metric`: `weight`, `waist` and `hip` as those words; an own type by its name, quoted when it has `,` or `"` in it.
+- `metric`: `weight`, `chest`, `waist` and `hip` as those words; an own type by its name, quoted when it has `,` or `"` in it.
 
 ### Import
 
 Multi-file select. Auto-detects:
 - Delimiter `,` or `;`; decimal `.` or `,`.
-- **Own format**: `takenAt,metric,value`. `metric` is a label: `weight`/`vikt` → weight; otherwise the type with that id, then the type with that name (ignoring case); `waist`/`midja` and `hip`/`höft` bring Midja and Höft back if they were deleted; any other name creates a type. So an export restores every entry, and every type that has one, on an empty app. Without a header a file is in this format when its first row has text second and a number third; a later row with a number where the name goes is invalid.
-- **Legacy per-year sheets** (Numbers export, e.g. `2024-År 2024 tracking.csv`): date in column 1; header `Vikt`/`Midja`/`Höft` → weight/waist/hip, other columns ignored. No recognised header → weight in column 2. Dates `YYYY-MM-DD` or `D/M` with the year taken from the file name. Values may carry `kg`/`cm`. Waist/hip values repeated from the row above are carried forward, not new measurements → skipped. Date-only rows get `takenAt` 12:00 local (avoids day shift).
+- **Own format**: `takenAt,metric,value`. `metric` is a label: `weight`/`vikt` → weight; otherwise the type with that id, then the type with that name (ignoring case); `chest`/`bröst`, `waist`/`midja` and `hip`/`höft` mean Bröst, Midja and Höft: the type by that name if there is one, otherwise the default is brought back; any other name creates a type. So an export restores every entry, and every type that has one, on an empty app. Without a header a file is in this format when its first row has text second and a number third; a later row with a number where the name goes is invalid.
+- **Legacy per-year sheets** (Numbers export, e.g. `2024-År 2024 tracking.csv`): date in column 1; header `Vikt`/`Bröst`/`Midja`/`Höft` → weight/chest/waist/hip, other columns ignored. No recognised header → weight in column 2. Dates `YYYY-MM-DD` or `D/M` with the year taken from the file name. Values may carry `kg`/`cm`. Chest/waist/hip values repeated from the row above are carried forward, not new measurements → skipped. Date-only rows get `takenAt` 12:00 local (avoids day shift).
 
 Flow: pick files → imported straight away, no preview or confirm step → result under the row (`Hittade 143 rader (3 jan 2024 – 28 dec 2024)`, `143 importerade, 0 dubbletter hoppades över`, and an expandable `2 ogiltiga rader` list). Rows identical to an existing entry (same metric + takenAt + value) are skipped, so re-import is idempotent. Invalid rows listed, not imported.
 

@@ -15,8 +15,12 @@ export interface Metric {
   createdAt: number
 }
 
+/** Bröst: a default since schema version 3, which adds it to the installs that came before. */
+export const CHEST_ID = 'chest'
+
 /** The types every install starts with. */
 const DEFAULT_METRICS = [
+  { id: CHEST_ID, name: sv.metrics.chest },
   { id: 'waist', name: sv.metrics.waist },
   { id: 'hip', name: sv.metrics.hip },
 ]

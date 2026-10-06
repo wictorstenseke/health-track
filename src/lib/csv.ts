@@ -1,10 +1,10 @@
 import { parseDayMonth, parseLocalIso, toLocalIso } from './dates'
 import { parseDecimal } from './format'
-import { BUILT_IN_IDS, cleanName, isValidValue, METRIC_NAME_MAX, WEIGHT_ID, type Metric, type MetricId } from './metrics'
+import { BUILT_IN_IDS, CHEST_ID, cleanName, isValidValue, METRIC_NAME_MAX, WEIGHT_ID, type Metric, type MetricId } from './metrics'
 import { sortByTime } from './stats'
 
 export interface CsvRow {
-  /** `weight`, `waist`, `hip`, or the name of one of the user's own types. `importRows` turns it into a metric id. */
+  /** `weight`, `chest`, `waist`, `hip`, or the name of one of the user's own types. `importRows` turns it into a metric id. */
   metric: string
   takenAt: number
   value: number
@@ -83,6 +83,8 @@ type Layout = { kind: 'own'; takenAt: number; metric: number; value: number; inf
 const ALIASES = new Map<string, MetricId>([
   ['vikt', WEIGHT_ID],
   ['weight', WEIGHT_ID],
+  ['bröst', CHEST_ID],
+  ['chest', CHEST_ID],
   ['midja', 'waist'],
   ['waist', 'waist'],
   ['höft', 'hip'],
@@ -119,7 +121,7 @@ export interface ParseOptions {
 
 /**
  * Accepts our own export (`takenAt,metric,value`) and legacy per-year sheets (date first, then
- * Vikt/Midja/Höft by header, or weight in column 2 without one). Separator `,` `;` or tab; decimal `.` or `,`.
+ * Vikt/Bröst/Midja/Höft by header, or weight in column 2 without one). Separator `,` `;` or tab; decimal `.` or `,`.
  * Knows nothing about the stored types: a row's `metric` is a label for `importRows` to resolve.
  */
 export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseResult {
@@ -160,7 +162,7 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
       return
     }
     for (const row of sheetRows) {
-      // Sheets repeat the last waist/hip measurement on every row; only a changed value is a new one.
+      // Sheets repeat the last chest/waist/hip measurement on every row; only a changed value is a new one.
       if (row.metric !== WEIGHT_ID && lastMeasure.get(row.metric) === row.value) continue
       lastMeasure.set(row.metric, row.value)
       rows.push(row)

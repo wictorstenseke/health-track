@@ -111,21 +111,35 @@ describe('entries', () => {
 
   it('imports an own type by its name and creates it once, whatever the case', async () => {
     const rows = [
-      { metric: 'Bröst', takenAt: at(1), value: 104.5 },
-      { metric: 'bröst', takenAt: at(2), value: 104 },
-      { metric: 'BRÖST', takenAt: at(3), value: 103.5 },
+      { metric: 'Lår', takenAt: at(1), value: 55.5 },
+      { metric: 'lår', takenAt: at(2), value: 55 },
+      { metric: 'LÅR', takenAt: at(3), value: 54.5 },
     ]
     expect(await importRows(rows)).toEqual({ added: 3, skipped: 0 })
-    const chest = (await getMetrics()).filter((m) => m.name.toLowerCase() === 'bröst')
-    expect(chest.map((m) => m.name)).toEqual(['Bröst'])
-    expect((await getEntries(chest[0].id)).map((e) => e.value)).toEqual([104.5, 104, 103.5])
+    const thigh = (await getMetrics()).filter((m) => m.name.toLowerCase() === 'lår')
+    expect(thigh.map((m) => m.name)).toEqual(['Lår'])
+    expect((await getEntries(thigh[0].id)).map((e) => e.value)).toEqual([55.5, 55, 54.5])
   })
 
   it('imports into a type that already has that name', async () => {
-    const chest = await addMetric('Bröst')
-    await importRows([{ metric: 'bröst', takenAt: at(1), value: 104.5 }])
+    const thigh = await addMetric('Lår')
+    await importRows([{ metric: 'lår', takenAt: at(1), value: 55.5 }])
+    expect(await db.metrics.count()).toBe(4)
+    expect(await getEntries(thigh.id)).toHaveLength(1)
+  })
+
+  it("imports a sheet's Bröst column into the default type", async () => {
+    await importRows([{ metric: 'chest', takenAt: at(1), value: 101 }])
     expect(await db.metrics.count()).toBe(3)
-    expect(await getEntries(chest.id)).toHaveLength(1)
+    expect((await getEntries('chest')).map((e) => e.value)).toEqual([101])
+  })
+
+  it("imports a sheet's Bröst column into the Bröst the user made themselves", async () => {
+    await deleteMetric('chest')
+    const own = await addMetric('Bröst')
+    await importRows([{ metric: 'chest', takenAt: at(1), value: 101 }])
+    expect(await db.metrics.get('chest')).toBeUndefined()
+    expect((await getEntries(own.id)).map((e) => e.value)).toEqual([101])
   })
 
   it('brings back a deleted default type when a file has it', async () => {
@@ -136,33 +150,34 @@ describe('entries', () => {
   })
 
   it('restores a backup with own types into an empty app', async () => {
-    const chest = await addMetric('Bröst')
+    const neck = await addMetric('Nacke')
     const thigh = await addMetric('Lår, vänster')
     await addEntry('weight', 82.4, at(1))
-    await addEntry(chest.id, 104.5, at(2))
+    await addEntry(neck.id, 38.5, at(2))
     await addEntry(thigh.id, 55, at(2))
     await addEntry('hip', 101.5, at(3))
+    await addEntry('chest', 104.5, at(3))
 
     const csv = toCsv(csvRows(await getAllEntries(), await getMetrics()))
     await clearAllData()
     const result = parseCsv(csv)
     expect(result.errors).toEqual([])
-    expect(await importRows(result.rows)).toEqual({ added: 4, skipped: 0 })
+    expect(await importRows(result.rows)).toEqual({ added: 5, skipped: 0 })
 
     const names = new Map((await getMetrics()).map((m) => [m.id, m.name]))
-    expect([...names.values()].sort()).toEqual(['Bröst', 'Höft', 'Lår, vänster', 'Midja'])
+    expect([...names.values()].sort()).toEqual(['Bröst', 'Höft', 'Lår, vänster', 'Midja', 'Nacke'])
     const restored = (await getAllEntries()).map((e) => `${names.get(e.metricId) ?? e.metricId} ${e.value}`).sort()
-    expect(restored).toEqual(['Bröst 104.5', 'Höft 101.5', 'Lår, vänster 55', 'weight 82.4'])
+    expect(restored).toEqual(['Bröst 104.5', 'Höft 101.5', 'Lår, vänster 55', 'Nacke 38.5', 'weight 82.4'])
   })
 
   it('clears everything and puts the default types back', async () => {
     await addEntry('weight', 82.4, at(1))
     await setName('Wictor')
-    await addMetric('Bröst')
+    await addMetric('Lår')
     await deleteMetric('hip')
     await clearAllData()
     expect(await db.entries.count()).toBe(0)
     expect((await getProfile()).name).toBe('')
-    expect((await getMetrics()).map((m) => m.id).sort()).toEqual(['hip', 'waist'])
+    expect((await getMetrics()).map((m) => m.id).sort()).toEqual(['chest', 'hip', 'waist'])
   })
 })

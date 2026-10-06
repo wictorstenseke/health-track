@@ -3,8 +3,8 @@ const countEntries = (n: number) => (n === 1 ? '1 mätning' : `${n} mätningar`)
 export const sv = {
   appName: 'Veyin',
   tabs: { setup: 'Kom igång', home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
-  // waist and hip are only what the default types are created as; after that a type goes by its stored name.
-  metrics: { weight: 'Vikt', waist: 'Midja', hip: 'Höft' },
+  // chest, waist and hip are only what the default types are created as; after that a type goes by its stored name.
+  metrics: { weight: 'Vikt', chest: 'Bröst', waist: 'Midja', hip: 'Höft' },
   common: {
     save: 'Spara',
     saved: 'Sparat ✓',

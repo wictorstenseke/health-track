@@ -50,8 +50,9 @@ describe('isValidValue for a measurement type', () => {
 })
 
 describe('defaultMetrics', () => {
-  it('is Midja and Höft under the ids the CSV export uses', () => {
+  it('is Bröst, Midja and Höft under the ids the CSV export uses', () => {
     expect(defaultMetrics(5)).toEqual([
+      { id: 'chest', name: 'Bröst', createdAt: 5 },
       { id: 'waist', name: 'Midja', createdAt: 5 },
       { id: 'hip', name: 'Höft', createdAt: 5 },
     ])
@@ -84,7 +85,7 @@ describe('nameProblem', () => {
     expect(nameProblem('vänster  ARM', existing)).toBe('taken')
   })
   it('rejects the reserved words', () => {
-    for (const name of ['Vikt', 'weight', 'Waist', 'HIP']) expect(nameProblem(name, [])).toBe('taken')
+    for (const name of ['Vikt', 'weight', 'Chest', 'Waist', 'HIP']) expect(nameProblem(name, [])).toBe('taken')
   })
 })
 
@@ -97,7 +98,7 @@ describe('sortMetrics', () => {
 })
 
 describe('resolveLabel', () => {
-  const metrics = [...defaultMetrics(0), { id: 'abc', name: 'Bröst', createdAt: 0 }]
+  const metrics = [...defaultMetrics(0), { id: 'abc', name: 'Nacke', createdAt: 0 }]
 
   it('keeps weight', () => {
     expect(resolveLabel('weight', metrics)).toEqual({ id: 'weight' })
@@ -106,7 +107,7 @@ describe('resolveLabel', () => {
     expect(resolveLabel('waist', metrics)).toEqual({ id: 'waist' })
   })
   it('finds a type by its name, ignoring case', () => {
-    expect(resolveLabel('bröst', metrics)).toEqual({ id: 'abc' })
+    expect(resolveLabel('nacke', metrics)).toEqual({ id: 'abc' })
   })
   it('asks for an unknown name to be created under a new id', () => {
     const resolved = resolveLabel('  Lår ', metrics)
@@ -115,11 +116,15 @@ describe('resolveLabel', () => {
     expect(metrics.some((m) => m.id === resolved.id)).toBe(false)
   })
   it('brings a deleted default back under its own id and name', () => {
+    expect(resolveLabel('chest', [])).toEqual({ id: 'chest', create: 'Bröst' })
     expect(resolveLabel('waist', [])).toEqual({ id: 'waist', create: 'Midja' })
     expect(resolveLabel('hip', [])).toEqual({ id: 'hip', create: 'Höft' })
   })
   it('uses an own type called Midja when the default is gone', () => {
     expect(resolveLabel('waist', [{ id: 'xyz', name: 'midja', createdAt: 0 }])).toEqual({ id: 'xyz' })
+  })
+  it('uses the Bröst the user made themselves when there is no default one', () => {
+    expect(resolveLabel('chest', [{ id: 'xyz', name: 'Bröst', createdAt: 0 }])).toEqual({ id: 'xyz' })
   })
   it('treats a name that is also an Object property as a name', () => {
     expect(resolveLabel('toString', metrics).create).toBe('toString')

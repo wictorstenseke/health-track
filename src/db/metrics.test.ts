@@ -6,8 +6,8 @@ import { addMetric, deleteMetric, getMetrics } from './metrics'
 const at = (d: number) => new Date(2026, 8, d, 8).getTime()
 
 describe('metrics', () => {
-  it('starts with Midja and Höft', async () => {
-    expect((await getMetrics()).map((m) => m.name).sort()).toEqual(['Höft', 'Midja'])
+  it('starts with Bröst, Höft and Midja', async () => {
+    expect((await getMetrics()).map((m) => m.name).sort()).toEqual(['Bröst', 'Höft', 'Midja'])
   })
 
   it('adds a type with a cleaned name and an id of its own', async () => {
@@ -21,7 +21,8 @@ describe('metrics', () => {
     await expect(addMetric('midja')).rejects.toThrow()
     await expect(addMetric('Vikt')).rejects.toThrow()
     await expect(addMetric('   ')).rejects.toThrow()
-    expect(await db.metrics.count()).toBe(2)
+    await expect(addMetric('bröst')).rejects.toThrow()
+    expect(await db.metrics.count()).toBe(3)
   })
 
   it('deletes a type together with its entries and leaves the rest', async () => {
@@ -30,16 +31,16 @@ describe('metrics', () => {
     const hip = await addEntry('hip', 101, at(3))
     const weight = await addEntry('weight', 82.4, at(4))
     await deleteMetric('waist')
-    expect((await getMetrics()).map((m) => m.id)).toEqual(['hip'])
+    expect((await getMetrics()).map((m) => m.id).sort()).toEqual(['chest', 'hip'])
     expect(await getAllEntries()).toEqual([hip, weight])
   })
 
   it('deletes an own type together with its entries', async () => {
-    const chest = await addMetric('Bröst')
-    await addEntry(chest.id, 104.5, at(1))
+    const thigh = await addMetric('Lår')
+    await addEntry(thigh.id, 55, at(1))
     const waist = await addEntry('waist', 92.5, at(2))
-    await deleteMetric(chest.id)
-    expect(await db.metrics.get(chest.id)).toBeUndefined()
+    await deleteMetric(thigh.id)
+    expect(await db.metrics.get(thigh.id)).toBeUndefined()
     expect(await getAllEntries()).toEqual([waist])
   })
 

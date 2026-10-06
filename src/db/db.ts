@@ -1,5 +1,5 @@
 import { Dexie, type EntityTable } from 'dexie'
-import { defaultMetrics, type Entry, type Metric } from '../lib/metrics'
+import { CHEST_ID, defaultMetrics, nameProblem, type Entry, type Metric } from '../lib/metrics'
 
 export type SettingKey = 'name' | 'heightCm' | 'lastExportAt' | 'demo'
 
@@ -25,11 +25,18 @@ export class VagenDb extends Dexie {
       entries: 'id, metricId, takenAt, [metricId+takenAt]',
       settings: 'key',
     })
-    // An install coming from version 1 gets the default types here. A new database gets them from `populate`,
-    // because Dexie runs no upgrade when it creates the database.
+    // An install coming from version 1 gets its default types here. A new database gets them from `populate`,
+    // because Dexie runs no upgrade when it creates the database. Only the two defaults this version had:
+    // Bröst is version 3's to add.
     this.version(2)
       .stores({ metrics: 'id' })
-      .upgrade((tx) => tx.table('metrics').bulkAdd(defaultMetrics()))
+      .upgrade((tx) => tx.table('metrics').bulkAdd(defaultMetrics().filter((m) => m.id !== CHEST_ID)))
+    // Bröst became a default. Not added when the user already has a type by that name: theirs is the one to keep.
+    this.version(3).upgrade(async (tx) => {
+      const metrics = tx.table<Metric, string>('metrics')
+      const chest = defaultMetrics().find((m) => m.id === CHEST_ID)
+      if (chest && nameProblem(chest.name, await metrics.toArray()) === null) await metrics.add(chest)
+    })
     this.on('populate', (tx) => {
       void tx.table('metrics').bulkAdd(defaultMetrics())
     })
