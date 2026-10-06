@@ -1,7 +1,7 @@
 import { Dexie } from 'dexie'
 import type { CsvRow } from '../lib/csv'
 import { newId } from '../lib/id'
-import { roundValue, type Entry, type MetricId } from '../lib/metrics'
+import { defaultMetrics, roundValue, type Entry, type MetricId } from '../lib/metrics'
 import { latestOnDay } from '../lib/stats'
 import { db } from './db'
 
@@ -81,8 +81,10 @@ export async function importRows(rows: CsvRow[]): Promise<{ added: number; skipp
 }
 
 export async function clearAllData(): Promise<void> {
-  await db.transaction('rw', db.entries, db.settings, async () => {
+  await db.transaction('rw', db.entries, db.settings, db.metrics, async () => {
     await db.entries.clear()
     await db.settings.clear()
+    await db.metrics.clear()
+    await db.metrics.bulkAdd(defaultMetrics())
   })
 }

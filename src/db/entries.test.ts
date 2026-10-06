@@ -3,6 +3,7 @@ import { db } from './db'
 import {
   addEntries, addEntry, clearAllData, deleteEntry, getAllEntries, getEntries, importRows, restoreEntry, saveWeightForDay, updateEntry,
 } from './entries'
+import { addMetric, deleteMetric, getMetrics } from './metrics'
 import { getProfile, setName } from './settings'
 import { parseCsv, toCsv } from '../lib/csv'
 
@@ -108,11 +109,14 @@ describe('entries', () => {
     expect(identity(await getAllEntries())).toEqual(before)
   })
 
-  it('clears everything', async () => {
+  it('clears everything and puts the default types back', async () => {
     await addEntry('weight', 82.4, at(1))
     await setName('Wictor')
+    await addMetric('Bröst')
+    await deleteMetric('hip')
     await clearAllData()
     expect(await db.entries.count()).toBe(0)
     expect((await getProfile()).name).toBe('')
+    expect((await getMetrics()).map((m) => m.id).sort()).toEqual(['hip', 'waist'])
   })
 })

@@ -1,5 +1,5 @@
 import { Dexie, type EntityTable } from 'dexie'
-import type { Entry } from '../lib/metrics'
+import { defaultMetrics, type Entry, type Metric } from '../lib/metrics'
 
 export type SettingKey = 'name' | 'heightCm' | 'lastExportAt' | 'demo'
 
@@ -15,13 +15,23 @@ export interface Setting {
 export class VagenDb extends Dexie {
   declare entries: EntityTable<Entry, 'id'>
   declare settings: EntityTable<Setting, 'key'>
+  declare metrics: EntityTable<Metric, 'id'>
 
-  constructor() {
+  /** `name` is there for the migration test; the app always uses the default. */
+  constructor(name = 'vagen') {
     // Named for the app's first name, Vågen; renaming it would leave the stored data behind.
-    super('vagen')
+    super(name)
     this.version(1).stores({
       entries: 'id, metricId, takenAt, [metricId+takenAt]',
       settings: 'key',
+    })
+    // An install coming from version 1 gets the default types here. A new database gets them from `populate`,
+    // because Dexie runs no upgrade when it creates the database.
+    this.version(2)
+      .stores({ metrics: 'id' })
+      .upgrade((tx) => tx.table('metrics').bulkAdd(defaultMetrics()))
+    this.on('populate', (tx) => {
+      void tx.table('metrics').bulkAdd(defaultMetrics())
     })
   }
 }
