@@ -12,14 +12,8 @@ const EASE = 0.25
 /** A quiet trend mark for a list row: a soft curve fading down to faint axes, with a white-centred dot on the latest value. */
 export function Sparkline({ values }: { values: number[] }) {
   const fade = useId()
-  const axes = <path d={`M${AXIS},0 V${H - AXIS} H${W}`} fill="none" strokeWidth={1} className="stroke-faint/40" />
-  if (values.length < 2) {
-    return (
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden>
-        {axes}
-      </svg>
-    )
-  }
+  // Nothing to draw a trend from. The empty box keeps the row's height and the value's column.
+  if (values.length < 2) return <svg width={W} height={H} aria-hidden />
   const min = Math.min(...values)
   const max = Math.max(...values)
   const span = max - min
@@ -46,7 +40,7 @@ export function Sparkline({ values }: { values: number[] }) {
         </linearGradient>
       </defs>
       <path d={`${line} L${end.x},${floor} L${points[0].x},${floor} Z`} fill={`url(#${fade})`} />
-      {axes}
+      <path d={`M${AXIS},0 V${floor} H${W}`} fill="none" strokeWidth={1} className="stroke-faint/40" />
       <path d={line} fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
       <circle cx={end.x} cy={end.y} r={3} fill="currentColor" />
       <circle cx={end.x} cy={end.y} r={1.25} fill="#fff" />

@@ -22,7 +22,7 @@ Dark mode, server DB/sync, goal weight, English UI, lb units, notifications, ins
 - Recharts
 - Vitest + fake-indexeddb
 - Font: Geist, self-hosted via `@fontsource-variable/geist` (works offline)
-- Display font: Bungee (latin subset, self-hosted via `@fontsource/bungee`) for the welcome titles on the orange header cards (setup title, the name on Hem), with `text-sticker`: a burnt-orange (#9a3412) outline and a solid extruded shadow to 4×5 px. Hem's `Välkommen tillbaka` above the name is a small uppercase, wide-tracked label in Geist.
+- Serif: Instrument Serif (latin subset, self-hosted via `@fontsource/instrument-serif`) for the name on Hem's orange header card. `Välkommen tillbaka` above it is a small uppercase, wide-tracked label in Geist. Both are white with `text-on-hero`: a soft burnt-orange (#9a3412) drop shadow.
 - Hash routing (avoids GitHub Pages base-path 404s)
 
 ## Hosting

@@ -1,14 +1,14 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
-/* Display face for the welcome title; the latin subset covers å ä ö, and the others would only grow the precache. */
-@import "@fontsource/bungee/latin-400.css";
+/* Serif for the name on Hem; the latin subset covers å ä ö, and the others would only grow the precache. */
+@import "@fontsource/instrument-serif/latin-400.css";
 
 /* Dark mode is a setting, not the system's (lib/theme.ts): `dark:` follows `<html data-theme="dark">`. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bungee", "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --color-ember-300: #ffb08a;
   --color-ember-400: #ff7a3d;
   --color-ember-500: #ff5a1f;
@@ -99,26 +99,12 @@
   }
 }
 
-/* Sticker look for the Bungee titles on the orange header cards: an outline round the letters (the stroke is
-   painted under the fill, so only its outer half shows) and a hard shadow with no blur, both in burnt orange,
-   a darker shade of the card. Same in both themes, since the cards are. */
-@utility text-sticker {
-  -webkit-text-stroke: 4px #9a3412;
-  paint-order: stroke fill;
-  /* One copy per pixel of the way out, so the shadow reads as a solid extrusion rather than a detached copy. */
+/* Soft shadow under the white text on the orange header cards: burnt orange, a darker shade of the card, so it
+   lifts the letters without greying the colour beneath. Same in both themes, since the cards are. */
+@utility text-on-hero {
   text-shadow:
-    0.8px 1px 0 #9a3412,
-    1.6px 2px 0 #9a3412,
-    2.4px 3px 0 #9a3412,
-    3.2px 4px 0 #9a3412,
-    4px 5px 0 #9a3412;
-}
-
-/* Small Bungee text over the header cards, such as the line above the name: the sticker's outline without
-   its shadow, which crowds letters this small. */
-@utility text-sticker-outline {
-  -webkit-text-stroke: 2px #9a3412;
-  paint-order: stroke fill;
+    0 1px 2px rgb(154 52 18 / 0.4),
+    0 2px 12px rgb(154 52 18 / 0.3);
 }
 
 @layer components {
