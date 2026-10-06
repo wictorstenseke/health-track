@@ -1,22 +1,24 @@
 import { useState } from 'react'
 import { addEntries } from '../db/entries'
+import { useMetrics } from '../db/hooks'
 import { sv } from '../i18n/sv'
 import { parseDecimal } from '../lib/format'
-import { isValidValue, MEASURE_METRIC_IDS, METRICS, type MetricId } from '../lib/metrics'
+import { isValidValue, unitOf, type MetricId } from '../lib/metrics'
 import { BottomSheet } from './BottomSheet'
 import { DateTimeField } from './DateTimeField'
 import { DecimalField } from './Fields'
 
 /** Batch form: fill whichever measurements you took; all get the same timestamp. */
 export function MeasureSheet({ onClose }: { onClose: () => void }) {
+  const metrics = useMetrics()
   const [texts, setTexts] = useState<Partial<Record<MetricId, string>>>({})
   const [takenAt, setTakenAt] = useState<number | null>(null)
 
-  const items = MEASURE_METRIC_IDS.flatMap((metricId) => {
-    const text = texts[metricId] ?? ''
+  const items = metrics.flatMap(({ id }) => {
+    const text = texts[id] ?? ''
     if (text.trim() === '') return []
     const value = parseDecimal(text)
-    return [{ metricId, value: value !== null && isValidValue(metricId, value) ? value : null }]
+    return [{ metricId: id, value: value !== null && isValidValue(id, value) ? value : null }]
   })
   const canSave = items.length > 0 && items.every((i) => i.value !== null)
 
@@ -29,15 +31,16 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <BottomSheet title={sv.measures.formTitle} onClose={onClose}>
-      <div className="space-y-3">
-        {MEASURE_METRIC_IDS.map((metricId) => (
+      {/* Scrolls when there are many types, so Spara stays on screen. The padding keeps the focus ring from being clipped. */}
+      <div className="-mx-1 max-h-[40dvh] space-y-3 overflow-y-auto overscroll-contain px-1 py-1">
+        {metrics.map(({ id, name }) => (
           <DecimalField
-            key={metricId}
-            label={sv.metrics[metricId]}
-            unit={METRICS[metricId].unit}
-            value={texts[metricId] ?? ''}
-            onChange={(text) => setTexts((t) => ({ ...t, [metricId]: text }))}
-            invalid={items.some((i) => i.metricId === metricId && i.value === null)}
+            key={id}
+            label={name}
+            unit={unitOf(id)}
+            value={texts[id] ?? ''}
+            onChange={(text) => setTexts((t) => ({ ...t, [id]: text }))}
+            invalid={items.some((i) => i.metricId === id && i.value === null)}
           />
         ))}
       </div>

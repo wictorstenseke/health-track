@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  cleanName, defaultMetrics, isMetricId, isValidHeight, isValidValue, nameProblem, resolveLabel, roundValue, sortMetrics, unitOf,
+  cleanName, defaultMetrics, isValidHeight, isValidValue, nameProblem, resolveLabel, roundValue, sortMetrics, unitOf,
 } from './metrics'
 
 describe('roundValue', () => {
@@ -11,15 +11,6 @@ describe('roundValue', () => {
   })
   it('never returns negative zero', () => {
     expect(Object.is(roundValue(-0.04), 0)).toBe(true)
-  })
-})
-
-describe('isMetricId', () => {
-  it('accepts known ids only', () => {
-    expect(isMetricId('weight')).toBe(true)
-    expect(isMetricId('hip')).toBe(true)
-    expect(isMetricId('chest')).toBe(false)
-    expect(isMetricId('toString')).toBe(false)
   })
 })
 

@@ -34,6 +34,15 @@ describe('metrics', () => {
     expect(await getAllEntries()).toEqual([hip, weight])
   })
 
+  it('deletes an own type together with its entries', async () => {
+    const chest = await addMetric('Bröst')
+    await addEntry(chest.id, 104.5, at(1))
+    const waist = await addEntry('waist', 92.5, at(2))
+    await deleteMetric(chest.id)
+    expect(await db.metrics.get(chest.id)).toBeUndefined()
+    expect(await getAllEntries()).toEqual([waist])
+  })
+
   it('never deletes weight', async () => {
     await addEntry('weight', 82.4, at(1))
     await expect(deleteMetric('weight')).rejects.toThrow()

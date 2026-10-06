@@ -5,16 +5,17 @@ import { ChevronDownIcon, ChevronLeftIcon } from '../components/icons'
 import { UndoToast } from '../components/UndoToast'
 import { yearColor, YearChart } from '../components/YearChart'
 import { restoreEntry } from '../db/entries'
-import { useEntries } from '../db/hooks'
+import { useEntries, useMetricName } from '../db/hooks'
 import { sv } from '../i18n/sv'
 import { formatDate, formatDelta, formatNumber, formatRowDate, formatTime, formatValue } from '../lib/format'
-import { METRICS, type Entry, type MetricId } from '../lib/metrics'
+import { unitOf, WEIGHT_ID, type Entry, type MetricId } from '../lib/metrics'
 import { goBack } from '../lib/router'
 import { bmi, latest, sameDateLastYear, withDeltas, yearSeries, yearsDescending, yearStats } from '../lib/stats'
 import { useDark } from '../lib/theme'
 
 export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heightCm: number | null }) {
   const entries = useEntries(metricId)
+  const name = useMetricName(metricId)
   const [hiddenYears, setHiddenYears] = useState<number[]>([])
   // Years whose accordion the user flipped away from its default (only the newest year starts open).
   const [flippedYears, setFlippedYears] = useState<number[]>([])
@@ -23,7 +24,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
   const dismissUndo = useCallback(() => setUndo(null), [])
   const dark = useDark()
 
-  const unit = METRICS[metricId].unit
+  const unit = unitOf(metricId)
   const years = yearsDescending(entries)
   const series = yearSeries(entries, years.filter((y) => !hiddenYears.includes(y)))
   const last = latest(entries)
@@ -47,7 +48,7 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
         <button type="button" onClick={goBack} aria-label={sv.common.back} className="-ml-2 rounded-full p-2">
           <ChevronLeftIcon />
         </button>
-        <h1 className="text-3xl font-semibold tracking-tight">{sv.metrics[metricId]}</h1>
+        <h1 className="min-w-0 truncate text-3xl font-semibold tracking-tight">{name}</h1>
       </header>
 
       {entries.length === 0 ? (
@@ -123,9 +124,9 @@ export function DetailScreen({ metricId, heightCm }: { metricId: MetricId; heigh
               })}
             </Group>
 
-            {(comparison || (metricId === 'weight' && heightCm && last)) && (
+            {(comparison || (metricId === WEIGHT_ID && heightCm && last)) && (
               <Group label={sv.detail.overview}>
-                {metricId === 'weight' && heightCm && last && (
+                {metricId === WEIGHT_ID && heightCm && last && (
                   <Row>
                     <span>{sv.detail.bmi}</span>
                     <span className="font-semibold tabular-nums">{formatNumber(bmi(last.value, heightCm))}</span>

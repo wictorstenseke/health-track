@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { isMetricId, type MetricId } from './metrics'
+import { WEIGHT_ID, type MetricId } from './metrics'
 
 export type Route = { name: 'setup' } | { name: 'home' } | { name: 'measures' } | { name: 'settings' } | { name: 'metric'; metricId: MetricId }
 
@@ -8,8 +8,9 @@ export function parseHash(hash: string): Route {
   if (path === '/start') return { name: 'setup' }
   if (path === '/matt') return { name: 'measures' }
   if (path === '/installningar') return { name: 'settings' }
-  const metric = path.match(/^\/metric\/(\w+)$/)
-  if (metric && isMetricId(metric[1])) return { name: 'metric', metricId: metric[1] }
+  // Any id parses (own types have UUIDs); whether it exists is `detailMetricId`'s call, where the types are known.
+  const metric = path.match(/^\/metric\/([\w-]+)$/)
+  if (metric) return { name: 'metric', metricId: metric[1] }
   return { name: 'home' }
 }
 
@@ -42,7 +43,16 @@ export function tabsFor(demo: boolean): TabName[] {
 export function tabOf(route: Route, demo = false): TabName {
   if (route.name === 'setup') return demo ? 'setup' : 'home'
   if (route.name !== 'metric') return route.name
-  return route.metricId === 'weight' ? 'home' : 'measures'
+  return route.metricId === WEIGHT_ID ? 'home' : 'measures'
+}
+
+/**
+ * The metric a route opens a detail screen for, or null. A type that was deleted, or an id that never existed,
+ * gets no detail screen: its tab (Mått) shows instead.
+ */
+export function detailMetricId(route: Route, metricIds: MetricId[]): MetricId | null {
+  if (route.name !== 'metric') return null
+  return route.metricId === WEIGHT_ID || metricIds.includes(route.metricId) ? route.metricId : null
 }
 
 /** Written on every history entry the app pushes, so back knows the previous entry is the app too. */

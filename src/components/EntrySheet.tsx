@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { deleteEntry, updateEntry } from '../db/entries'
+import { useMetricName } from '../db/hooks'
 import { sv } from '../i18n/sv'
 import { formatNumber, parseDecimal } from '../lib/format'
-import { isValidValue, METRICS, type Entry } from '../lib/metrics'
+import { isValidValue, unitOf, WEIGHT_ID, type Entry } from '../lib/metrics'
 import { BottomSheet } from './BottomSheet'
 import { DateTimeField } from './DateTimeField'
 import { DecimalField } from './Fields'
@@ -10,7 +11,8 @@ import { WeightPicker } from './WeightPicker'
 
 /** Edit or delete one entry. Weight uses the dial; cm metrics a decimal field. */
 export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClose: () => void; onDeleted: (entry: Entry) => void }) {
-  const isWeight = entry.metricId === 'weight'
+  const isWeight = entry.metricId === WEIGHT_ID
+  const label = useMetricName(entry.metricId)
   const [weight, setWeight] = useState(entry.value)
   const [text, setText] = useState(formatNumber(entry.value))
   const [takenAt, setTakenAt] = useState(entry.takenAt)
@@ -34,7 +36,7 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
       {isWeight ? (
         <WeightPicker value={weight} onChange={setWeight} />
       ) : (
-        <DecimalField label={sv.metrics[entry.metricId]} unit={METRICS[entry.metricId].unit} value={text} onChange={setText} invalid={!valid} />
+        <DecimalField label={label} unit={unitOf(entry.metricId)} value={text} onChange={setText} invalid={!valid} />
       )}
       <div className="my-5 flex justify-center">
         <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />

@@ -1,8 +1,8 @@
 import { memo, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { ErrorToast } from './components/ErrorToast'
 import { TabBar } from './components/TabBar'
-import { EntriesProvider, useProfile } from './db/hooks'
-import { routeToHash, tabOf, tabsFor, useRoute, type Route } from './lib/router'
+import { DataProvider, useMetrics, useProfile } from './db/hooks'
+import { detailMetricId, routeToHash, tabOf, tabsFor, useRoute, type Route } from './lib/router'
 import { DetailScreen } from './screens/DetailScreen'
 import { HomeScreen } from './screens/HomeScreen'
 import { MeasuresScreen } from './screens/MeasuresScreen'
@@ -18,9 +18,9 @@ const Settings = memo(SettingsScreen)
 export function App() {
   return (
     <>
-      <EntriesProvider>
+      <DataProvider>
         <Screens />
-      </EntriesProvider>
+      </DataProvider>
       <ErrorToast />
     </>
   )
@@ -29,12 +29,14 @@ export function App() {
 function Screens() {
   const profile = useProfile()
   const route = useRoute()
-  useScrollPerScreen(route)
+  const metrics = useMetrics()
+  const detailId = detailMetricId(route, metrics.map((m) => m.id))
+  const isDetail = detailId !== null
+  useScrollPerScreen(route, isDetail)
 
   if (!profile) return null
   const setupOnly = !profile.name
   const tab = tabOf(route, profile.demo)
-  const isDetail = route.name === 'metric'
 
   return (
     <div className="relative mx-auto max-w-md">
@@ -55,7 +57,7 @@ function Screens() {
           <TabPanel shown={tab === 'settings' && !isDetail}>
             <Settings profile={profile} />
           </TabPanel>
-          {isDetail && <DetailScreen metricId={route.metricId} heightCm={profile.heightCm} />}
+          {detailId !== null && <DetailScreen metricId={detailId} heightCm={profile.heightCm} />}
           <TabBar tabs={tabsFor(profile.demo)} active={tab} />
         </>
       )}
@@ -76,10 +78,9 @@ function TabPanel({ shown, children }: { shown: boolean; children: ReactNode }) 
 }
 
 /** Each tab keeps its own scroll position; a detail screen opens at the top. */
-function useScrollPerScreen(route: Route) {
+function useScrollPerScreen(route: Route, isDetail: boolean) {
   const positions = useRef(new Map<string, number>())
   const key = routeToHash(route)
-  const isDetail = route.name === 'metric'
 
   useLayoutEffect(() => {
     window.scrollTo(0, isDetail ? 0 : (positions.current.get(key) ?? 0))

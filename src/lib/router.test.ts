@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { APP_HISTORY_STATE, backTarget, parseHash, routeToHash, tabOf, tabsFor, type Route } from './router'
+import { APP_HISTORY_STATE, backTarget, detailMetricId, parseHash, routeToHash, tabOf, tabsFor, type Route } from './router'
 
 describe('router', () => {
   it('parses known hashes', () => {
@@ -10,9 +10,27 @@ describe('router', () => {
     expect(parseHash('#/start')).toEqual({ name: 'setup' })
     expect(parseHash('#/metric/waist')).toEqual({ name: 'metric', metricId: 'waist' })
   })
+  it('parses any metric id, also a UUID', () => {
+    expect(parseHash('#/metric/chest')).toEqual({ name: 'metric', metricId: 'chest' })
+    expect(parseHash('#/metric/3f2b8c1e-7a4d-4e5f-9b6a-1c2d3e4f5a6b')).toEqual({
+      name: 'metric',
+      metricId: '3f2b8c1e-7a4d-4e5f-9b6a-1c2d3e4f5a6b',
+    })
+  })
   it('falls back to home for unknown hashes', () => {
-    expect(parseHash('#/metric/chest')).toEqual({ name: 'home' })
     expect(parseHash('#/nope')).toEqual({ name: 'home' })
+    expect(parseHash('#/metric/')).toEqual({ name: 'home' })
+    expect(parseHash('#/metric/a/b')).toEqual({ name: 'home' })
+  })
+  it('opens a detail screen only for weight and for types that exist', () => {
+    const ids = ['waist', 'abc']
+    expect(detailMetricId({ name: 'metric', metricId: 'weight' }, ids)).toBe('weight')
+    expect(detailMetricId({ name: 'metric', metricId: 'abc' }, ids)).toBe('abc')
+    expect(detailMetricId({ name: 'metric', metricId: 'gone' }, ids)).toBeNull()
+    expect(detailMetricId({ name: 'measures' }, ids)).toBeNull()
+  })
+  it('shows Mått for a type that no longer exists', () => {
+    expect(tabOf({ name: 'metric', metricId: 'gone' })).toBe('measures')
   })
   it('round-trips every route', () => {
     const routes: Route[] = [{ name: 'setup' }, { name: 'home' }, { name: 'measures' }, { name: 'settings' }, { name: 'metric', metricId: 'weight' }]

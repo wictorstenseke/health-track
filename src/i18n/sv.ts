@@ -1,9 +1,8 @@
-import type { MetricId } from '../lib/metrics'
-
 export const sv = {
   appName: 'Veyin',
   tabs: { setup: 'Kom igång', home: 'Hem', measures: 'Mått', settings: 'Inställningar' },
-  metrics: { weight: 'Vikt', waist: 'Midja', hip: 'Höft' } satisfies Record<MetricId, string>,
+  // waist and hip are only what the default types are created as; after that a type goes by its stored name.
+  metrics: { weight: 'Vikt', waist: 'Midja', hip: 'Höft' },
   common: {
     save: 'Spara',
     saved: 'Sparat ✓',

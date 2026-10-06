@@ -1,32 +1,16 @@
 import { sv } from '../i18n/sv'
 import { newId } from './id'
 
-export type MetricId = 'weight' | 'waist' | 'hip'
+/** `weight`, or the id of a measurement type. */
+export type MetricId = string
 export type Unit = 'kg' | 'cm'
-
-export interface MetricDef {
-  id: MetricId
-  unit: Unit
-  /** Plausible range. Values outside are rejected on input and import. */
-  validMin: number
-  validMax: number
-}
-
-export const METRICS: Record<MetricId, MetricDef> = {
-  weight: { id: 'weight', unit: 'kg', validMin: 20, validMax: 300 },
-  waist: { id: 'waist', unit: 'cm', validMin: 20, validMax: 300 },
-  hip: { id: 'hip', unit: 'cm', validMin: 20, validMax: 300 },
-}
-
-/** Metrics shown on the Mått tab. */
-export const MEASURE_METRIC_IDS: MetricId[] = ['waist', 'hip']
 
 /** The one fixed metric; Hem is built on it. Every other metric is a type the user can create and delete. */
 export const WEIGHT_ID = 'weight'
 
 /** A measurement type on the Mått tab: a row in the `metrics` table. Always cm. */
 export interface Metric {
-  id: string
+  id: MetricId
   name: string
   createdAt: number
 }
@@ -45,9 +29,7 @@ export function defaultMetrics(now = Date.now()): Metric[] {
  * What the CSV export calls the built-in metrics. They are not available as names either, or a type called
  * "waist" would come back as Midja on import.
  */
-export const BUILT_IN_IDS: string[] = [WEIGHT_ID, ...DEFAULT_METRICS.map((m) => m.id)]
-
-export const unitOf = (metricId: string): Unit => (metricId === WEIGHT_ID ? 'kg' : 'cm')
+export const BUILT_IN_IDS: MetricId[] = [WEIGHT_ID, ...DEFAULT_METRICS.map((m) => m.id)]
 
 export interface Entry {
   id: string
@@ -60,9 +42,7 @@ export interface Entry {
   updatedAt: number
 }
 
-export function isMetricId(v: string): v is MetricId {
-  return Object.hasOwn(METRICS, v)
-}
+export const unitOf = (metricId: MetricId): Unit => (metricId === WEIGHT_ID ? 'kg' : 'cm')
 
 /** Rounds to 1 decimal. `+ 0` turns -0 into 0. */
 export function roundValue(v: number): number {
@@ -72,7 +52,7 @@ export function roundValue(v: number): number {
 /** Plausible range per unit. Values outside are rejected on input and import. */
 const VALID_RANGE: Record<Unit, { min: number; max: number }> = { kg: { min: 20, max: 300 }, cm: { min: 1, max: 300 } }
 
-export function isValidValue(metricId: string, v: number): boolean {
+export function isValidValue(metricId: MetricId, v: number): boolean {
   const { min, max } = VALID_RANGE[unitOf(metricId)]
   return Number.isFinite(v) && v >= min && v <= max
 }
@@ -108,7 +88,7 @@ export function sortMetrics<T extends Pick<Metric, 'name'>>(metrics: T[]): T[] {
  * The metric a CSV label stands for. With `create` set, the type isn't stored yet and must be added under that
  * name first: an own type from another install, or a default type the user has deleted.
  */
-export function resolveLabel(label: string, metrics: Metric[]): { id: string; create?: string } {
+export function resolveLabel(label: string, metrics: Metric[]): { id: MetricId; create?: string } {
   if (label === WEIGHT_ID) return { id: WEIGHT_ID }
   const byId = metrics.find((m) => m.id === label)
   if (byId) return { id: byId.id }

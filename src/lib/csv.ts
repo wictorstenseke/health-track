@@ -1,6 +1,6 @@
 import { parseDayMonth, parseLocalIso, toLocalIso } from './dates'
 import { parseDecimal } from './format'
-import { isMetricId, isValidValue, type MetricId } from './metrics'
+import { BUILT_IN_IDS, isValidValue, type MetricId } from './metrics'
 import { sortByTime } from './stats'
 
 export interface CsvRow {
@@ -110,7 +110,7 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
         return
       }
       layout =
-        cells.length >= 3 && isMetricId(cells[1]) ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy', columns: LEGACY_DEFAULT }
+        cells.length >= 3 && BUILT_IN_IDS.includes(cells[1]) ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy', columns: LEGACY_DEFAULT }
     }
 
     if (layout.kind === 'own') {
@@ -150,7 +150,7 @@ function parseOwnRow(cells: string[], layout: Extract<Layout, { kind: 'own' }>):
   if (dateCell === undefined || metricCell === undefined || valueCell === undefined) return null
   const takenAt = parseLocalIso(dateCell)
   const value = parseDecimal(valueCell)
-  if (takenAt === null || value === null || !isMetricId(metricCell) || !isValidValue(metricCell, value)) return null
+  if (takenAt === null || value === null || !BUILT_IN_IDS.includes(metricCell) || !isValidValue(metricCell, value)) return null
   return { metricId: metricCell, takenAt, value }
 }
 
