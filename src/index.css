@@ -123,10 +123,56 @@
     display: block;
     animation: tab-pop 380ms cubic-bezier(0.3, 1.25, 0.5, 1) both;
   }
+  /* A tab's page (App.tsx TabPanel) slides in from the side its tab sits on; no fill, so no transform lingers. */
+  .tab-enter-from-right {
+    animation: tab-enter-from-right 380ms cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+  }
+  .tab-enter-from-left {
+    animation: tab-enter-from-left 380ms cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+  }
+  /* The page being left (App.tsx TabPanel) keeps playing on, pinned where it was scrolled to. */
+  .tab-leave-to-left {
+    animation: tab-leave-to-left 380ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+  .tab-leave-to-right {
+    animation: tab-leave-to-right 380ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .tab-pop {
+    .tab-pop,
+    .tab-enter-from-right,
+    .tab-enter-from-left,
+    .tab-leave-to-left,
+    .tab-leave-to-right {
       animation: none;
     }
+  }
+}
+
+@keyframes tab-enter-from-right {
+  from {
+    transform: translateX(6rem);
+    opacity: 0;
+  }
+}
+
+@keyframes tab-leave-to-left {
+  to {
+    transform: translateX(-6rem);
+    opacity: 0;
+  }
+}
+
+@keyframes tab-leave-to-right {
+  to {
+    transform: translateX(6rem);
+    opacity: 0;
+  }
+}
+
+@keyframes tab-enter-from-left {
+  from {
+    transform: translateX(-6rem);
+    opacity: 0;
   }
 }
 
