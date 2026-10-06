@@ -91,7 +91,7 @@ The `metric` column holds a label, not always an id.
 
 **Import**
 
-Parsing stays pure and knows nothing about the stored types: a row is `{ metric: label, takenAt, value }`, valid when the label is 1–30 characters and the value is in range for its kind (weight, or anything else). A headerless file is in the own format when its first row has at least three cells and the second is not a number.
+Parsing stays pure and knows nothing about the stored types: a row is `{ metric: label, takenAt, value }`, valid when the label is 1–30 characters and the value is in range for its kind (weight, or anything else). A headerless file is in the own format when its first row has at least three cells, the second is not a number and the third is; a later row with a number where the name goes is then invalid, so a sheet's weights never become types.
 
 The data layer then resolves each label, in this order, creating types in the same transaction as the entries:
 
@@ -101,7 +101,7 @@ The data layer then resolves each label, in this order, creating types in the sa
 4. `waist` / `midja`, `hip` / `höft` → the type named Midja / Höft if there is one, otherwise the default is created again.
 5. Anything else → a new type with that name.
 
-So export followed by import on an empty app restores every type and entry, and an old export still imports. Duplicate detection is unchanged and runs on the resolved id.
+So export followed by import on an empty app restores every entry and every type that has one (a type with no entries has no row in the file), and an old export still imports. Duplicate detection is unchanged and runs on the resolved id.
 
 Legacy per-year sheets are read as today (`Vikt` / `Midja` / `Höft` columns, others ignored); their labels go through the same resolution, so a deleted Midja comes back when a sheet with that column is imported.
 

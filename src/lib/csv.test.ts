@@ -104,6 +104,22 @@ describe('parseCsv — legacy per-year sheets', () => {
   it('ignores extra columns', () => {
     expect(parseCsv('2024-01-03;88,2;bra dag').rows).toHaveLength(1)
   })
+  it('reads a headerless sheet as a sheet when its first row has a note where the weight goes', () => {
+    const result = parseCsv('2024-01-02,sjuk,\n2024-01-03,82,4\n2024-01-04,82,1\n')
+    expect(result.rows).toEqual([
+      { metric: 'weight', takenAt: at(2024, 1, 3), value: 82.4 },
+      { metric: 'weight', takenAt: at(2024, 1, 4), value: 82.1 },
+    ])
+    expect(result.errors).toEqual([{ line: 1, text: '2024-01-02,sjuk,' }])
+  })
+  it('never takes a number for the name of a type in a file without a header', () => {
+    const result = parseCsv('2024-01-02;x;75\n2024-01-03;82,4;75\n2024-01-04;82,1;75\n')
+    expect(result.rows.map((r) => r.metric)).toEqual(['x'])
+    expect(result.errors.map((e) => e.line)).toEqual([2, 3])
+  })
+  it('still reads a type whose name is a number from a file with a header', () => {
+    expect(parseCsv('takenAt,metric,value\n2026-10-01T07:32,10,50\n').rows).toEqual([{ metric: '10', takenAt: at(2026, 10, 1, 7, 32), value: 50 }])
+  })
   it('ignores a column whose header is also an Object property', () => {
     expect(parseCsv('Datum;Vikt;constructor\n2024-01-03;82;5\n')).toEqual({
       rows: [{ metric: 'weight', takenAt: at(2024, 1, 3), value: 82 }],

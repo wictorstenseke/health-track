@@ -73,7 +73,8 @@ function splitLine(line: string, delimiter: string): string[] {
 
 /** Label → column index. */
 type Columns = Record<string, number>
-type Layout = { kind: 'own'; takenAt: number; metric: number; value: number } | { kind: 'legacy'; columns: Columns }
+/** `inferred`: there was no header, so the own layout is a guess from the first row. */
+type Layout = { kind: 'own'; takenAt: number; metric: number; value: number; inferred?: true } | { kind: 'legacy'; columns: Columns }
 
 /**
  * Other words for the built-in metrics: the column headers in the per-year sheets, and our own ids in any case.
@@ -141,9 +142,9 @@ export function parseCsv(text: string, { year }: ParseOptions = {}): CsvParseRes
         layout = layoutFromHeader(cells)
         return
       }
-      // Without a header: our own format has the metric second, a sheet has the weight there.
-      const own = cells.length >= 3 && cells[1] !== '' && parseDecimal(cells[1]) === null
-      layout = own ? { kind: 'own', takenAt: 0, metric: 1, value: 2 } : { kind: 'legacy', columns: LEGACY_DEFAULT }
+      // Without a header: our own format has a name second and its value third; a sheet has the weight second.
+      const own = cells.length >= 3 && cells[1] !== '' && parseDecimal(cells[1]) === null && parseDecimal(cells[2]) !== null
+      layout = own ? { kind: 'own', takenAt: 0, metric: 1, value: 2, inferred: true } : { kind: 'legacy', columns: LEGACY_DEFAULT }
     }
 
     if (layout.kind === 'own') {
@@ -181,6 +182,8 @@ function mergeDecimalComma(cells: string[]): string[] {
 function parseOwnRow(cells: string[], layout: Extract<Layout, { kind: 'own' }>): CsvRow | null {
   const [dateCell, metricCell, valueCell] = [cells[layout.takenAt], cells[layout.metric], cells[layout.value]]
   if (dateCell === undefined || metricCell === undefined || valueCell === undefined) return null
+  // A number where the name goes means the guess was wrong: it is a sheet, and its weights must not become types.
+  if (layout.inferred && parseDecimal(metricCell) !== null) return null
   const takenAt = parseLocalIso(dateCell)
   const value = parseDecimal(valueCell)
   const metric = labelOf(metricCell)
