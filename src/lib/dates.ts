@@ -1,7 +1,7 @@
 const DAY_MS = 86_400_000
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** Local wall-clock time without offset, e.g. `2026-10-01T07:32`. Used for CSV and `<input type="datetime-local">`. */
+/** Local wall-clock time without offset, e.g. `2026-10-01T07:32`. Used for CSV and date inputs. */
 export function toLocalIso(ts: number): string {
   const d = new Date(ts)
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`

@@ -5,7 +5,7 @@ import { sv } from '../i18n/sv'
 import { formatNumber, parseDecimal } from '../lib/format'
 import { isValidValue, unitOf, WEIGHT_ID, type Entry } from '../lib/metrics'
 import { BottomSheet } from './BottomSheet'
-import { DateTimeField } from './DateTimeField'
+import { DateField } from './DateField'
 import { DecimalField } from './Fields'
 import { WeightPicker } from './WeightPicker'
 
@@ -39,7 +39,7 @@ export function EntrySheet({ entry, onClose, onDeleted }: { entry: Entry; onClos
         <DecimalField label={label} unit={unitOf(entry.metricId)} value={text} onChange={setText} invalid={!valid} />
       )}
       <div className="my-5 flex justify-center">
-        <DateTimeField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
+        <DateField value={takenAt} onChange={(ts) => setTakenAt((prev) => ts ?? prev)} />
       </div>
       <div className="flex justify-center gap-3">
         <button type="button" onClick={() => void remove()} className="h-10 rounded-full bg-red-500/10 px-5 text-base font-semibold text-red-600 dark:text-red-400">

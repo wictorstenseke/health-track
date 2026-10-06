@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { DateTimeField, dateTimeLabel } from '../components/DateTimeField'
+import { DateField, dateLabel } from '../components/DateField'
 import { HapticTap } from '../components/HapticTap'
 import { CalendarIcon } from '../components/icons'
 import { WeightScale } from '../components/WeightPicker'
@@ -119,9 +119,9 @@ export function HomeScreen({ name }: { name: string }) {
           value={shown}
           onChange={changeWeight}
           numberRef={numberRef}
-          caption={takenAt !== null && dateTimeLabel(takenAt)}
+          caption={takenAt !== null && dateLabel(takenAt)}
           start={
-            <DateTimeField
+            <DateField
               value={takenAt}
               onChange={changeDate}
               label={sv.home.changeDate}
@@ -129,7 +129,7 @@ export function HomeScreen({ name }: { name: string }) {
               className={`size-10 justify-center rounded-full ${takenAt === null ? 'bg-fill text-ink' : 'bg-ember-500/10 text-ember-600 dark:text-ember-400'}`}
             >
               <CalendarIcon />
-            </DateTimeField>
+            </DateField>
           }
         >
           <HapticTap onTap={() => void save()} disabled={saved}>

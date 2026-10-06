@@ -1,18 +1,22 @@
 import type { ReactNode } from 'react'
 import { sv } from '../i18n/sv'
 import { parseLocalIso, toLocalIso } from '../lib/dates'
-import { formatDate, formatTime } from '../lib/format'
+import { formatDate } from '../lib/format'
 
-/** "Idag", or the picked date and time. `value` null means "now". */
-export function dateTimeLabel(value: number | null): string {
-  return value === null ? sv.home.today : `${formatDate(value)} ${formatTime(value)}`
+/** "Idag", or the picked date. `value` null means "now". */
+export function dateLabel(value: number | null): string {
+  return value === null ? sv.home.today : formatDate(value)
 }
 
+/** `YYYY-MM-DD` for `<input type="date">`. */
+const toLocalDate = (ts: number) => toLocalIso(ts).slice(0, 10)
+
 /**
- * Opens the native date-time picker (transparent input on top). Shows "Idag · ändra" unless `children` replace
+ * Opens the native date picker (transparent input on top). Shows "Idag · ändra" unless `children` replace
  * it (e.g. an icon; then `label` names the control). `value` null means "now"; clearing the picker resets to null.
+ * Only the date is picked: the time of day is kept from the current value (or now), capped at now.
  */
-export function DateTimeField({
+export function DateField({
   value,
   onChange,
   className = '',
@@ -32,18 +36,20 @@ export function DateTimeField({
     <label className={`relative flex items-center ${children ? '' : 'w-fit text-sm text-muted'} ${className}`}>
       {children ?? (
         <span>
-          {dateTimeLabel(value)} · <span className="font-medium text-ember-600 dark:text-ember-400">{sv.common.change}</span>
+          {dateLabel(value)} · <span className="font-medium text-ember-600 dark:text-ember-400">{sv.common.change}</span>
         </span>
       )}
       <input
         aria-label={label}
-        type="datetime-local"
+        type="date"
         className="absolute inset-0 opacity-0"
-        value={toLocalIso(value ?? Date.now())}
-        max={toLocalIso(Date.now())}
+        value={toLocalDate(value ?? Date.now())}
+        max={toLocalDate(Date.now())}
         // `max` is only a hint to the picker; typed or pasted values can still be in the future.
         onChange={(e) => {
-          const ts = parseLocalIso(e.target.value)
+          if (!e.target.value) return onChange(null)
+          const time = toLocalIso(value ?? Date.now()).slice(11)
+          const ts = parseLocalIso(`${e.target.value}T${time}`)
           onChange(ts === null ? null : Math.min(ts, Date.now()))
         }}
       />

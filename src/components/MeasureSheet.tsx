@@ -6,7 +6,7 @@ import { sv } from '../i18n/sv'
 import { parseDecimal } from '../lib/format'
 import { isValidValue, METRIC_NAME_MAX, nameProblem, unitOf, type MetricId } from '../lib/metrics'
 import { BottomSheet } from './BottomSheet'
-import { DateTimeField } from './DateTimeField'
+import { DateField } from './DateField'
 import { DecimalField, TextField } from './Fields'
 import { PlusLabel } from './PlusLabel'
 
@@ -103,7 +103,7 @@ export function MeasureSheet({ onClose }: { onClose: () => void }) {
             <PlusLabel>{sv.measures.newType}</PlusLabel>
           </button>
           <div className="my-5 flex justify-center">
-            <DateTimeField value={takenAt} onChange={setTakenAt} />
+            <DateField value={takenAt} onChange={setTakenAt} />
           </div>
           <button
             type="button"
