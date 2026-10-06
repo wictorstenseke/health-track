@@ -129,7 +129,7 @@ export function HomeScreen({ name }: { name: string }) {
               the text sits centred between the card's top and the chart. */}
           <div className="px-5">
             <p className="text-xs leading-5 font-medium tracking-[0.14em] text-white/80 uppercase text-on-hero">{sv.home.welcome}</p>
-            <h1 className="font-serif text-5xl leading-12 text-white text-on-hero">{name}</h1>
+            <h1 className="font-serif text-[3.5rem] leading-14 text-white text-on-hero">{name}</h1>
           </div>
           <div className="mt-16">
             <YearCard entries={entries} mark={mark} />
