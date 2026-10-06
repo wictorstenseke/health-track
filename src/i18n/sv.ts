@@ -12,7 +12,6 @@ export const sv = {
     close: 'Stäng',
     delete: 'Radera',
     back: 'Tillbaka',
-    change: 'ändra',
     noData: 'Ingen data än',
   },
   relative: {
