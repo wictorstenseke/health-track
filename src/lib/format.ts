@@ -10,6 +10,8 @@ const dayMonthYear = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 's
 const weekdayDayMonth = new Intl.DateTimeFormat(LOCALE, { weekday: 'short', day: 'numeric', month: 'short' })
 const time = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' })
 const monthNarrow = new Intl.DateTimeFormat(LOCALE, { month: 'narrow' })
+const monthShort = new Intl.DateTimeFormat(LOCALE, { month: 'short' })
+const weekdayNarrow = new Intl.DateTimeFormat(LOCALE, { weekday: 'narrow' })
 
 // sv-SE short months end with a dot ("okt."); the design uses "okt".
 const stripDots = (s: string) => s.replace(/\./g, '')
@@ -30,6 +32,15 @@ export const formatRowDate = (ts: number) => stripDots(weekdayDayMonth.format(ts
 export const formatTime = (ts: number) => time.format(ts)
 /** J, F, M … for month index 0–11 */
 export const formatMonthInitial = (monthIndex: number) => monthNarrow.format(new Date(2000, monthIndex, 1))
+/** okt */
+export const formatMonthShort = (ts: number) => stripDots(monthShort.format(ts))
+/** M, T, O … for the weekday */
+export const formatWeekdayInitial = (ts: number) => weekdayNarrow.format(ts)
+/** 25/11 */
+export const formatDayMonth = (ts: number) => {
+  const d = new Date(ts)
+  return `${d.getDate()}/${d.getMonth() + 1}`
+}
 
 /** idag / igår / för 3 dagar sedan */
 export function formatRelativeDay(ts: number, now: number): string {

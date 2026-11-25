@@ -3,32 +3,50 @@ import { DateField, dateLabel } from '../components/DateField'
 import { HapticTap } from '../components/HapticTap'
 import { CalendarIcon } from '../components/icons'
 import { WeightScale } from '../components/WeightPicker'
-import { YearChart, YearPillDot, yearPillClass, type ChartMark } from '../components/YearChart'
+import { YearChart, type ChartMark } from '../components/YearChart'
 import { saveWeightForDay } from '../db/entries'
 import { useEntries } from '../db/hooks'
 import { sv } from '../i18n/sv'
-import { chartDay } from '../lib/dates'
 import { DEFAULT_WEIGHT, toDialValue } from '../lib/dialMath'
 import { flyToMark } from '../lib/flight'
 import { formatDeltaValue } from '../lib/format'
 import type { Entry } from '../lib/metrics'
+import { RANGES, rangeChart, rangeX, type Range } from '../lib/ranges'
 import { navigate } from '../lib/router'
-import { latest, latestOnDay, yearSeries, yearStats } from '../lib/stats'
-import { useDark } from '../lib/theme'
+import { latest, latestOnDay } from '../lib/stats'
 
 const SAVED_MS = 1500
 
+// Same prefix as the theme's key (see theme.ts).
+const RANGE_KEY = 'vagen-home-range'
+const CHART_HEIGHT = 120
+
+function storedRange(): Range {
+  try {
+    const stored = localStorage.getItem(RANGE_KEY)
+    return RANGES.find((r) => r === stored) ?? 'year'
+  } catch {
+    return 'year'
+  }
+}
+
 // Memo: the dial re-renders Hem on every 0.1 kg step, and redrawing the Recharts chart each time made dragging stutter.
-const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; mark?: ChartMark }) {
-  const year = new Date().getFullYear()
-  const series = yearSeries(entries, [year, year - 1, year - 2])
-  const [hiddenYears, setHiddenYears] = useState<number[]>([])
-  const toggleYear = (y: number) => setHiddenYears((h) => (h.includes(y) ? h.filter((x) => x !== y) : [...h, y]))
-  const stats = yearStats(entries, year)
-  const dark = useDark()
+const TrendCard = memo(function TrendCard({
+  entries,
+  range,
+  onRange,
+  mark,
+}: {
+  entries: Entry[]
+  range: Range
+  onRange: (range: Range) => void
+  mark?: ChartMark
+}) {
+  const now = Date.now()
+  const chart = rangeChart(entries, range, now)
   return (
     <div className="relative rounded-[28px] bg-surface p-4 pb-2 shadow-card">
-      {/* The whole card opens the detail screen. It lies under the content, so the year pills can be buttons of their own. */}
+      {/* The whole card opens the detail screen. It lies under the content, so the range pills can be buttons of their own. */}
       <button
         type="button"
         onClick={() => navigate({ name: 'metric', metricId: 'weight' })}
@@ -37,27 +55,36 @@ const YearCard = memo(function YearCard({ entries, mark }: { entries: Entry[]; m
       />
       <div className="pointer-events-none relative">
         <div className="flex items-center justify-between gap-2">
-          {/* The years the chart draws, newest first; a tap hides or shows that year's line. */}
-          <div className="pointer-events-auto flex gap-2">
-            {series.map((s) => (
+          {/* How far back the chart goes. Only this year's line here; the other years are on the detail screen. */}
+          <div className="pointer-events-auto flex gap-1">
+            {RANGES.map((r) => (
               <button
-                key={s.year}
+                key={r}
                 type="button"
-                onClick={() => toggleYear(s.year)}
-                aria-pressed={!hiddenYears.includes(s.year)}
-                className={`${yearPillClass} aria-[pressed=false]:opacity-40`}
+                onClick={() => onRange(r)}
+                aria-pressed={r === range}
+                aria-label={sv.home.rangeLabel[r]}
+                // Narrower on a 320px screen, where four pills and the change wouldn't fit on one line.
+                className="min-w-8 rounded-full px-2 py-1 text-sm font-medium text-muted aria-pressed:bg-fill aria-pressed:text-ink min-[360px]:min-w-10 min-[360px]:px-3"
               >
-                <YearPillDot year={s.year} dark={dark} />
-                {s.year}
+                {sv.home.range[r]}
               </button>
             ))}
           </div>
-          {stats && stats.count >= 2 && <span className="pr-1 text-lg font-semibold tabular-nums">{formatDeltaValue(stats.change, 'kg')}</span>}
+          {chart.change !== null && <span className="pr-1 text-lg font-semibold whitespace-nowrap tabular-nums">{formatDeltaValue(chart.change, 'kg')}</span>}
         </div>
-        {series.length > 0 ? (
-          <YearChart series={series.filter((s) => !hiddenYears.includes(s.year))} height={120} variant="card" mark={mark} />
+        {chart.points.length > 0 ? (
+          <YearChart
+            series={[{ year: new Date(now).getFullYear(), points: chart.points }]}
+            height={CHART_HEIGHT}
+            variant="card"
+            mark={mark}
+            axis={chart.axis}
+          />
         ) : (
-          <p className="py-10 text-center text-sm text-faint">{sv.common.noData}</p>
+          <p className="flex items-center justify-center text-sm text-faint" style={{ height: CHART_HEIGHT }}>
+            {entries.length > 0 ? sv.home.noneInRange : sv.common.noData}
+          </p>
         )}
       </div>
     </div>
@@ -75,6 +102,15 @@ export function HomeScreen({ name }: { name: string }) {
   /** The weight just saved: the chart marks it and the number flies there. */
   const [landing, setLanding] = useState<{ value: number; takenAt: number } | null>(null)
   const numberRef = useRef<HTMLSpanElement>(null)
+  const [range, setRange] = useState(storedRange)
+  const changeRange = useCallback((next: Range) => {
+    setRange(next)
+    try {
+      localStorage.setItem(RANGE_KEY, next)
+    } catch {
+      // Storage blocked: the range still applies until the app reloads.
+    }
+  }, [])
 
   useEffect(() => {
     if (!justSaved) return
@@ -95,8 +131,9 @@ export function HomeScreen({ name }: { name: string }) {
   }, [])
   const mark = useMemo(() => {
     if (!landing || !entries.some((e) => e.value === landing.value && e.takenAt === landing.takenAt)) return undefined
-    return { x: chartDay(landing.takenAt), y: landing.value, ref: onMark }
-  }, [landing, entries, onMark])
+    const x = rangeX(range, landing.takenAt, Date.now())
+    return x === null ? undefined : { x, y: landing.value, ref: onMark }
+  }, [landing, entries, range, onMark])
 
   const shown = weight ?? toDialValue(last?.value ?? DEFAULT_WEIGHT)
   const savedOnDay = latestOnDay(entries, takenAt ?? Date.now())
@@ -116,8 +153,8 @@ export function HomeScreen({ name }: { name: string }) {
     await saveWeightForDay(shown, at)
     setTakenAt(null)
     setJustSaved(true)
-    // The card only charts this year and the two before.
-    if (new Date(at).getFullYear() >= new Date().getFullYear() - 2) setLanding({ value: shown, takenAt: at })
+    // Nothing to fly to when the chart's range doesn't reach the day saved.
+    setLanding(rangeX(range, at, Date.now()) === null ? null : { value: shown, takenAt: at })
   }
 
   return (
@@ -125,14 +162,14 @@ export function HomeScreen({ name }: { name: string }) {
       <section className="px-4 pt-(--screen-top)">
         {/* Radius = the chart card's 28px + this 8px padding, so the corners run parallel. */}
         <div className="hero-gradient rounded-[36px] p-2 pt-16">
-          {/* 8px card border + 20px here = where "2026" starts inside the chart card. Same space above and below:
+          {/* 8px card border + 20px here = where the first range pill starts inside the chart card. Same space above and below:
               the text sits centred between the card's top and the chart. */}
           <div className="px-5">
             <p className="text-xs leading-5 font-medium tracking-[0.14em] text-white/80 uppercase text-on-hero">{sv.home.welcome}</p>
             <h1 className="font-serif text-[3.5rem] leading-14 text-white text-on-hero">{name}</h1>
           </div>
           <div className="mt-16">
-            <YearCard entries={entries} mark={mark} />
+            <TrendCard entries={entries} range={range} onRange={changeRange} mark={mark} />
           </div>
         </div>
       </section>

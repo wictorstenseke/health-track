@@ -24,6 +24,9 @@ export const sv = {
     today: 'Idag',
     changeDate: 'Ändra datum',
     typeValue: 'Skriv in vikt',
+    range: { week: 'V', month: 'M', quarter: '3M', year: 'År' },
+    rangeLabel: { week: 'Senaste veckan', month: 'Senaste månaden', quarter: 'Senaste tre månaderna', year: 'I år' },
+    noneInRange: 'Inga vägningar i perioden',
   },
   detail: {
     year: 'År',

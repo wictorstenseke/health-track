@@ -2,6 +2,7 @@ import { useId, type RefCallback } from 'react'
 import { Area, ComposedChart, LabelList, Line, ReferenceDot, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { CHART_DAY_MAX, MONTH_START_DAYS } from '../lib/dates'
 import { formatMonthInitial } from '../lib/format'
+import type { ChartAxis } from '../lib/ranges'
 import type { YearSeries } from '../lib/stats'
 import { useDark } from '../lib/theme'
 
@@ -21,7 +22,7 @@ export function yearColor(year: number, dark: boolean, currentYear = new Date().
   return `rgb(${ink} / 0.18)`
 }
 
-/** A year's pill: its line colour as a dot, then the year. Detail's pills toggle; Hem's are a legend. */
+/** A year's pill: its line colour as a dot, then the year. A tap hides or shows that year's line. */
 export const yearPillClass = 'flex items-center gap-1.5 rounded-full bg-fill px-3 py-1 text-sm font-medium'
 
 export function YearPillDot({ year, dark }: { year: number; dark: boolean }) {
@@ -31,17 +32,22 @@ export function YearPillDot({ year, dark }: { year: number; dark: boolean }) {
 /** A point to mark (chart coordinates), drawn hidden: `ref` gets a `<g>` of ring + dot to animate. */
 export type ChartMark = { x: number; y: number; ref: RefCallback<SVGGElement> }
 
-/** `series` newest first. Lines are drawn oldest first so the current year sits on top. */
+/**
+ * `series` newest first. Lines are drawn oldest first so the current year sits on top.
+ * The x axis is Jan–Dec unless `axis` gives another one (Hem's shorter ranges).
+ */
 export function YearChart({
   series,
   height,
   variant,
   mark,
+  axis,
 }: {
   series: YearSeries[]
   height: number
   variant: 'card' | 'full'
   mark?: ChartMark
+  axis?: ChartAxis
 }) {
   const currentYear = new Date().getFullYear()
   const full = variant === 'full'
@@ -54,9 +60,10 @@ export function YearChart({
         <XAxis
           type="number"
           dataKey="x"
-          domain={[0, CHART_DAY_MAX]}
-          ticks={MONTH_START_DAYS}
-          tickFormatter={(v: number) => formatMonthInitial(MONTH_START_DAYS.indexOf(v))}
+          domain={axis?.domain ?? [0, CHART_DAY_MAX]}
+          ticks={axis?.ticks ?? MONTH_START_DAYS}
+          tickFormatter={axis?.label ?? ((v: number) => formatMonthInitial(MONTH_START_DAYS.indexOf(v)))}
+          interval={0}
           axisLine={false}
           tickLine={false}
           tick={AXIS_TICK[theme]}
