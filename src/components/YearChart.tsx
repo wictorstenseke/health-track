@@ -54,6 +54,8 @@ export function YearChart({
   const theme = useDark() ? 'dark' : 'light'
   const fade = useId()
   const current = series.find((s) => s.year === currentYear)
+  // Hem's card rounds the corners between points; the full chart keeps them exact.
+  const curve = full ? 'linear' : 'monotone'
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart margin={{ top: 8, right: 8, bottom: 0, left: full ? 0 : 4 }}>
@@ -88,7 +90,7 @@ export function YearChart({
         </defs>
         {/* Only the year in progress fades down to the axis, and under the other years' lines: one fade per line would turn to mud. */}
         {current && current.points.length > 1 && (
-          <Area data={current.points} dataKey="y" type="linear" stroke="none" fill={`url(#${fade})`} fillOpacity={1} activeDot={false} isAnimationActive={false} />
+          <Area data={current.points} dataKey="y" type={curve} stroke="none" fill={`url(#${fade})`} fillOpacity={1} activeDot={false} isAnimationActive={false} />
         )}
         {[...series].reverse().map((s) => {
           const color = yearColor(s.year, theme === 'dark', currentYear)
@@ -98,7 +100,7 @@ export function YearChart({
               key={s.year}
               data={s.points}
               dataKey="y"
-              type="linear"
+              type={curve}
               stroke={color}
               strokeWidth={s.year === currentYear ? 1.5 : 1.25}
               dot={s.points.length === 1 ? { r: 3, fill: color, stroke: color } : false}

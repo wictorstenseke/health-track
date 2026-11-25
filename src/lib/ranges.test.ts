@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { chartDay } from './dates'
-import { rangeChart, rangeWindow, rangeX } from './ranges'
+import { rangeChart, rangeWindow, rangeX, smoothPoints } from './ranges'
 
 const at = (y: number, m: number, d: number, h = 8) => new Date(y, m - 1, d, h).getTime()
 const p = (y: number, m: number, d: number, value: number) => ({ takenAt: at(y, m, d), value })
@@ -61,6 +61,13 @@ describe('rangeChart', () => {
     expect(labels('week')).toEqual(['T', 'F', 'L', 'S', 'M', 'T', 'O'])
     expect(labels('month')).toEqual(['28/10', '4/11', '11/11', '18/11', '25/11'])
     expect(labels('quarter')).toEqual(['sep', 'okt', 'nov'])
+  })
+})
+
+describe('smoothPoints', () => {
+  it('averages each point with its neighbours within reach, and leaves the ends', () => {
+    const points = [0, 1, 2, 3, 10].map((x, i) => ({ x, y: [70, 73, 70, 72, 60][i] }))
+    expect(smoothPoints(points, 1).map((c) => c.y)).toEqual([70, 71, 71.66666666666667, 71, 60])
   })
 })
 

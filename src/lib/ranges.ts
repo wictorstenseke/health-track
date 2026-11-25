@@ -23,6 +23,21 @@ export interface RangeChart {
   change: number | null
 }
 
+const DAY_MS = 86_400_000
+
+/**
+ * Each point becomes the average of the points within `reach` of it on the x axis, which takes the day-to-day noise
+ * out of a long range. The first and last points stay as they are, so the line still ends on the latest weight
+ * and still spans the change shown next to it.
+ */
+export function smoothPoints(points: ChartPoint[], reach: number): ChartPoint[] {
+  return points.map((p, i) => {
+    if (i === 0 || i === points.length - 1) return p
+    const near = points.filter((q) => Math.abs(q.x - p.x) <= reach)
+    return { x: p.x, y: near.reduce((sum, q) => sum + q.y, 0) / near.length }
+  })
+}
+
 /** Local midnight `days` from the day of `now`, plus `months` whole months. */
 function dayFrom(now: number, days: number, months = 0, hour = 0): number {
   const d = new Date(now)
@@ -55,12 +70,14 @@ const TICK_LABEL: Record<Rolling, (ts: number) => string> = {
 /**
  * The points, axis and change for one range. A rolling range's x is the timestamp; when there are points both
  * before and inside it, the line starts at the left edge on the value it had there, so the change covers the whole range.
+ * The change is between the weights as saved; the longer ranges' lines are smoothed.
  */
 export function rangeChart(points: Point[], range: Range, now: number): RangeChart {
   if (range === 'year') {
     const year = yearOf(now)
     const stats = yearStats(points, year)
-    return { points: yearSeries(points, [year])[0]?.points ?? [], change: stats && stats.count >= 2 ? stats.change : null }
+    // A week's average: the year axis counts in days.
+    return { points: smoothPoints(yearSeries(points, [year])[0]?.points ?? [], 3), change: stats && stats.count >= 2 ? stats.change : null }
   }
   const { start, end } = rangeWindow(range, now)
   const sorted = sortByTime(points)
@@ -70,7 +87,8 @@ export function rangeChart(points: Point[], range: Range, now: number): RangeCha
     if (atStart !== null) chart.unshift({ x: start, y: roundValue(atStart) })
   }
   return {
-    points: chart,
+    // Three months get a light average; a week or a month has few enough points to show as they are.
+    points: range === 'quarter' ? smoothPoints(chart, 2 * DAY_MS) : chart,
     axis: { domain: [start, end], ticks: rangeTicks(range, now, start, end), label: TICK_LABEL[range] },
     change: chart.length >= 2 ? roundValue(chart[chart.length - 1].y - chart[0].y) : null,
   }
