@@ -29,6 +29,19 @@ export function YearPillDot({ year, dark }: { year: number; dark: boolean }) {
   return <span className="size-2.5 rounded-full" style={{ background: yearColor(year, dark) }} />
 }
 
+/**
+ * Hem's card is too low for more than three values: the bottom, middle and top of a range that ends on whole numbers
+ * around the data. An even span keeps the middle whole too.
+ */
+function wholeTicks(series: YearSeries[]): [number, number, number] | undefined {
+  const values = series.flatMap((s) => s.points.map((p) => p.y))
+  if (values.length === 0) return undefined
+  const low = Math.floor(Math.min(...values) - 0.5)
+  const high = Math.ceil(Math.max(...values) + 0.5)
+  const top = high + ((high - low) % 2)
+  return [low, (low + top) / 2, top]
+}
+
 /** A point to mark (chart coordinates), drawn hidden: `ref` gets a `<g>` of ring + dot to animate. */
 export type ChartMark = { x: number; y: number; ref: RefCallback<SVGGElement> }
 
@@ -56,9 +69,10 @@ export function YearChart({
   const current = series.find((s) => s.year === currentYear)
   // Hem's card rounds the corners between points; the full chart keeps them exact.
   const curve = full ? 'linear' : 'monotone'
+  const cardTicks = full ? undefined : wholeTicks(series)
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ComposedChart margin={{ top: 8, right: 8, bottom: 0, left: full ? 0 : 4 }}>
+      <ComposedChart margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
         <XAxis
           type="number"
           dataKey="x"
@@ -74,8 +88,8 @@ export function YearChart({
         <YAxis
           type="number"
           dataKey="y"
-          domain={['dataMin - 1', 'dataMax + 1']}
-          hide={!full}
+          domain={cardTicks ? [cardTicks[0], cardTicks[2]] : ['dataMin - 1', 'dataMax + 1']}
+          ticks={cardTicks}
           width={30}
           axisLine={false}
           tickLine={false}
